@@ -1,0 +1,55 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Manuscript extends Model
+{
+    use HasFactory;
+
+    protected $primaryKey = 'naskah_id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    protected $fillable = [
+        'penulis_user_id',
+        'judul_naskah',
+        'sinopsis',
+        'genre',
+        'tanggal_masuk',
+        'status',
+        'file_naskah_url',
+        'info_tambahan',
+    ];
+
+    protected $casts = [
+        'tanggal_masuk' => 'datetime',
+        'info_tambahan' => 'array',
+    ];
+
+    /**
+     * Get the author of the manuscript.
+     */
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'penulis_user_id', 'user_id');
+    }
+
+    /**
+     * Get the target publishers for this manuscript.
+     */
+    public function targetPublishers()
+    {
+        return $this->hasMany(ManuscriptTargetPublisher::class, 'naskah_id', 'naskah_id');
+    }
+
+    /**
+     * Get the book created from this manuscript.
+     */
+    public function book()
+    {
+        return $this->hasOne(Book::class, 'naskah_id', 'naskah_id');
+    }
+}
