@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { FileText, LayoutGrid } from 'lucide-react';
+import { FileText, LayoutGrid, Shield, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -21,16 +21,21 @@ const mainNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
-    // {
-    //     title: 'Repository',
-    //     href: 'https://github.com/laravel/react-starter-kit',
-    //     icon: Folder,
-    // },
-    // {
-    //     title: 'Documentation',
-    //     href: 'https://laravel.com/docs/starter-kits#react',
-    //     icon: BookOpen,
-    // },
+    {
+        title: 'Manajemen Role',
+        href: '/manajemen-role',
+        icon: Shield,
+    },
+    {
+        title: 'Manajemen Tim',
+        href: '/manajemen-tim',
+        icon: Users,
+    },
+    {
+        title: 'Manajemen Pengguna',
+        href: '/manajemen-pengguna',
+        icon: Users,
+    },
 ];
 
 export function AppSidebar() {
@@ -47,6 +52,7 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
+
 
             <SidebarContent>
                 <NavMain items={mainNavItems} />

@@ -18,6 +18,12 @@ class RolePermissionSeeder extends Seeder
 
         // Create permissions
         $permissions = [
+            //role management
+            'view roles',
+            'create roles',
+            'edit roles',
+            'delete roles',
+            
             // User management
             'view users',
             'create users',

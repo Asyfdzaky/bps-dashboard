@@ -1,11 +1,13 @@
+import { StatsCard } from '@/components/perfomance-card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 import { Input } from '@/components/ui/input';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { Table, TableBody, TableCell, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { Search } from 'lucide-react';
+import { ChevronDown, Search, Trophy } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -27,66 +29,107 @@ export default function Dashboard() {
                     <Button>
                         <Search />
                     </Button>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="flex items-center gap-2">
+                                <span>Semua Status</span>
+                                <ChevronDown className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem>Semua Status</DropdownMenuItem>
+                            <DropdownMenuItem>Diterima</DropdownMenuItem>
+                            <DropdownMenuItem>Ditolak</DropdownMenuItem>
+                            <DropdownMenuItem>Dalam Proses</DropdownMenuItem>
+                            <DropdownMenuItem>Selesai</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="flex items-center gap-2">
+                                <span>Semua Penerbit</span>
+                                <ChevronDown className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                            <DropdownMenuItem>Semua Penerbit</DropdownMenuItem>
+                            <DropdownMenuItem>Penerbit 1</DropdownMenuItem>
+                            <DropdownMenuItem>Penerbit 2</DropdownMenuItem>
+                            <DropdownMenuItem>Penerbit 3</DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                 <div className="grid auto-rows-min gap-2 md:grid-cols-5">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Target Tahun ini </CardTitle>
-                            <CardContent>
-                                <div className="m-2 items-center">
-                                    <span className="text-2xl font-bold">100</span>
-                                </div>
-                            </CardContent>
-                            <CardDescription>Judul Buku</CardDescription>
-                        </CardHeader>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Target Tahun ini </CardTitle>
-                            <CardContent>
-                                <div className="m-2 items-center">
-                                    <span className="text-2xl font-bold">100</span>
-                                </div>
-                            </CardContent>
-                            <CardDescription>Judul Buku</CardDescription>
-                        </CardHeader>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Target Tahun ini </CardTitle>
-                            <CardContent>
-                                <div className="m-2 items-center">
-                                    <span className="text-2xl font-bold">100</span>
-                                </div>
-                            </CardContent>
-                            <CardDescription>Judul Buku</CardDescription>
-                        </CardHeader>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Target Tahun ini </CardTitle>
-                            <CardContent>
-                                <div className="m-2 items-center">
-                                    <span className="text-2xl font-bold">100</span>
-                                </div>
-                            </CardContent>
-                            <CardDescription>Judul Buku</CardDescription>
-                        </CardHeader>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Target Tahun ini </CardTitle>
-                            <CardContent>
-                                <div className="m-2 items-center">
-                                    <span className="text-2xl font-bold">100</span>
-                                </div>
-                            </CardContent>
-                            <CardDescription>Judul Buku</CardDescription>
-                        </CardHeader>
-                    </Card>
+                    <StatsCard
+                        title="Target Tahun ini"
+                        value={100}
+                        change="+12.00%"
+                        period="this week"
+                        positive={true}
+                        icon={<Trophy className="h-5 w-5 text-yellow-500" />}
+                    />
+                    <StatsCard
+                        title="Target Tahun ini"
+                        value={100}
+                        change="+12.00%"
+                        period="this week"
+                        positive={true}
+                        icon={<Trophy className="h-5 w-5 text-yellow-500" />}
+                    />
+                    <StatsCard
+                        title="Target Tahun ini"
+                        value={100}
+                        change="+12.00%"
+                        period="this week"
+                        positive={true}
+                        icon={<Trophy className="h-5 w-5 text-yellow-500" />}
+                    />
+                    <StatsCard
+                        title="Target Tahun ini"
+                        value={100}
+                        change="+12.00%"
+                        period="this week"
+                        positive={true}
+                        icon={<Trophy className="h-5 w-5 text-yellow-500" />}
+                    />
+                    <StatsCard
+                        title="Target Tahun ini"
+                        value={100}
+                        change="+12.00%"
+                        period="this week"
+                        positive={true}
+                        icon={<Trophy className="h-5 w-5 text-yellow-500" />}
+                    />
                 </div>
                 <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>No</TableHead>
+                                <TableHead>Nama</TableHead>
+                                <TableHead>Penerbit</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Tanggal</TableHead>
+                                <TableHead>Aksi</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow>
+                                <TableCell>1</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>1</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>1</TableCell>
+                            </TableRow>
+                        </TableBody>
+                        <TableFooter>
+                            <TableRow>
+                                <TableCell>1</TableCell>
+                            </TableRow>
+                        </TableFooter>
+                    </Table>
                 </div>
             </div>
         </AppLayout>
