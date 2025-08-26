@@ -108,7 +108,7 @@ class NaskahController extends Controller
         $publishers = \App\Models\Publisher::select('penerbit_id', 'nama_penerbit')->get();
         $masterTasks = \App\Models\MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
         
-        return Inertia::render('manajemen-naskah/edit-naskah', [
+        return Inertia::render('manajemen-naskah/edit', [
             'book' => $book,
             'users' => $users,
             'publishers' => $publishers,
