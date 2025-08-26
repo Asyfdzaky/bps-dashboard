@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 200" role="img" aria-label="Reneturos Group">
+  <style>
+    :root{
+      --ink:#0A2240;         /* warna teks (navy gelap) */
+      --accent-1:#1D3557;    /* biru */
+      --accent-2:#0E6B4D;    /* hijau */
+      --accent-3:#E67E22;    /* oranye */
+    }
+    text{font-family: Inter, Poppins, "Segoe UI", Arial, sans-serif; font-weight:800; fill:var(--ink);}
+  </style>
+
+  <!-- Mark minimalis: tiga batang miring dengan ujung rounded -->
+  <g transform="translate(40 30) rotate(-24)">
+    <rect x="0"   y="0"  width="20" height="98" rx="10" fill="var(--accent-1)"/>
+    <rect x="40"  y="18" width="20" height="98" rx="10" fill="var(--accent-2)"/>
+    <rect x="80"  y="36" width="20" height="98" rx="10" fill="var(--accent-3)"/>
+  </g>
+
+  <!-- Teks -->
+  <g transform="translate(190 78)">
+    <text x="0" y="0" font-size="64" letter-spacing="1.2">RENETUROS</text>
+    <text x="0" y="72" font-size="64" letter-spacing="1.2">GROUP</text>
+  </g>
+</svg>

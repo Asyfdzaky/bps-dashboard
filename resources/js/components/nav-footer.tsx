@@ -25,10 +25,10 @@ export function NavFooter({
         if (item.href === '/manajemen-tim' || item.href === '/manajemen-pengguna') {
             return user?.roles?.includes('manajer') || false;
         }
-
-        // Allow other items
         return true;
     });
+    
+    
 
     return (
         <SidebarGroup {...props} className={`group-data-[collapsible-0]:p-0 ${className || ''}`}>

@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RolePermissionSeeder::class);
+        $this->call(BukuSeeder::class);
 
         // pastikan role ada
         foreach (['manajer', 'produksi', 'penulis', 'penerjemah'] as $role) {
