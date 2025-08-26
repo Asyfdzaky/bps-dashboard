@@ -1,13 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\dashboard;
+namespace App\Http\Controllers\naskah;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Models\Book;
+use App\Models\Publisher;
+use App\Models\User;
+use App\Models\MasterTask;
 
-class BukuController extends Controller
+class NaskahController extends Controller
 {
     public function index(Request $request)
     {
@@ -21,15 +24,34 @@ class BukuController extends Controller
         ])->get();
         
         // Get data needed for edit dialog
-        $users = \App\Models\User::select('user_id', 'nama_lengkap', 'email')->get();
-        $publishers = \App\Models\Publisher::select('penerbit_id', 'nama_penerbit')->get();
-        $masterTasks = \App\Models\MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
+        $users = User::select('user_id', 'nama_lengkap', 'email')->get();
+        $publishers = Publisher::select('penerbit_id', 'nama_penerbit')->get();
+        $masterTasks = MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
+
+            // Perbaiki query statistik berdasarkan data yang ada
+        $TargetTahunan = Book::whereYear('tanggal_target_naik_cetak', now()->year)->count();
+        $SedangDikerjakan = Book::whereIn('status_keseluruhan', ['editing', 'review'])->count();
+        $MendekatiDeadline = Book::where('tanggal_target_naik_cetak', '<', now()->addDays(7))->count();
+        $Published = Book::where('status_keseluruhan', 'published')->count();
         
-        return Inertia::render('dashboard/dashboard', [
+        $ChartData = [
+            'Belum Mulai' => Book::where('status_keseluruhan', 'draft')->count(),
+            'Dalam Proses' => Book::whereIn('status_keseluruhan', ['editing', 'review'])->count(),
+            'Selesai' => Book::where('status_keseluruhan', 'published')->count(),
+        ];
+       
+
+        
+        return Inertia::render('manajemen-naskah/page', [
             'books' => $books,
             'users' => $users,
             'publishers' => $publishers,
-            'masterTasks' => $masterTasks
+            'masterTasks' => $masterTasks,
+            'TargetTahunan' => $TargetTahunan,
+            'SedangDikerjakan' => $SedangDikerjakan,
+            'MendekatiDeadline' => $MendekatiDeadline,
+            'Published' => $Published,
+            'ChartData' => $ChartData,
         ]);
     }
     
@@ -66,7 +88,7 @@ class BukuController extends Controller
             }
         }
         
-        return Inertia::render('dashboard/show-dashboard', [
+        return Inertia::render('manajemen-naskah/show', [
             'book' => $book
         ]);
     }
@@ -86,7 +108,7 @@ class BukuController extends Controller
         $publishers = \App\Models\Publisher::select('penerbit_id', 'nama_penerbit')->get();
         $masterTasks = \App\Models\MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
         
-        return Inertia::render('dashboard/edit-dashboard', [
+        return Inertia::render('manajemen-naskah/edit-naskah', [
             'book' => $book,
             'users' => $users,
             'publishers' => $publishers,
@@ -142,13 +164,13 @@ class BukuController extends Controller
             }
         }
         
-        return redirect()->route('dashboard');
+        return redirect()->route('manajemen-naskah');
     }
     
     public function destroy($id)
     {
         $book = Book::findOrFail($id);
         $book->delete();
-        return redirect()->route('dashboard');
+        return redirect()->route('manajemen-naskah');
     }
 }

@@ -15,7 +15,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Naskah',
-        href: '/naskah',
+        href: '/manajemen-naskah',
         icon: FileText,
     },
 ];

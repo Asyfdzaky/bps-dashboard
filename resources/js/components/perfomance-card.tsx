@@ -1,35 +1,43 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react';
-import * as React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
-type StatsCardProps = {
+interface StatsCardProps {
     title: string;
-    value: string | number;
-    change?: string | number;
-    period?: string;
-    positive?: boolean;
+    value: number;
+    description?: string;
     icon?: React.ReactNode;
     className?: string;
-};
+    iconClassName?: string;
+    trend?: {
+        value: number;
+        isPositive: boolean;
+    };
+}
 
-export function StatsCard({ title, value, change, period = '', positive = true, icon, className = '' }: StatsCardProps) {
+export function StatsCard({ title, value, description, icon, className, iconClassName, trend }: StatsCardProps) {
     return (
-        <Card className={`w-full ${className}`}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{title}</CardTitle>
-                {icon}
-            </CardHeader>
-
-            <CardContent>
-                <div className="text-2xl font-bold">{typeof value === 'number' ? value.toLocaleString() : value}</div>
-
-                <p className={`flex items-center text-xs ${positive ? 'text-green-500' : 'text-red-500'}`}>
-                    {positive ? <ArrowUpRight className="mr-1 h-4 w-4" /> : <ArrowDownRight className="mr-1 h-4 w-4" />}
-                    <span className="font-medium">{change}</span>
-                    {period ? <span className="ml-1 text-muted-foreground">{period}</span> : null}
-                </p>
+        <Card className={cn('h-full bg-white', className)}>
+            <CardContent className="p-6">
+                <div className="flex h-full flex-col justify-between">
+                    <div className="mb-2 flex items-center justify-between">
+                        <span className="text-3xl font-bold text-gray-900">{value}</span>
+                        {icon && <div className={cn('flex h-10 w-10 items-center justify-center rounded-full', iconClassName)}>{icon}</div>}
+                    </div>
+                    <div>
+                        <p className="text-sm text-gray-600">{title}</p>
+                        {description && <p className="mt-1 text-xs text-gray-500">{description}</p>}
+                        {trend && (
+                            <div className="mt-2 flex items-center gap-1 rounded-md bg-green-100 px-2 py-1 text-sm text-green-700">
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                                <span>{trend.value}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </CardContent>
         </Card>
     );
