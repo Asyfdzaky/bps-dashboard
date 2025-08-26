@@ -20,11 +20,16 @@ class TaskProgress extends Model
         'pic_tugas_user_id',
         'deadline',
         'status',
+        'tanggal_mulai',
+        'tanggal_selesai',
         'catatan',
     ];
 
     protected $casts = [
         'deadline' => 'date',
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai' => 'date',
+    
     ];
 
     /**

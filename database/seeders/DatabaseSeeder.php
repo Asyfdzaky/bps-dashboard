@@ -13,7 +13,6 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RolePermissionSeeder::class);
-        $this->call(BukuSeeder::class);
 
         // pastikan role ada
         foreach (['manajer', 'produksi', 'penulis', 'penerjemah'] as $role) {
@@ -41,5 +40,8 @@ class DatabaseSeeder extends Seeder
                 $user->assignRole($data['role']);
             }
         }
+
+        // Jalankan BukuSeeder setelah user dibuat
+        $this->call(BukuSeeder::class);
     }
 }

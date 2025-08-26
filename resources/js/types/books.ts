@@ -41,19 +41,28 @@ export interface Book {
         deskripsi_segmen: string;
     };
 
-    taskProgress?: Array<{
-        id: string;
+    task_progress?: Array<{
+        // Ubah dari taskProgress ke task_progress
+        progres_id: string;
         buku_id: string;
-        master_task_id: string;
+        tugas_id: string;
+        pic_tugas_user_id?: string;
+        deadline?: string;
+        status: 'pending' | 'in_progress' | 'completed' | 'overdue';
         progress_percentage: number;
-        status: string;
         tanggal_mulai?: string;
         tanggal_selesai?: string;
         catatan?: string;
-        masterTask?: {
-            nama_task: string;
-            deskripsi: string;
+        master_task?: {
+            // Ubah dari masterTask ke master_task
+            tugas_id: string;
+            nama_tugas: string;
             urutan: number;
+        };
+        pic?: {
+            user_id: string;
+            nama_lengkap: string;
+            email: string;
         };
     }>;
 }

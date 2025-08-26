@@ -1,17 +1,23 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Book } from '@/types/books';
+import { Link } from '@inertiajs/react';
 import { type ColumnDef } from '@tanstack/react-table';
-import { Edit, Eye, Trash2 } from 'lucide-react';
+import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
 import { DataTable } from './table-data';
 
 interface ListBukuProps {
     books: Book[];
     title?: string;
     showFilters?: boolean;
+    onEdit?: (book: Book) => void;
+    onDelete?: (book: Book) => void;
+    onSearch?: (q: string) => void;
+    onSort?: (colId: string, dir: 'asc' | 'desc') => void;
 }
 
-export default function ListBuku({ books }: ListBukuProps) {
+export default function ListBuku({ books, onDelete, onSearch, onSort }: ListBukuProps) {
     const getStatusColor = (status: Book['status_keseluruhan']) => {
         switch (status) {
             case 'published':
@@ -100,19 +106,30 @@ export default function ListBuku({ books }: ListBukuProps) {
         {
             accessorKey: 'actions',
             header: 'Aksi',
-            cell: () => {
+            cell: ({ row }) => {
                 return (
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                        </Button>
-                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuItem asChild>
+                                <Link href={`/dashboard/book/${row.original.buku_id}`}>
+                                    <Eye className="mr-2 h-4 w-4" /> Lihat Detail
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild>
+                                <Link href={`/dashboard/book/${row.original.buku_id}/edit`}>
+                                    <Edit className="mr-2 h-4 w-4" /> Edit
+                                </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-red-600 focus:text-red-600" onClick={() => onDelete?.(row.original)}>
+                                <Trash2 className="mr-2 h-4 w-4" /> Hapus
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 );
             },
         },
@@ -129,9 +146,8 @@ export default function ListBuku({ books }: ListBukuProps) {
                     perPage: 10,
                     total: books.length,
                 }}
-                // onSearch={onSearch}
-                // onSort={onSort}
-                // onPageChange={onPageChange}
+                onSearch={onSearch}
+                onSort={onSort}
             />
         </div>
     );
