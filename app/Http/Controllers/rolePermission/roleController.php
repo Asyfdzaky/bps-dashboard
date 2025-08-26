@@ -31,6 +31,7 @@ class RoleController extends Controller
                 'edit'   => $request->user()->can('edit roles'),
                 'delete' => $request->user()->can('delete roles'),
             ],
+            'permissions' => Permission::orderBy('name')->get(['id','name']),
         ]);
     }
 
@@ -38,9 +39,18 @@ class RoleController extends Controller
     {
         $data = $request->validate([
             'name' => ['required','string','max:100','unique:roles,name'],
+            'permissions' => ['array'],
+            'permissions.*' => ['string','exists:permissions,name'],
         ]);
+        
         $role = Role::create(['name'=>$data['name'], 'guard_name'=>'web']);
-        return back()->with('success','Role created');
+        
+        // Assign permissions if provided
+        if (!empty($data['permissions'])) {
+            $role->syncPermissions($data['permissions']);
+        }
+        
+        return back()->with('success','Role created successfully with permissions');
     }
 
     public function edit($id)

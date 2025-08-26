@@ -10,6 +10,11 @@ export type Paginated<T> = {
     links: Array<{ url: string | null; label: string; active: boolean }>;
 };
 
+export type Permission = {
+    id: number;
+    name: string;
+};
+
 export type RoleRow = {
     id: number;
     name: string;
@@ -36,4 +41,5 @@ export type RoleIndexPageProps = {
     roles: Paginated<RoleRow>;
     filters: RoleIndexFilters;
     can: RoleIndexCan;
+    permissions: Permission[];
 };

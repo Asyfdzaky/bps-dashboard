@@ -1,19 +1,49 @@
-import { StatsCard } from '@/components/perfomance-card';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import type { RoleIndexPageProps } from '@/types/role';
+import type { Permission, RoleIndexPageProps } from '@/types/role';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { Key, Shield, Users } from 'lucide-react';
+import { Key, Plus, Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import TableRole from './table-role';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Manajemen Role', href: '/manajemen-role' }];
 
-export default function Page() {
-    // ← KUNCI: ketik propsnya
-    const { roles, filters, can } = usePage<RoleIndexPageProps>().props;
+// Function to categorize permissions
+const categorizePermissions = (permissions: Permission[]) => {
+    const categories: Record<string, Permission[]> = {};
 
-    const { data, setData, post, processing, reset } = useForm({ name: '' });
+    permissions.forEach((permission) => {
+        const parts = permission.name.split(' ');
+        const category = parts[1] || 'Other'; // Use second word as category
+
+        if (!categories[category]) {
+            categories[category] = [];
+        }
+        categories[category].push(permission);
+    });
+
+    return categories;
+};
+
+export default function Page() {
+
+    const { roles, filters, can, permissions } = usePage<RoleIndexPageProps>().props;
+
+    const { data, setData, post, processing, reset, errors } = useForm({
+        name: '',
+        permissions: [] as string[],
+    });
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Categorize permissions for better organization
+    const permissionCategories = useMemo(() => categorizePermissions(permissions), [permissions]);
 
     const search = (value: string) => {
         router.get(route('roles.index'), { ...filters, q: value }, { preserveState: true, replace: true });
@@ -21,7 +51,38 @@ export default function Page() {
 
     const onCreate = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('roles.store'), { onSuccess: () => reset() });
+        post(route('roles.store'), {
+            onSuccess: () => {
+                reset();
+                setIsModalOpen(false);
+            },
+        });
+    };
+
+    const handleModalClose = () => {
+        setIsModalOpen(false);
+        reset();
+    };
+
+    const handlePermissionToggle = (permissionName: string) => {
+        const currentPermissions = [...data.permissions];
+        if (currentPermissions.includes(permissionName)) {
+            setData(
+                'permissions',
+                currentPermissions.filter((p) => p !== permissionName),
+            );
+        } else {
+            setData('permissions', [...currentPermissions, permissionName]);
+        }
+    };
+
+    const handleSelectAll = () => {
+        const allPermissionNames = permissions.map((p) => p.name);
+        setData('permissions', allPermissionNames);
+    };
+
+    const handleDeselectAll = () => {
+        setData('permissions', []);
     };
 
     return (
@@ -33,41 +94,118 @@ export default function Page() {
                         <h1 className="text-2xl font-bold">Manajemen Role</h1>
                         <p className="text-muted-foreground">Kelola role dan permission untuk user. Klik tombol edit untuk mengatur permission.</p>
                     </div>
-                    {can?.create && (
-                        <div className="flex flex-col gap-2">
-                            <form onSubmit={onCreate} className="flex items-center gap-2">
-                                <input
-                                    className="rounded border px-3 py-2"
-                                    placeholder="Nama role baru"
-                                    value={data.name}
-                                    onChange={(e) => setData('name', e.target.value)}
-                                />
-                                <Button disabled={processing} type="submit">
-                                    Tambah Role
-                                </Button>
-                            </form>
-                            <p className="text-xs text-muted-foreground">Setelah membuat role, klik tombol edit untuk mengatur permission</p>
-                        </div>
-                    )}
                 </div>
 
                 {/* Summary Statistics */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <StatsCard title="Total Roles" value={roles.total} icon={<Users className="h-4 w-4" />} />
-                    <StatsCard
-                        title="Roles with Permissions"
-                        value={roles.data.filter((role) => role.permissions_count > 0).length}
-                        change={`${((roles.data.filter((role) => role.permissions_count > 0).length / roles.total) * 100).toFixed(1)}%`}
-                        period="of total roles"
-                        icon={<Shield className="h-4 w-4" />}
-                    />
-                    <StatsCard
-                        title="Total Permissions"
-                        value={roles.data.reduce((sum, role) => sum + role.permissions_count, 0)}
-                        icon={<Key className="h-4 w-4" />}
-                    />
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Role</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{roles.total}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Permission </CardTitle>
+                            <Key className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{roles.data.reduce((sum, role) => sum + role.permissions_count, 0)}</div>
+                        </CardContent>
+                    </Card>
                 </div>
+                {can?.create && (
+                    <div className="flex flex-col gap-2">
+                        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                            <DialogTrigger asChild>
+                                <Button>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Tambah Role
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
+                                <DialogHeader>
+                                    <DialogTitle>Tambah Role Baru</DialogTitle>
+                                    <DialogDescription>
+                                        Masukkan nama role dan pilih permission yang akan diberikan. Role ini akan dapat diatur permissionnya.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <form onSubmit={onCreate} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name">Nama Role</Label>
+                                        <Input
+                                            id="name"
+                                            type="text"
+                                            placeholder="Masukkan nama role"
+                                            value={data.name}
+                                            onChange={(e) => setData('name', e.target.value)}
+                                            className={errors.name ? 'border-red-500' : ''}
+                                            required
+                                        />
+                                        {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+                                    </div>
 
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between">
+                                            <Label>Permission</Label>
+                                            <div className="flex gap-2">
+                                                <Button type="button" variant="outline" size="sm" onClick={handleSelectAll}>
+                                                    Pilih Semua
+                                                </Button>
+                                                <Button type="button" variant="outline" size="sm" onClick={handleDeselectAll}>
+                                                    Hapus Semua
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {Object.keys(permissionCategories).length > 0 ? (
+                                            <div className="space-y-4">
+                                                {Object.entries(permissionCategories).map(([category, categoryPermissions]) => (
+                                                    <div key={category} className="space-y-2">
+                                                        <h4 className="text-sm font-medium text-muted-foreground capitalize">
+                                                            {category} ({categoryPermissions.length})
+                                                        </h4>
+                                                        <div className="grid grid-cols-1 gap-2 pl-4">
+                                                            {categoryPermissions.map((permission) => (
+                                                                <div key={permission.id} className="flex items-center space-x-2">
+                                                                    <Checkbox
+                                                                        id={permission.name}
+                                                                        checked={data.permissions.includes(permission.name)}
+                                                                        onCheckedChange={() => handlePermissionToggle(permission.name)}
+                                                                    />
+                                                                    <Label htmlFor={permission.name} className="cursor-pointer text-sm font-normal">
+                                                                        {permission.name}
+                                                                    </Label>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <Separator />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="py-4 text-center text-muted-foreground">Tidak ada permission yang tersedia</div>
+                                        )}
+
+                                        {errors.permissions && <p className="text-sm text-red-500">{errors.permissions}</p>}
+                                    </div>
+
+                                    <DialogFooter>
+                                        <Button type="button" variant="outline" onClick={handleModalClose}>
+                                            Batal
+                                        </Button>
+                                        <Button type="submit" disabled={processing}>
+                                            {processing ? 'Menyimpan...' : 'Simpan Role'}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                )}
                 <div className="flex items-center justify-between">
                     <TableRole
                         roles={roles}

@@ -18,7 +18,9 @@ return new class extends Migration
             $table->unsignedBigInteger('tugas_id');
             $table->uuid('pic_tugas_user_id')->nullable();
             $table->date('deadline')->nullable();
-            $table->string('status', 50)->default('Belum Mulai');
+            $table->string('status', 50)->default('pending');
+            $table->date('tanggal_mulai')->nullable();
+            $table->date('tanggal_selesai')->nullable();
             $table->text('catatan')->nullable();
             $table->timestamps();
 

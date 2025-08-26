@@ -40,5 +40,8 @@ class DatabaseSeeder extends Seeder
                 $user->assignRole($data['role']);
             }
         }
+
+        // Jalankan BukuSeeder setelah user dibuat
+        $this->call(BukuSeeder::class);
     }
 }

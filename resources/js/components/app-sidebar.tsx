@@ -21,6 +21,8 @@ const mainNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
+
+    
     {
         title: 'Manajemen Role',
         href: '/manajemen-role',
