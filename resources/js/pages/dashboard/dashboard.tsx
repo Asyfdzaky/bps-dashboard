@@ -1,15 +1,14 @@
-import ListBuku from '@/components/list-naskah';
+import ListNaskahDeadline from '@/components/list-naskah-deadline';
+import ListNaskahTerkini from '@/components/list-naskah-terkini';
 import { StatsCard } from '@/components/perfomance-card';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
+import StatusBukuChart from '@/components/pie-chart';
+import { Card, CardContent } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { type Book } from '@/types/books';
 import { Head, usePage } from '@inertiajs/react';
-import { ChevronDown, Search, Trophy } from 'lucide-react';
-import { useState } from 'react';
+import { BookOpen, Clock, FileText, Trophy } from 'lucide-react';
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -19,141 +18,92 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Dashboard() {
-    const { books = [] } = usePage<{ books: Book[] }>().props;
+    const {
+        books = [],
+        TargetTahunan,
+        SedangDikerjakan,
+        MendekatiDeadline,
+        Published,
+        ChartData,
+    } = usePage<{
+        books: Book[];
+        TargetTahunan: number;
+        SedangDikerjakan: number;
+        MendekatiDeadline: number;
+        Published: number;
+        ChartData: { [key: string]: number };
+    }>().props;
 
-    const [selectedBook, setSelectedBook] = useState<Book | null>(null);
-    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  
 
-    const handleDelete = (book: Book) => {
-        setSelectedBook(book);
-        setIsDeleteDialogOpen(true);
-    };
-
-    const closeDeleteDialog = () => {
-        setIsDeleteDialogOpen(false);
-        setSelectedBook(null);
-    };
+    
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard Manajemen Penerbitan Buku" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div>
+            <div className="mx-auto w-full max-w-7xl px-4 py-6">
+                <div className="mb-4">
                     <h1 className="text-2xl font-bold">Dashboard Manajemen Penerbitan Buku</h1>
                 </div>
-                <div className="flex items-center gap-2">
-                    <Input type="text" placeholder="Cari naskah" />
-                    <Button>
-                        <Search />
-                    </Button>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="flex items-center gap-2">
-                                <span>Semua Status</span>
-                                <ChevronDown className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem>Semua Status</DropdownMenuItem>
-                            <DropdownMenuItem>Diterima</DropdownMenuItem>
-                            <DropdownMenuItem>Ditolak</DropdownMenuItem>
-                            <DropdownMenuItem>Dalam Proses</DropdownMenuItem>
-                            <DropdownMenuItem>Selesai</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="flex items-center gap-2">
-                                <span>Semua Penerbit</span>
-                                <ChevronDown className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                            <DropdownMenuItem>Semua Penerbit</DropdownMenuItem>
-                            <DropdownMenuItem>Penerbit 1</DropdownMenuItem>
-                            <DropdownMenuItem>Penerbit 2</DropdownMenuItem>
-                            <DropdownMenuItem>Penerbit 3</DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
-                <div className="grid auto-rows-min gap-2 md:grid-cols-5">
-                    <StatsCard
-                        title="Total Buku"
-                        value={books?.length || 0}
-                        change="+12.00%"
-                        period="this week"
-                        positive={true}
-                        icon={<Trophy className="h-5 w-5 text-yellow-500" />}
-                    />
-                    <StatsCard
-                        title="Buku Published"
-                        value={books?.filter((b) => b.status_keseluruhan === 'published').length || 0}
-                        change="+8.00%"
-                        period="this week"
-                        positive={true}
-                        icon={<Trophy className="h-5 w-5 text-green-500" />}
-                    />
-                    <StatsCard
-                        title="Dalam Review"
-                        value={books?.filter((b) => b.status_keseluruhan === 'review').length || 0}
-                        change="+5.00%"
-                        period="this week"
-                        positive={true}
-                        icon={<Trophy className="h-5 w-5 text-blue-500" />}
-                    />
-                    <StatsCard
-                        title="Dalam Editing"
-                        value={books?.filter((b) => b.status_keseluruhan === 'editing').length || 0}
-                        change="+3.00%"
-                        period="this week"
-                        positive={true}
-                        icon={<Trophy className="h-5 w-5 text-orange-500" />}
-                    />
-                    <StatsCard
-                        title="Draft"
-                        value={books?.filter((b) => b.status_keseluruhan === 'draft').length || 0}
-                        change="+2.00%"
-                        period="this week"
-                        positive={true}
-                        icon={<Trophy className="h-5 w-5 text-gray-500" />}
-                    />
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <div className="flex flex-col gap-4 p-4">
-                        <div className="flex flex-col gap-2">
-                            <h2 className="text-lg font-bold">Daftar Buku Terkini</h2>
-                            <ListBuku books={books || []} onDelete={handleDelete} />
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+                    <div className="flex flex-col gap-6 lg:col-span-8">
+                        {/* ===== Stats top ===== */}
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            <StatsCard
+                                className="row-span-2 sm:col-span-2"
+                                title="Target Cetak"
+                                value={TargetTahunan}
+                                description="Target Cetak Tahun Ini"
+                                icon={<Trophy className="h-6 w-6 text-yellow-500" />}
+                                trend={{ value: 11, isPositive: true }}
+                                iconClassName="bg-yellow-100"
+                            />
+
+                            <StatsCard
+                                className="sm:col-span-2"
+                                title="Buku Published"
+                                value={Published}
+                                description="Judul Buku"
+                                icon={<BookOpen className="h-6 w-6 text-green-500" />}
+                                iconClassName="bg-green-100"
+                            />
+
+                            <StatsCard
+                                title="Sedang Dikerjakan"
+                                value={SedangDikerjakan}
+                                description="Judul Buku"
+                                icon={<FileText className="h-6 w-6 text-blue-500" />}
+                                iconClassName="bg-blue-100"
+                            />
+
+                            <StatsCard
+                                title="Mendekati deadline"
+                                value={MendekatiDeadline}
+                                description="Judul Buku"
+                                icon={<Clock className="h-6 w-6 text-gray-500" />}
+                                iconClassName="bg-gray-100"
+                            />
                         </div>
+                        {/* RIGHT (sidebar) */}
+                        <section>
+                            <ListNaskahTerkini books={books} title="Naskah Terkini" />
+                        </section>
                     </div>
+
+                    {/* ===== Main grid: left content + right sidebar ===== */}
+                    <aside className="space-y-6 self-start lg:sticky lg:top-4 lg:col-span-4 lg:row-span-2">
+                        {/* LEFT */}
+                        <ListNaskahDeadline books={books} title="Daftar Naskah Buku Terkini" />
+                        <Card className="bg-white">
+                            <CardContent>
+                                <StatusBukuChart data={ChartData} />
+                            </CardContent>
+                        </Card>
+                    </aside>
                 </div>
             </div>
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Konfirmasi Hapus</DialogTitle>
-                        <DialogDescription>
-                            Apakah Anda yakin ingin menghapus buku "{selectedBook?.judul_buku}"? Tindakan ini tidak dapat dibatalkan.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={closeDeleteDialog}>
-                            Batal
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => {
-                                // Implementasi hapus buku
-                                console.log('Menghapus buku:', selectedBook?.buku_id);
-                                closeDeleteDialog();
-                            }}
-                        >
-                            Hapus
-                        </Button>
-                    </div>
-                </DialogContent>
-            </Dialog>
+            
         </AppLayout>
     );
 }

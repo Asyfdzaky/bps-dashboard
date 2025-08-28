@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\dashboard\DashboardController;
+use App\Http\Controllers\naskah\NaskahController;
 use App\Http\Controllers\rolePermission\RoleController;
 use App\Http\Controllers\rolePermission\TeamController;
-use App\Http\Controllers\dashboard\BukuController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -11,11 +12,17 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', [BukuController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/book/{id}', [BukuController::class, 'show'])->name('dashboard.book.show');
-    Route::get('/dashboard/book/{id}/edit', [BukuController::class, 'edit'])->name('dashboard.book.edit');
-    Route::put('/dashboard/book/{id}', [BukuController::class, 'update'])->name('dashboard.book.update');
-    Route::delete('/dashboard/book/{id}', [BukuController::class, 'destroy'])->name('dashboard.book.destroy');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    Route::get('/manajemen-naskah', [NaskahController::class, 'index'])->name('manajemen-naskah');
+    Route::get('/manajemen-naskah/{id}', [NaskahController::class, 'show'])->name('manajemen-naskah.show');
+    Route::get('/manajemen-naskah/{id}/edit', [NaskahController::class, 'edit'])->name('manajemen-naskah.edit');
+    Route::put('/manajemen-naskah/{id}', [NaskahController::class, 'update'])->name('manajemen-naskah.update');
+    Route::delete('/manajemen-naskah/{id}', [NaskahController::class, 'destroy'])->name('manajemen-naskah.destroy');
+
+
+
+
 
     Route::get('/manajemen-role', [RoleController::class, 'index'])->name('roles.index')
         ->middleware('role:manajer');

@@ -13,11 +13,9 @@ interface ListBukuProps {
     showFilters?: boolean;
     onEdit?: (book: Book) => void;
     onDelete?: (book: Book) => void;
-    onSearch?: (q: string) => void;
-    onSort?: (colId: string, dir: 'asc' | 'desc') => void;
 }
 
-export default function ListBuku({ books, onDelete, onSearch, onSort }: ListBukuProps) {
+export default function ListBuku({ books, onDelete }: ListBukuProps) {
     const getStatusColor = (status: Book['status_keseluruhan']) => {
         switch (status) {
             case 'published':
@@ -116,12 +114,12 @@ export default function ListBuku({ books, onDelete, onSearch, onSort }: ListBuku
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
-                                <Link href={`/dashboard/book/${row.original.buku_id}`}>
+                                <Link href={`/manajemen-naskah/${row.original.buku_id}`}>
                                     <Eye className="mr-2 h-4 w-4" /> Lihat Detail
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
-                                <Link href={`/dashboard/book/${row.original.buku_id}/edit`}>
+                                <Link href={`/manajemen-naskah/${row.original.buku_id}/edit`}>
                                     <Edit className="mr-2 h-4 w-4" /> Edit
                                 </Link>
                             </DropdownMenuItem>
@@ -143,11 +141,9 @@ export default function ListBuku({ books, onDelete, onSearch, onSort }: ListBuku
                 searchableColumn="judul_buku"
                 pagination={{
                     page: 1,
-                    perPage: 10,
+                    perPage: 5,
                     total: books.length,
                 }}
-                onSearch={onSearch}
-                onSort={onSort}
             />
         </div>
     );

@@ -101,7 +101,7 @@ export default function EditBookPage({ book, users, publishers, masterTasks }: E
         try {
             // Use Inertia router to update the book
             router.put(
-                `/dashboard/book/${editedBook.buku_id}`,
+                `/manajemen-naskah/${editedBook.buku_id}`,
                 {
                     judul_buku: editedBook.judul_buku,
                     pic_user_id: editedBook.pic_user_id,
@@ -114,7 +114,7 @@ export default function EditBookPage({ book, users, publishers, masterTasks }: E
                 {
                     onSuccess: () => {
                         // Redirect back to dashboard
-                        router.visit('/dashboard');
+                        router.visit('/manajemen-naskah');
                     },
                     onError: (errors) => {
                         console.error('Error updating book:', errors);
@@ -129,7 +129,7 @@ export default function EditBookPage({ book, users, publishers, masterTasks }: E
     };
 
     const handleBack = () => {
-        router.visit('/dashboard');
+        router.visit('/manajemen-naskah');
     };
 
     const getStatusIcon = (status: string) => {
