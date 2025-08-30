@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,6 +22,12 @@ class ProfileController extends Controller
         return Inertia::render('settings/profile', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => $request->session()->get('status'),
+            'user' => [
+                'nama_lengkap'   => $request->user()->nama_lengkap,
+                'email'          => $request->user()->email,
+                'foto_profil_url'=> $request->user()->foto_profil_url
+                    
+            ],
         ]);
     }
 
@@ -29,15 +36,33 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        // isi field text yang tervalidasi
+        $user->fill($request->safe()->only(['nama_lengkap','email']));
+
+        // handle upload foto (opsional)
+        if ($request->hasFile('foto_profil')) {
+            // hapus file lama kalau ada
+            if ($user->foto_profil_url && Storage::disk('public')->exists($user->foto_profil_url)) {
+                Storage::disk('public')->delete($user->foto_profil_url);
+            }
+
+            // simpan file baru ke disk public
+            $path = $request->file('foto_profil')->store('profile-pictures', 'public');
+
+            // simpan path relatif ke DB
+            $user->foto_profil_url = $path;
         }
 
-        $request->user()->save();
+        // jika email berubah, reset verifikasi
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
 
-        return to_route('profile.edit');
+        $user->save();
+
+        return to_route('profile.edit')->with('status', 'Profil diperbarui.');
     }
 
     /**
@@ -51,8 +76,12 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        Auth::logout();
+        // opsional: hapus foto saat akun dihapus
+        if ($user->foto_profil_url && Storage::disk('public')->exists($user->foto_profil_url)) {
+            Storage::disk('public')->delete($user->foto_profil_url);
+        }
 
+        Auth::logout();
         $user->delete();
 
         $request->session()->invalidate();

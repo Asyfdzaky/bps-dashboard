@@ -30,23 +30,23 @@ class BukuSeeder extends Seeder
     {
         $publishers = [
             [
-                'nama_penerbit' => 'Gramedia Pustaka Utama',
+                'nama_penerbit' => 'Renebook',
                 'deskripsi_segmen' => 'Fiksi & Non-Fiksi Umum'
             ],
             [
-                'nama_penerbit' => 'Elex Media Komputindo',
+                'nama_penerbit' => 'Turos Pustaka',
                 'deskripsi_segmen' => 'Teknologi & Programming'
             ],
             [
-                'nama_penerbit' => 'Penerbit Erlangga',
+                'nama_penerbit' => 'Reneluv',
                 'deskripsi_segmen' => 'Pendidikan & Akademik'
             ],
             [
-                'nama_penerbit' => 'Mizan Pustaka',
+                'nama_penerbit' => 'Renekids',
                 'deskripsi_segmen' => 'Agama & Spiritual'
             ],
             [
-                'nama_penerbit' => 'Kompas Media Nusantara',
+                'nama_penerbit' => 'Milestone',
                 'deskripsi_segmen' => 'Berita & Jurnalistik'
             ]
         ];
@@ -208,9 +208,11 @@ class BukuSeeder extends Seeder
 
         // Ambil ID penerbit berdasarkan nama
         $publishers = [
-            'Elex Media Komputindo' => Publisher::where('nama_penerbit', 'Elex Media Komputindo')->first()->penerbit_id,
-            'Penerbit Erlangga' => Publisher::where('nama_penerbit', 'Penerbit Erlangga')->first()->penerbit_id,
-            'Gramedia Pustaka Utama' => Publisher::where('nama_penerbit', 'Gramedia Pustaka Utama')->first()->penerbit_id,
+            'Renebook' => Publisher::where('nama_penerbit', 'Renebook')->first()->penerbit_id,
+            'Turos Pustaka' => Publisher::where('nama_penerbit', 'Turos Pustaka')->first()->penerbit_id,
+            'Reneluv' => Publisher::where('nama_penerbit', 'Reneluv')->first()->penerbit_id,
+            'Renekids' => Publisher::where('nama_penerbit', 'Renekids')->first()->penerbit_id,
+            'Milestone' => Publisher::where('nama_penerbit', 'Milestone')->first()->penerbit_id,
         ];
 
         // Ambil manuscripts yang sudah dibuat
@@ -220,7 +222,7 @@ class BukuSeeder extends Seeder
             [
                 'judul_buku' => 'Panduan Lengkap Laravel untuk Pemula',
                 'pic_user_id' => $manajer->user_id,
-                'penerbit_id' => $publishers['Elex Media Komputindo'],
+                'penerbit_id' => $publishers['Renebook'],
                 'status_keseluruhan' => 'published',
                 'tanggal_target_naik_cetak' => now()->addDays(30),
                 'tanggal_realisasi_naik_cetak' => now()->subDays(5)
@@ -228,28 +230,28 @@ class BukuSeeder extends Seeder
             [
                 'judul_buku' => 'React.js: Modern Web Development',
                 'pic_user_id' => $produksi->user_id,
-                'penerbit_id' => $publishers['Elex Media Komputindo'],
+                'penerbit_id' => $publishers['Renebook'],
                 'status_keseluruhan' => 'review',
                 'tanggal_target_naik_cetak' => now()->addDays(45)
             ],
             [
                 'judul_buku' => 'Database Design Principles',
                 'pic_user_id' => $produksi->user_id,
-                'penerbit_id' => $publishers['Penerbit Erlangga'],
+                'penerbit_id' => $publishers['Turos Pustaka'],
                 'status_keseluruhan' => 'editing',
                 'tanggal_target_naik_cetak' => now()->addDays(60)
             ],
             [
                 'judul_buku' => 'UI/UX Design Fundamentals',
                 'pic_user_id' => $manajer->user_id,
-                'penerbit_id' => $publishers['Gramedia Pustaka Utama'],
+                'penerbit_id' => $publishers['Reneluv'],
                 'status_keseluruhan' => 'draft',
                 'tanggal_target_naik_cetak' => now()->addDays(90)
             ],
             [
                 'judul_buku' => 'Python for Data Science',
                 'pic_user_id' => $produksi->user_id,
-                'penerbit_id' => $publishers['Elex Media Komputindo'],
+                'penerbit_id' => $publishers['Milestone'],
                 'status_keseluruhan' => 'cancelled',
                 'tanggal_target_naik_cetak' => now()->addDays(75)
             ]

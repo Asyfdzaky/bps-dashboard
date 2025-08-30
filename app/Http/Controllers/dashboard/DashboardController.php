@@ -14,44 +14,48 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        $user = $request->user();
         
-        $books = Book::with([
-            'manuscript.author', 
+        // Base query for books
+        $booksQuery = Book::with([
+            'publisher', 
             'pic', 
-            'publisher',
             'taskProgress.masterTask',
             'taskProgress.pic'
-        ])->get();
+        ]);
         
-        // // Get data needed for edit dialog
-        // $users = User::select('user_id', 'nama_lengkap', 'email')->get();
-        // $publishers = Publisher::select('penerbit_id', 'nama_penerbit')->get();
-        // $masterTasks = MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
-
-            // Perbaiki query statistik berdasarkan data yang ada
-        $TargetTahunan = Book::whereYear('tanggal_target_naik_cetak', now()->year)->count();
-        $SedangDikerjakan = Book::whereIn('status_keseluruhan', ['editing', 'review'])->count();
-        $MendekatiDeadline = Book::where('tanggal_target_naik_cetak', '<', now()->addDays(7))->count();
-        $Published = Book::where('status_keseluruhan', 'published')->count();
+        // Apply publisher filtering if user has publisher role
+        if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
+            $booksQuery = $booksQuery->where('penerbit_id', $user->penerbit_id);
+        }
+        
+        $books = $booksQuery->get();
+        
+        // Get statistics with publisher filtering
+        $statsQuery = Book::query();
+        if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
+            $statsQuery = $statsQuery->where('penerbit_id', $user->penerbit_id);
+        }
+        
+        $TargetTahunan = $statsQuery->clone()->whereYear('tanggal_target_naik_cetak', now()->year)->count();
+        $SedangDikerjakan = $statsQuery->clone()->whereIn('status_keseluruhan', ['editing', 'review'])->count();
+        $MendekatiDeadline = $statsQuery->clone()->where('tanggal_target_naik_cetak', '<', now()->addDays(7))->count();
+        $Published = $statsQuery->clone()->where('status_keseluruhan', 'published')->count();
         
         $ChartData = [
-            'Belum Mulai' => Book::where('status_keseluruhan', 'draft')->count(),
-            'Dalam Proses' => Book::whereIn('status_keseluruhan', ['editing', 'review'])->count(),
-            'Selesai' => Book::where('status_keseluruhan', 'published')->count(),
+            'Belum Mulai' => $statsQuery->clone()->where('status_keseluruhan', 'draft')->count(),
+            'Dalam Proses' => $statsQuery->clone()->whereIn('status_keseluruhan', ['editing', 'review'])->count(),
+            'Selesai' => $statsQuery->clone()->where('status_keseluruhan', 'published')->count(),
         ];
-       
-
         
         return Inertia::render('dashboard/dashboard', [
             'books' => $books,
-            // 'users' => $users,
-            // 'publishers' => $publishers,
-            // 'masterTasks' => $masterTasks,
             'TargetTahunan' => $TargetTahunan,
             'SedangDikerjakan' => $SedangDikerjakan,
             'MendekatiDeadline' => $MendekatiDeadline,
             'Published' => $Published,
             'ChartData' => $ChartData,
+            'userPublisher' => $user && $user->hasPublisherRole() ? $user->publisher : null,
         ]);
     }
     

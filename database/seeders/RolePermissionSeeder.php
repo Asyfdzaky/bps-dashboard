@@ -8,106 +8,71 @@ use Spatie\Permission\Models\Permission;
 
 class RolePermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create permissions
+        $guard = config('auth.defaults.guard', 'web');
+
+        // Permissions
         $permissions = [
-            //role management
-            'view roles',
-            'create roles',
-            'edit roles',
-            'delete roles',
-            
-            // User management
-            'view users',
-            'create users',
-            'edit users',
-            'delete users',
-            
-            // Manuscript management
-            'view manuscripts',
-            'create manuscripts',
-            'edit manuscripts',
-            'delete manuscripts',
-            'review manuscripts',
-            
-            // Book management
-            'view books',
-            'create books',
-            'edit books',
-            'delete books',
-            'manage book progress',
-            
-            // Publisher management
-            'view publishers',
-            'create publishers',
-            'edit publishers',
-            'delete publishers',
-            
-            // Task management
-            'view tasks',
-            'create tasks',
-            'edit tasks',
-            'delete tasks',
-            'assign tasks',
-            
-            // Target management
-            'view targets',
-            'create targets',
-            'edit targets',
-            'delete targets',
-            
-            // Reports
-            'view reports',
-            'export reports',
+            'view roles','create roles','edit roles','delete roles',
+            'view users','create users','edit users','delete users',
+
+            'view manuscripts','create manuscripts','edit manuscripts','delete manuscripts','review manuscripts',
+            'view books','create books','edit books','delete books','manage book progress',
+
+            'view publishers','create publishers','edit publishers','delete publishers',
+
+            'view tasks','create tasks','edit tasks','delete tasks','assign tasks',
+
+            'view targets','create targets','edit targets','delete targets',
+
+            'view reports','export reports',
+
+            // khusus super admin
+            'manage team','manage settings',
         ];
 
-        // Create permissions if they don't exist
-        foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+        foreach ($permissions as $name) {
+            Permission::firstOrCreate(['name' => $name, 'guard_name' => $guard]);
         }
 
-        // Create roles and assign permissions
-        $manajerRole = Role::firstOrCreate(['name' => 'manajer']);
-        $manajerRole->syncPermissions(Permission::all());
+        // Roles inti
+        $manajer = Role::firstOrCreate(['name' => 'manajer', 'guard_name' => $guard]);
+        $manajer->syncPermissions(Permission::all());
 
-        $produksiRole = Role::firstOrCreate(['name' => 'produksi']);
-        $produksiRole->syncPermissions([
-            'view manuscripts',
-            'edit manuscripts',
-            'review manuscripts',
-            'view books',
-            'edit books',
-            'manage book progress',
-            'view tasks',
-            'edit tasks',
+        $produksi = Role::firstOrCreate(['name' => 'produksi', 'guard_name' => $guard]);
+        $produksi->syncPermissions([
+            'view manuscripts','edit manuscripts','review manuscripts',
+            'view books','edit books','manage book progress',
+            'view tasks','edit tasks',
             'view targets',
-            'view reports'
+            'view reports',
         ]);
 
-        $penulisRole = Role::firstOrCreate(['name' => 'penulis']);
-        $penulisRole->syncPermissions([
-            'view manuscripts',
-            'create manuscripts',
-            'edit manuscripts',
-            'view books',
-            'view tasks',
-            'view targets'
+        $penulis = Role::firstOrCreate(['name' => 'penulis', 'guard_name' => $guard]);
+        $penulis->syncPermissions([
+            'view manuscripts','create manuscripts','edit manuscripts',
+            'view books','view tasks','view targets',
         ]);
 
-        $penerjemahRole = Role::firstOrCreate(['name' => 'penerjemah']);
-        $penerjemahRole->syncPermissions([
-            'view manuscripts',
-            'edit manuscripts',
-            'view books',
-            'view tasks',
-            'view targets'
+        $penerjemah = Role::firstOrCreate(['name' => 'penerjemah', 'guard_name' => $guard]);
+        $penerjemah->syncPermissions([
+            'view manuscripts','edit manuscripts',
+            'view books','view tasks','view targets',
         ]);
+
+        // Role tunggal untuk semua penerbit
+        $penerbit = Role::firstOrCreate(['name' => 'penerbit', 'guard_name' => $guard]);
+        $penerbit->syncPermissions([
+            'view manuscripts','create manuscripts','edit manuscripts','delete manuscripts','review manuscripts',
+            'view books','create books','edit books','delete books','manage book progress',
+            'view tasks','create tasks','edit tasks','delete tasks',
+            'view targets','create targets','edit targets','delete targets',
+            'view reports','export reports',
+        ]);
+
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }

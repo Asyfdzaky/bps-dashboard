@@ -5,25 +5,24 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { X } from 'lucide-react';
 
 import { DataTable } from '@/components/table-data';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import type { Role, TeamIndexPageProps, UserRow } from '@/types/team';
+import type { Role, UserRow } from '@/types/team';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowUpDown, Edit, Plus, Trash2, Users } from 'lucide-react';
+import { ArrowUpDown, BookOpen, Edit, Languages, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Manajemen Tim',
-        href: '/manajemen-tim',
+        title: 'Manajemen Pengguna',
+        href: '/manajemen-pengguna',
     },
 ];
 
-export default function ManajemenTim() {
-    const { users, filters, roles, publishers, can } = usePage<TeamIndexPageProps>().props;
+export default function ManajemenPengguna() {
+    const { users, filters, roles, can } = usePage<any>().props;
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editingUser, setEditingUser] = useState<UserRow | null>(null);
@@ -34,17 +33,16 @@ export default function ManajemenTim() {
         password: '',
         password_confirmation: '',
         roles: [] as number[],
-        penerbit_id: null as number | null,
         q: '',
     });
 
     const search = (value: string) => {
-        router.get(route('manajemen-tim'), { ...filters, q: value }, { preserveState: true, replace: true });
+        router.get(route('manajemen-pengguna'), { ...filters, q: value }, { preserveState: true, replace: true });
     };
 
     const onCreate = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('manajemen-tim.store'), {
+        post(route('manajemen-pengguna.store'), {
             onSuccess: () => {
                 reset();
                 setShowCreateDialog(false);
@@ -56,7 +54,7 @@ export default function ManajemenTim() {
         e.preventDefault();
         if (!editingUser) return;
 
-        put(route('manajemen-tim.update', editingUser.user_id), {
+        put(route('manajemen-pengguna.update', editingUser.user_id), {
             onSuccess: () => {
                 reset();
                 setShowEditDialog(false);
@@ -67,7 +65,7 @@ export default function ManajemenTim() {
 
     const onDelete = (userId: string) => {
         if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-            router.delete(route('manajemen-tim.destroy', userId), { preserveScroll: true });
+            router.delete(route('manajemen-pengguna.destroy', userId), { preserveScroll: true });
         }
     };
 
@@ -79,7 +77,6 @@ export default function ManajemenTim() {
             password: '',
             password_confirmation: '',
             roles: user.roles.map((r: Role) => r.id),
-            penerbit_id: user.publisher?.penerbit_id || null,
         });
         setShowEditDialog(true);
     };
@@ -114,6 +111,11 @@ export default function ManajemenTim() {
         );
     };
 
+    // Filter users berdasarkan role
+    const penulisUsers = users?.data?.filter((user: UserRow) => user.roles.some((role: Role) => role.name === 'penulis')) || [];
+
+    const penerjemahUsers = users?.data?.filter((user: UserRow) => user.roles.some((role: Role) => role.name === 'penerjemah')) || [];
+
     const columns = [
         {
             accessorKey: 'nama_lengkap',
@@ -122,7 +124,11 @@ export default function ManajemenTim() {
                     variant="ghost"
                     onClick={() => {
                         const next = filters?.sort === 'nama_lengkap' && filters?.dir === 'asc' ? 'desc' : 'asc';
-                        router.get(route('manajemen-tim'), { ...filters, sort: 'nama_lengkap', dir: next }, { preserveState: true, replace: true });
+                        router.get(
+                            route('manajemen-pengguna'),
+                            { ...filters, sort: 'nama_lengkap', dir: next },
+                            { preserveState: true, replace: true },
+                        );
                     }}
                 >
                     Nama Lengkap <ArrowUpDown className="ml-1 h-4 w-4" />
@@ -137,7 +143,7 @@ export default function ManajemenTim() {
                     variant="ghost"
                     onClick={() => {
                         const next = filters?.sort === 'email' && filters?.dir === 'asc' ? 'desc' : 'asc';
-                        router.get(route('manajemen-tim'), { ...filters, sort: 'email', dir: next }, { preserveState: true, replace: true });
+                        router.get(route('manajemen-pengguna'), { ...filters, sort: 'email', dir: next }, { preserveState: true, replace: true });
                     }}
                 >
                     Email <ArrowUpDown className="ml-1 h-4 w-4" />
@@ -156,13 +162,6 @@ export default function ManajemenTim() {
                         </Badge>
                     ))}
                 </div>
-            ),
-        },
-        {
-            accessorKey: 'publisher',
-            header: 'Penerbit',
-            cell: ({ row }: { row: { original: UserRow } }) => (
-                <div className="text-sm text-muted-foreground">{row.original.publisher ? row.original.publisher.nama_penerbit : '-'}</div>
             ),
         },
         {
@@ -200,58 +199,53 @@ export default function ManajemenTim() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Manajemen Tim" />
+            <Head title="Manajemen Pengguna" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Manajemen Tim</h1>
-                        <p className="text-muted-foreground">Kelola anggota tim, tambah user baru, dan assign role untuk mereka</p>
+                        <h1 className="text-2xl font-bold">Manajemen Pengguna</h1>
+                        <p className="text-muted-foreground">Kelola penulis dan penerjemah untuk proyek naskah</p>
                     </div>
+                </div>
+
+                {/* Summary Statistics */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Penulis</CardTitle>
+                            <BookOpen className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{penulisUsers.length}</div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Penerjemah</CardTitle>
+                            <Languages className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{penerjemahUsers.length}</div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
                     {can?.create && (
                         <Button onClick={handleCreateClick}>
                             <Plus className="mr-2 h-4 w-4" />
-                            Tambah User
+                            Tambah User Baru
                         </Button>
                     )}
                 </div>
 
-                {/* Summary Statistics */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{users.total}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Users with Roles</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{users.data.filter((user) => user.roles.length > 0).length}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Roles</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{roles.length}</div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Create/Edit User Form */}
+                {/* Create User Form */}
                 <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                     <DialogContent className="max-w-2xl">
                         <DialogHeader>
                             <DialogTitle>Tambah User Baru</DialogTitle>
-                            <DialogDescription>Buat user baru dan assign role untuk mereka</DialogDescription>
+                            <DialogDescription>Buat user baru dengan role penulis atau penerjemah</DialogDescription>
                         </DialogHeader>
                         <form onSubmit={onCreate} className="space-y-4">
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -309,67 +303,26 @@ export default function ManajemenTim() {
 
                             <div className="space-y-3">
                                 <Label>Roles</Label>
-                                <Select onValueChange={handleRoleAdd} defaultValue="">
+                                <Select
+                                    onValueChange={(value) => {
+                                        const role = roles.find((r: Role) => r.name === value);
+                                        if (role) {
+                                            setData('roles', [role.id]);
+                                        }
+                                    }}
+                                    value=""
+                                >
                                     <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Pilih role untuk ditambahkan" />
+                                        <SelectValue placeholder="Pilih role (penulis atau penerjemah)" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {roles
-                                            .filter((role) => !data.roles.includes(role.id))
-                                            .map((role) => (
-                                                <SelectItem key={role.id} value={role.id.toString()}>
-                                                    {role.name}
-                                                </SelectItem>
-                                            ))}
+                                        <SelectItem value="penulis">Penulis</SelectItem>
+                                        <SelectItem value="penerjemah">Penerjemah</SelectItem>
                                     </SelectContent>
                                 </Select>
 
-                                {/* Display selected roles */}
-                                {data.roles.length > 0 && (
-                                    <div className="space-y-2">
-                                        <Label className="text-sm text-muted-foreground">Role yang dipilih:</Label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {data.roles.map((roleId) => {
-                                                const role = roles.find((r) => r.id === roleId);
-                                                return role ? (
-                                                    <Badge key={role.id} variant="default" className="flex items-center gap-1">
-                                                        {role.name}
-                                                        <X
-                                                            className="h-3 w-3 cursor-pointer hover:text-destructive"
-                                                            onClick={() => handleRoleRemove(role.id)}
-                                                        />
-                                                    </Badge>
-                                                ) : null;
-                                            })}
-                                        </div>
-                                    </div>
-                                )}
-
                                 {errors.roles && <p className="text-sm text-red-500">{errors.roles}</p>}
                             </div>
-
-                            {/* Publisher Selection (hanya muncul jika role 'penerbit' dipilih) */}
-                            {data.roles.some((roleId) => roles.find((role) => role.id === roleId)?.name === 'penerbit') && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="penerbit_id">Pilih Penerbit</Label>
-                                    <Select
-                                        onValueChange={(value) => setData('penerbit_id', Number(value) || null)}
-                                        value={data.penerbit_id?.toString() || ''}
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Pilih Penerbit" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {publishers.map((publisher) => (
-                                                <SelectItem key={publisher.penerbit_id} value={publisher.penerbit_id.toString()}>
-                                                    {publisher.nama_penerbit}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.penerbit_id && <p className="text-sm text-red-500">{errors.penerbit_id}</p>}
-                                </div>
-                            )}
 
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={handleCloseCreateDialog}>
@@ -425,8 +378,8 @@ export default function ManajemenTim() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {roles
-                                            .filter((role) => !data.roles.includes(role.id))
-                                            .map((role) => (
+                                            .filter((role: Role) => !data.roles.includes(role.id))
+                                            .map((role: Role) => (
                                                 <SelectItem key={role.id} value={role.id.toString()}>
                                                     {role.name}
                                                 </SelectItem>
@@ -440,7 +393,7 @@ export default function ManajemenTim() {
                                         <Label className="text-sm text-muted-foreground">Role yang dipilih:</Label>
                                         <div className="flex flex-wrap gap-2">
                                             {data.roles.map((roleId) => {
-                                                const role = roles.find((r) => r.id === roleId);
+                                                const role = roles.find((r: Role) => r.id === roleId);
                                                 return role ? (
                                                     <Badge key={role.id} variant="default" className="flex items-center gap-1">
                                                         {role.name}
@@ -458,29 +411,6 @@ export default function ManajemenTim() {
                                 {errors.roles && <p className="text-sm text-red-500">{errors.roles}</p>}
                             </div>
 
-                            {/* Publisher Selection (hanya muncul jika role 'penerbit' dipilih) */}
-                            {data.roles.some((roleId) => roles.find((role) => role.id === roleId)?.name === 'penerbit') && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="edit-penerbit_id">Pilih Penerbit</Label>
-                                    <Select
-                                        onValueChange={(value) => setData('penerbit_id', Number(value) || null)}
-                                        value={data.penerbit_id?.toString() || ''}
-                                    >
-                                        <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Pilih Penerbit" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {publishers.map((publisher) => (
-                                                <SelectItem key={publisher.penerbit_id} value={publisher.penerbit_id.toString()}>
-                                                    {publisher.nama_penerbit}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.penerbit_id && <p className="text-sm text-red-500">{errors.penerbit_id}</p>}
-                                </div>
-                            )}
-
                             <DialogFooter>
                                 <Button type="button" variant="outline" onClick={handleCloseEditDialog}>
                                     Batal
@@ -497,16 +427,16 @@ export default function ManajemenTim() {
                 <div className="space-y-4">
                     <DataTable
                         columns={columns}
-                        data={users.data}
+                        data={users?.data || []}
                         searchableColumn="nama_lengkap"
                         pagination={{
-                            page: users.current_page,
-                            perPage: users.per_page,
-                            total: users.total,
+                            page: users?.current_page || 1,
+                            perPage: users?.per_page || 10,
+                            total: users?.total || 0,
                         }}
                         onSearch={search}
                         onPageChange={(page) => {
-                            router.get(route('manajemen-tim'), { ...filters, page }, { preserveState: true, replace: true });
+                            router.get(route('manajemen-pengguna'), { ...filters, page }, { preserveState: true, replace: true });
                         }}
                     />
                 </div>

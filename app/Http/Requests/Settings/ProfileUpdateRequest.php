@@ -16,17 +16,28 @@ class ProfileUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->user()->user_id;
+        
         return [
-            'name' => ['required', 'string', 'max:255'],
-
+            'nama_lengkap' => ['required', 'string', 'max:255'],
             'email' => [
                 'required',
                 'string',
                 'lowercase',
                 'email',
                 'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
+                Rule::unique('users', 'email')->ignore($userId, 'user_id'),
             ],
+            'foto_profil'  => ['nullable','image','mimes:jpg,jpeg,png,webp','max:2048', 'dimensions:min_width=64,min_height=64'],
+        ];
+    
+    }
+    public function messages(): array
+    {
+        return [
+            'foto_profil.image' => 'File harus berupa gambar',
+            'foto_profil.mimes' => 'Format gambar harus jpeg, png, jpg, atau gif',
+            'foto_profil.max' => 'Ukuran gambar maksimal 2MB',
         ];
     }
 }
