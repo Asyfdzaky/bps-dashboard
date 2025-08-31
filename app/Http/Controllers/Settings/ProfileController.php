@@ -19,14 +19,26 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+        
         return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
+            'mustVerifyEmail' => $user instanceof MustVerifyEmail,
+            'status' => session('status'),
             'user' => [
-                'nama_lengkap'   => $request->user()->nama_lengkap,
-                'email'          => $request->user()->email,
-                'foto_profil_url'=> $request->user()->foto_profil_url
-                    
+                'nama_lengkap' => $user->nama_lengkap,
+                'email' => $user->email,
+                'foto_profil_url' => $user->foto_profil_url,
+                'profile' => $user->profile ? [
+                    'nik' => $user->profile->nik,
+                    'alamat' => $user->profile->alamat,
+                    'nomor_hp' => $user->profile->nomor_hp,
+                    'pendidikan' => $user->profile->pendidikan,
+                    'kegiatan_aktif' => $user->profile->kegiatan_aktif,
+                    'karya_tulis' => $user->profile->karya_tulis,
+                    'buku_lain' => $user->profile->buku_lain,
+                    'media_sosial' => $user->profile->media_sosial,
+                    'jejaring' => $user->profile->jejaring,
+                ] : null,
             ],
         ]);
     }
@@ -37,32 +49,34 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
+        $validatedData = $request->validated();
 
-        // isi field text yang tervalidasi
-        $user->fill($request->safe()->only(['nama_lengkap','email']));
+        // Update basic user info
+        $user->update([
+            'nama_lengkap' => $validatedData['nama_lengkap'],
+            'email' => $validatedData['email'],
+        ]);
 
-        // handle upload foto (opsional)
+        // Handle profile photo upload
         if ($request->hasFile('foto_profil')) {
-            // hapus file lama kalau ada
-            if ($user->foto_profil_url && Storage::disk('public')->exists($user->foto_profil_url)) {
-                Storage::disk('public')->delete($user->foto_profil_url);
-            }
-
-            // simpan file baru ke disk public
-            $path = $request->file('foto_profil')->store('profile-pictures', 'public');
-
-            // simpan path relatif ke DB
-            $user->foto_profil_url = $path;
+            $this->handlePhotoUpload($request, $user);
         }
 
-        // jika email berubah, reset verifikasi
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
+        // Update or create profile
+        $profileData = collect($validatedData)->except(['nama_lengkap', 'email', 'foto_profil'])->toArray();
+        
+        if ($user->profile) {
+            $user->profile->update($profileData);
+        } else {
+            $user->profile()->create($profileData);
         }
 
-        $user->save();
+        // Reset email verification if email changed
+        if ($user->wasChanged('email')) {
+            $user->update(['email_verified_at' => null]);
+        }
 
-        return to_route('profile.edit')->with('status', 'Profil diperbarui.');
+        return back()->with('status', 'Profil berhasil diperbarui.');
     }
 
     /**
@@ -76,8 +90,8 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
-        // opsional: hapus foto saat akun dihapus
-        if ($user->foto_profil_url && Storage::disk('public')->exists($user->foto_profil_url)) {
+        // Delete profile photo if exists
+        if ($user->foto_profil_url) {
             Storage::disk('public')->delete($user->foto_profil_url);
         }
 
@@ -88,5 +102,20 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/');
+    }
+
+    /**
+     * Handle profile photo upload.
+     */
+    private function handlePhotoUpload(Request $request, $user): void
+    {
+        // Delete old photo if exists
+        if ($user->foto_profil_url) {
+            Storage::disk('public')->delete($user->foto_profil_url);
+        }
+
+        // Store new photo
+        $path = $request->file('foto_profil')->store('profile-pictures', 'public');
+        $user->update(['foto_profil_url' => $path]);
     }
 }

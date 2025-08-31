@@ -1,7 +1,17 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { FileText, LayoutGrid, Shield, Users } from 'lucide-react';
@@ -19,10 +29,7 @@ const mainNavItems: NavItem[] = [
         icon: FileText,
     },
 ];
-
-const footerNavItems: NavItem[] = [
-
-    
+const ManajemenPenggunaNavItems: NavItem[] = [
     {
         title: 'Manajemen Role',
         href: '/manajemen-role',
@@ -40,6 +47,8 @@ const footerNavItems: NavItem[] = [
     },
 ];
 
+const footerNavItems: NavItem[] = [];
+
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -55,9 +64,20 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                {/* Main Navigation Group */}
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <NavMain items={mainNavItems} title="Menu Utama" collapsible icon={<LayoutGrid className="h-4 w-4" />} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                {/* Management Group */}
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <NavMain items={ManajemenPenggunaNavItems} title="Manajemen Pengguna" collapsible icon={<Users className="h-4 w-4" />} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
             </SidebarContent>
 
             <SidebarFooter>

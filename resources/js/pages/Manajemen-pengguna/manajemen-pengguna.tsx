@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DataTable } from '@/components/table-data';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
-import type { Role, UserRow } from '@/types/team';
+import type { Role, TeamIndexPageProps, UserRow } from '@/types/team';
+
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { ArrowUpDown, BookOpen, Edit, Languages, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
@@ -22,7 +23,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ManajemenPengguna() {
-    const { users, filters, roles, can } = usePage<any>().props;
+    const { users, filters, roles, can } = usePage<TeamIndexPageProps>().props;
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showEditDialog, setShowEditDialog] = useState(false);
     const [editingUser, setEditingUser] = useState<UserRow | null>(null);
