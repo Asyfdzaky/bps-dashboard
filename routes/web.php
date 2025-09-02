@@ -5,6 +5,7 @@ use App\Http\Controllers\naskah\NaskahController;
 use App\Http\Controllers\rolePermission\RoleController;
 use App\Http\Controllers\rolePermission\TeamController;
 use App\Http\Controllers\rolePermission\PenggunaController;
+use App\Http\Controllers\naskah\ProgresNaskahController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -46,6 +47,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('manajemen-pengguna', [PenggunaController::class, 'store'])->name('manajemen-pengguna.store')->middleware('role:manajer');
     Route::put('manajemen-pengguna/{id}', [PenggunaController::class, 'update'])->name('manajemen-pengguna.update')->middleware('role:manajer');
     Route::delete('manajemen-pengguna/{id}', [PenggunaController::class, 'destroy'])->name('manajemen-pengguna.destroy')->middleware('role:manajer');
+
+    Route::get('progres-naskah', [ProgresNaskahController::class, 'index'])->name('progres-naskah')->middleware('role:manajer');
 });
 
 require __DIR__.'/settings.php';
