@@ -48,6 +48,7 @@ class User extends Authenticatable
         'email',
         'password',
         'foto_profil_url',
+        'penerbit_id',
     ];
 
     /**
@@ -70,6 +71,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'penerbit_id' => 'integer',
         ];
     }
 
@@ -103,5 +105,36 @@ class User extends Authenticatable
     public function taskProgressAsPic()
     {
         return $this->hasMany(TaskProgress::class, 'pic_tugas_user_id', 'user_id');
+    }
+    /**
+     * Get the publisher this user manages
+     */
+    public function publisher()
+    {
+        return $this->belongsTo(Publisher::class, 'penerbit_id', 'penerbit_id');
+    }
+
+    /**
+     * Check if user has publisher role
+     */
+    public function hasPublisherRole()
+    {
+        return $this->hasRole('penerbit');
+    }
+
+    /**
+     * Get the publisher this user manages
+     */
+    public function getPublisher()
+    {
+        return $this->publisher;
+    }
+
+    /**
+     * Get the publisher ID this user manages
+     */
+    public function getPublisherId()
+    {
+        return $this->penerbit_id;
     }
 }

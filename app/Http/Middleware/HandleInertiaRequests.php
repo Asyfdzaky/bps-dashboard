@@ -53,6 +53,8 @@ class HandleInertiaRequests extends Middleware
                     'updated_at' => $request->user()->updated_at,
                     'roles' => $request->user()->getRoleNames()->toArray(),
                     'permissions' => $request->user()->getAllPermissions()->pluck('name')->toArray(),
+                    'publisher' => $request->user()->hasPublisherRole() ? $request->user()->publisher : null,
+                    'has_publisher_role' => $request->user()->hasPublisherRole(),
                 ] : null,
             ],
             'ziggy' => fn (): array => [

@@ -1,44 +1,70 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { FileText, LayoutGrid, Shield, Users } from 'lucide-react';
+import { BarChart, Calendar, FileText, LayoutGrid, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: '/dashboard',
-        icon: LayoutGrid,
     },
+];
+const NaskahNavItems: NavItem[] = [
     {
         title: 'Naskah',
         href: '/manajemen-naskah',
-        icon: FileText,
+    },
+    {
+        title: 'Progres',
+        href: '/progres-naskah',
     },
 ];
-
-const footerNavItems: NavItem[] = [
-
-    
+const ManajemenPenggunaNavItems: NavItem[] = [
     {
         title: 'Manajemen Role',
         href: '/manajemen-role',
-        icon: Shield,
     },
     {
         title: 'Manajemen Tim',
         href: '/manajemen-tim',
-        icon: Users,
     },
     {
         title: 'Manajemen Pengguna',
         href: '/manajemen-pengguna',
-        icon: Users,
     },
 ];
+const AnalitikNavItems: NavItem[] = [
+    {
+        title: 'Analitik',
+        href: '/analitik',
+    },
+    {
+        title: 'Target',
+        href: '/target',
+    },
+];
+const KalenderNavItems: NavItem[] = [
+    {
+        title: 'Kalender',
+        href: '/kalender',
+    },
+];
+
+const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     return (
@@ -55,9 +81,39 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                {/* Main Navigation Group */}
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <NavMain items={mainNavItems} title="Menu Utama" icon={<LayoutGrid className="h-4 w-4" />} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+                {/* Naskah Group */}
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <NavMain items={NaskahNavItems} title="Naskah" collapsible icon={<FileText className="h-4 w-4" />} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                {/* Analitik Group */}
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <NavMain items={AnalitikNavItems} title="Analitik" collapsible icon={<BarChart className="h-4 w-4" />} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
+                {/* Kalender Group */}
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <NavMain items={KalenderNavItems} title="Kalender" collapsible icon={<Calendar className="h-4 w-4" />} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
+                {/* Management Group */}
+                <SidebarGroup>
+                    <SidebarGroupContent>
+                        <NavMain items={ManajemenPenggunaNavItems} title="Manajemen Pengguna" collapsible icon={<Users className="h-4 w-4" />} />
+                    </SidebarGroupContent>
+                </SidebarGroup>
             </SidebarContent>
 
             <SidebarFooter>

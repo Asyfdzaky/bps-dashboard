@@ -14,15 +14,20 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->uuid('user_id')->primary()->default(DB::raw('uuid_generate_v4()'));
+            $table -> unsignedBigInteger('penerbit_id')->nullable();
             $table->string('nama_lengkap');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('foto_profil_url')->nullable();
             $table->rememberToken();
-            $table->foreignId('current_team_id')->nullable();
-            $table->string('profile_photo_path', 2048)->nullable();
+           
             $table->timestamps();
+
+            $table->foreign('penerbit_id')
+                  ->references('penerbit_id')
+                  ->on('publishers')
+                  ->onDelete('cascade');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
