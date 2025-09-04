@@ -105,11 +105,11 @@ export function KPICard({
 
     return (
         <Card className={cn("relative overflow-hidden", className)}>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-                        <h3 className={cn("text-3xl font-bold", {
+                    <div className="min-w-0 flex-1">
+                        <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</p>
+                        <h3 className={cn("text-xl sm:text-2xl lg:text-3xl font-bold", {
                             "text-primary": color === "primary",
                             "text-chart-2": color === "chart-2", 
                             "text-chart-3": color === "chart-3",
@@ -118,7 +118,7 @@ export function KPICard({
                             {value}
                         </h3>
                     </div>
-                    <div className={cn("flex h-12 w-12 items-center justify-center rounded-full", colorClasses[color])}>
+                    <div className={cn("flex h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 items-center justify-center rounded-full flex-shrink-0", colorClasses[color])}>
                         {icon}
                     </div>
                 </div>
@@ -140,7 +140,7 @@ interface KPIGridProps {
 
 export function KPIGrid({ items, className }: KPIGridProps) {
     return (
-        <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-4", className)}>
+        <div className={cn("grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4", className)}>
             {items.map((item, index) => (
                 <KPICard
                     key={index}
