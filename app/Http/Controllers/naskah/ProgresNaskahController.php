@@ -42,9 +42,26 @@ class ProgresNaskahController extends Controller
             ])
             ->get();
 
-        // Kelompokkan buku per stage_name. Null (tidak ada task aktif) => "Selesai"
+        // Kelompokkan buku per stage_name dengan logika status
         $grouped = $booksWithStage->groupBy(function ($book) {
-            return $book->current_stage_name ?? 'Selesai';
+            // Jika tidak ada task aktif => "Selesai"
+            if (!$book->current_stage_name) {
+                return 'Selesai';
+            }
+            
+            // Cek apakah ada task yang tertunda (melewati deadline)
+            $hasPendingOverdue = $book->taskProgress
+                ->where('status', 'pending')
+                ->filter(function ($task) {
+                    return $task->deadline && now()->isAfter($task->deadline);
+                })
+                ->isNotEmpty();
+                
+            if ($hasPendingOverdue) {
+                return 'Tertunda';
+            }
+            
+            return $book->current_stage_name;
         })->sortKeys();
 
         // Jika kamu ingin urutan grup mengikuti urutan master task:
@@ -53,7 +70,8 @@ class ProgresNaskahController extends Controller
             ->orderBy('urutan')
             ->pluck('nama_tugas')
             ->toArray();
-        // Pastikan "Selesai" di akhir
+        // Pastikan "Selesai" dan "Tertunda" di akhir
+        $orderedStageNames[] = 'Tertunda';
         $orderedStageNames[] = 'Selesai';
 
         $booksByStage = collect($orderedStageNames)->mapWithKeys(function ($stageName) use ($grouped) {

@@ -9,7 +9,29 @@ interface StatusBukuChartProps {
     title?: string;
 }
 
-const COLORS = ['#f87171', '#60a5fa', '#34d399'];
+// Fungsi untuk mendapatkan warna dari CSS variables
+const getCSSVariable = (variable: string) => {
+    if (typeof window !== 'undefined') {
+        return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+    }
+    return '';
+};
+
+// Menggunakan warna yang konsisten dengan tema app.css
+const getChartColors = () => {
+    // Fallback colors jika CSS variables tidak tersedia
+    const fallbackColors = ['#60a5fa', '#34d399', '#ef4444'];
+    
+    try {
+        const chart2 = getCSSVariable('--chart-2') || '#60a5fa';
+        const chart3 = getCSSVariable('--chart-3') || '#34d399';
+        const destructive = getCSSVariable('--destructive') || '#ef4444';
+        
+        return [chart2, chart3, destructive];
+    } catch {
+        return fallbackColors;
+    }
+};
 
 export default function StatusBukuChart({ data, title = 'Status Buku' }: StatusBukuChartProps) {
     // Convert the data object to array format for Recharts
@@ -18,18 +40,21 @@ export default function StatusBukuChart({ data, title = 'Status Buku' }: StatusB
         value,
     }));
 
+    // Get colors from CSS variables
+    const colors = getChartColors();
+
     return (
         <div className="w-full">
-            {title && <h3 className="mb-4 text-lg font-semibold text-gray-900">{title}</h3>}
+            {title && <h3 className="mb-4 text-lg font-semibold text-foreground">{title}</h3>}
             <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                     <Pie data={chartData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={3} dataKey="value">
                         {chartData.map((entry, i) => (
-                            <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />
+                            <Cell key={`cell-${i}`} fill={colors[i % colors.length]} />
                         ))}
                     </Pie>
                     <Tooltip formatter={(value: number) => [`${value} buku`, 'Jumlah']} labelFormatter={(label: string) => `Status: ${label}`} />
-                    <Legend verticalAlign="bottom" height={36} formatter={(value: string) => <span className="text-sm">{value}</span>} />
+                    <Legend verticalAlign="bottom" height={36} formatter={(value: string) => <span className="text-sm text-foreground">{value}</span>} />
                 </PieChart>
             </ResponsiveContainer>
         </div>

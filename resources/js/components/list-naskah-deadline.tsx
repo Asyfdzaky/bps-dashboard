@@ -35,9 +35,9 @@ export default function ListNaskahDeadline({ books }: Props) {
     };
 
     return (
-        <Card>
+        <Card className='bg-background'>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
+                <CardTitle className="flex items-center gap-2 text-base text-primary">
                     Deadline Terdekat
                     <AlertTriangle className="h-4 w-4 text-red-500" />
                 </CardTitle>
