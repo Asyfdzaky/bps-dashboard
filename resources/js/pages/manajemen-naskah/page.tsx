@@ -1,4 +1,5 @@
 import ListNaskah from '@/components/list-naskah';
+import { SummaryStats } from '@/components/summary-cards';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -41,6 +42,10 @@ export default function ManajemenNaskah() {
         setSelectedBook(null);
     };
 
+    const handleSearch = (q: string) => {
+        router.get('/manajemen-naskah', { q });
+    };
+
     // Calculate statistics
     const totalBooks = books.length;
     const draftBooks = books.filter((book) => book.status_keseluruhan === 'draft').length;
@@ -65,40 +70,9 @@ export default function ManajemenNaskah() {
                     </Link>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Naskah</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{totalBooks}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Draft</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{draftBooks}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Dalam Proses</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{inProgressBooks}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Dipublikasi</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{publishedBooks}</div>
-                        </CardContent>
-                    </Card>
+                <div className="mb-6">
+                    {/* Stats Cards */}
+                    <SummaryStats total={totalBooks} draft={draftBooks} progres={inProgressBooks} publish={publishedBooks} />
                 </div>
 
                 {/* Main Content */}
@@ -107,7 +81,7 @@ export default function ManajemenNaskah() {
                         <CardTitle>Daftar Naskah</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ListNaskah books={books} onDelete={handleDelete} />
+                        <ListNaskah books={books} onDelete={handleDelete} onSearch={handleSearch} />
                     </CardContent>
                 </Card>
             </div>

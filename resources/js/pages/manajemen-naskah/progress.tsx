@@ -2,23 +2,12 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
+import { Book as BookType } from '@/types/books';
 import { Head, usePage } from '@inertiajs/react';
 import { Book, FileText } from 'lucide-react';
 
-type Author = { name?: string | null };
-type Pic = { nama_lengkap?: string | null };
-type Manuscript = { author?: Author | null };
-type Book = {
-    buku_id: string;
-    judul_buku?: string | null;
-    manuscript?: Manuscript | null;
-    pic?: Pic | null;
-    tanggal_target_naik_cetak?: string | null;
-    tanggal_realisasi_naik_cetak?: string | null;
-};
-
 type PageProps = {
-    BooksByStage: Record<string, Book[]>;
+    BooksByStage: Record<string, BookType[]>;
     StageOrder?: string[];
 };
 
@@ -119,7 +108,7 @@ export default function ProgressPage() {
                                                                     {book.judul_buku ?? `Buku ${book.buku_id}`}
                                                                 </div>
                                                                 <div className="mb-1 text-sm text-muted-foreground">
-                                                                    <strong>Penulis:</strong> {book.manuscript?.author?.name ?? '-'}
+                                                                    <strong>Penulis:</strong> {book.manuscript?.author?.nama_lengkap ?? '-'}
                                                                 </div>
                                                                 <div className="mb-3 text-sm text-muted-foreground">
                                                                     <strong>PIC:</strong> {book.pic?.nama_lengkap ?? '-'}

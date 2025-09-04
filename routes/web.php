@@ -1,13 +1,15 @@
 <?php
 
-use App\Http\Controllers\dashboard\DashboardController;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\naskah\NaskahController;
+use App\Http\Controllers\Analitik\AnalitikController;
+use App\Http\Controllers\calender\CalenderController;
+use App\Http\Controllers\dashboard\DashboardController;
 use App\Http\Controllers\rolePermission\RoleController;
 use App\Http\Controllers\rolePermission\TeamController;
-use App\Http\Controllers\rolePermission\PenggunaController;
 use App\Http\Controllers\naskah\ProgresNaskahController;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\rolePermission\PenggunaController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -16,13 +18,16 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    Route::get('/manajemen-naskah/create', [NaskahController::class, 'create'])->name('manajemen-naskah.create');
+    Route::post('/manajemen-naskah', [NaskahController::class, 'store'])->name('manajemen-naskah.store');
     Route::get('/manajemen-naskah', [NaskahController::class, 'index'])->name('manajemen-naskah');
     Route::get('/manajemen-naskah/{id}', [NaskahController::class, 'show'])->name('manajemen-naskah.show');
     Route::get('/manajemen-naskah/{id}/edit', [NaskahController::class, 'edit'])->name('manajemen-naskah.edit');
     Route::put('/manajemen-naskah/{id}', [NaskahController::class, 'update'])->name('manajemen-naskah.update');
     Route::delete('/manajemen-naskah/{id}', [NaskahController::class, 'destroy'])->name('manajemen-naskah.destroy');
 
-
+    Route::get('/analitik', [AnalitikController::class, 'index'])->name('analitik');
+    Route::get('/calender', [CalenderController::class, 'index'])->name('calender');
 
 
 
@@ -48,7 +53,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('manajemen-pengguna/{id}', [PenggunaController::class, 'update'])->name('manajemen-pengguna.update')->middleware('role:manajer');
     Route::delete('manajemen-pengguna/{id}', [PenggunaController::class, 'destroy'])->name('manajemen-pengguna.destroy')->middleware('role:manajer');
 
-    Route::get('progres-naskah', [ProgresNaskahController::class, 'index'])->name('progres-naskah')->middleware('role:manajer');
+    Route::get('progres-naskah', [ProgresNaskahController::class, 'index'])->name('progres-naskah');
 });
 
 require __DIR__.'/settings.php';

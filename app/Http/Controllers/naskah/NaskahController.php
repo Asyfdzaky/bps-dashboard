@@ -9,7 +9,7 @@ use App\Models\Book;
 use App\Models\Publisher;
 use App\Models\User;
 use App\Models\MasterTask;
-
+use Illuminate\Support\Facades\DB;
 class NaskahController extends Controller
 {
     public function index(Request $request)
@@ -91,6 +91,80 @@ class NaskahController extends Controller
         return Inertia::render('manajemen-naskah/show', [
             'book' => $book
         ]);
+    }
+    public function create()
+    {
+        // Get data needed for create form
+        $users = User::select('user_id', 'nama_lengkap', 'email')->get();
+        $publishers = Publisher::select('penerbit_id', 'nama_penerbit')->get();
+        $masterTasks = MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
+        
+        return Inertia::render('manajemen-naskah/create', [
+            'users' => $users,
+            'publishers' => $publishers,
+            'masterTasks' => $masterTasks
+        ]);
+    }
+    
+    public function store(Request $request)
+    {
+        // Validate request
+        $request->validate([
+            'judul_buku' => 'required|string|max:255',
+            'pic_user_id' => 'required|exists:users,user_id',
+            'penerbit_id' => 'required|exists:publishers,penerbit_id',
+            'status_keseluruhan' => 'required|in:draft,editing,review,published',
+            'tanggal_target_naik_cetak' => 'nullable|date|after:today',
+            'tanggal_realisasi_naik_cetak' => 'nullable|date',
+            'task_progress' => 'array',
+            'task_progress.*.tugas_id' => 'required|exists:master_tasks,tugas_id',
+            'task_progress.*.pic_tugas_user_id' => 'nullable|exists:users,user_id',
+            'task_progress.*.deadline' => 'nullable|date',
+            'task_progress.*.status' => 'required|in:pending,in_progress,completed,overdue',
+            'task_progress.*.tanggal_mulai' => 'nullable|date',
+            'task_progress.*.tanggal_selesai' => 'nullable|date',
+            'task_progress.*.catatan' => 'nullable|string',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Create book
+            $book = Book::create([
+                'buku_id' => \Illuminate\Support\Str::uuid(),
+                'judul_buku' => $request->input('judul_buku'),
+                'pic_user_id' => $request->input('pic_user_id'),
+                'penerbit_id' => $request->input('penerbit_id'),
+                'status_keseluruhan' => $request->input('status_keseluruhan'),
+                'tanggal_target_naik_cetak' => $request->input('tanggal_target_naik_cetak'),
+                'tanggal_realisasi_naik_cetak' => $request->input('tanggal_realisasi_naik_cetak'),
+            ]);
+
+            // Create task progress if provided
+            if ($request->has('task_progress')) {
+                foreach ($request->input('task_progress') as $taskData) {
+                    \App\Models\TaskProgress::create([
+                        'progres_id' => \Illuminate\Support\Str::uuid(),
+                        'buku_id' => $book->buku_id,
+                        'tugas_id' => $taskData['tugas_id'],
+                        'pic_tugas_user_id' => ($taskData['pic_tugas_user_id'] && $taskData['pic_tugas_user_id'] !== 'none') ? $taskData['pic_tugas_user_id'] : null,
+                        'deadline' => $taskData['deadline'] ?: null,
+                        'status' => $taskData['status'],
+                        'tanggal_mulai' => $taskData['tanggal_mulai'] ?: null,
+                        'tanggal_selesai' => $taskData['tanggal_selesai'] ?: null,
+                        'catatan' => $taskData['catatan'] ?: null,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('manajemen-naskah')->with('success', 'Naskah berhasil dibuat!');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
     
     public function edit($id)

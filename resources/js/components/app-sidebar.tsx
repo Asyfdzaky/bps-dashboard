@@ -60,7 +60,7 @@ const AnalitikNavItems: NavItem[] = [
 const KalenderNavItems: NavItem[] = [
     {
         title: 'Kalender',
-        href: '/kalender',
+        href: '/calender',
     },
 ];
 
