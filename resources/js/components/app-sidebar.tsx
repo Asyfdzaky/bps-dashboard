@@ -5,8 +5,6 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
-    SidebarGroup,
-    SidebarGroupContent,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -83,37 +81,19 @@ export function AppSidebar() {
 
             <SidebarContent>
                 {/* Main Navigation Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={mainNavItems} title="Menu Utama" icon={<LayoutGrid className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                <NavMain items={mainNavItems} title="Menu Utama" icon={<LayoutGrid className="h-4 w-4" />} />
+                
                 {/* Naskah Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={NaskahNavItems} title="Naskah" collapsible icon={<FileText className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                <NavMain items={NaskahNavItems} title="Naskah" collapsible icon={<FileText className="h-4 w-4" />} />
 
                 {/* Analitik Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={AnalitikNavItems} title="Analitik" collapsible icon={<BarChart className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                <NavMain items={AnalitikNavItems} title="Analitik" collapsible icon={<BarChart className="h-4 w-4" />} />
 
                 {/* Kalender Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={KalenderNavItems} title="Kalender" collapsible icon={<Calendar className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                <NavMain items={KalenderNavItems} title="Kalender" collapsible icon={<Calendar className="h-4 w-4" />} />
+                
                 {/* Management Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={ManajemenPenggunaNavItems} title="Manajemen Pengguna" collapsible icon={<Users className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                <NavMain items={ManajemenPenggunaNavItems} title="Manajemen Pengguna" collapsible icon={<Users className="h-4 w-4" />} />
             </SidebarContent>
 
             <SidebarFooter>

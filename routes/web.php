@@ -10,6 +10,7 @@ use App\Http\Controllers\rolePermission\RoleController;
 use App\Http\Controllers\rolePermission\TeamController;
 use App\Http\Controllers\naskah\ProgresNaskahController;
 use App\Http\Controllers\rolePermission\PenggunaController;
+use App\Http\Controllers\TargetController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -28,6 +29,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/analitik', [AnalitikController::class, 'index'])->name('analitik');
     Route::get('/calender', [CalenderController::class, 'index'])->name('calender');
+    Route::get('/target', [TargetController::class, 'index'])->name('target');
 
 
 

@@ -1,4 +1,4 @@
-import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
@@ -19,10 +19,12 @@ export function NavMain({
     collapsible?: boolean;
 }) {
     const page = usePage();
+    const { state, setOpen } = useSidebar();
     const [isOpen, setIsOpen] = useState(defaultOpen);
     const [hasBeenManuallyClosed, setHasBeenManuallyClosed] = useState(false);
     const isGroupActive = items.some((item) => page.url.startsWith(item.href));
     const shouldBeCollapsible = collapsible && items.length > 1;
+    const isCollapsed = state === 'collapsed';
 
     // Auto-open if any item is active
     useEffect(() => {
@@ -32,6 +34,12 @@ export function NavMain({
     }, [isGroupActive, isOpen, hasBeenManuallyClosed]);
 
     const toggleGroup = () => {
+        // Jika sidebar collapsed dan group diklik, buka sidebar terlebih dahulu
+        if (isCollapsed) {
+            setOpen(true);
+            return;
+        }
+        
         if (shouldBeCollapsible) {
             const newState = !isOpen;
             setIsOpen(newState);
@@ -48,16 +56,14 @@ export function NavMain({
     if (items.length === 1) {
         const item = items[0];
         return (
-            <SidebarGroup className="px-2 py-0">
+            <SidebarGroup>
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem>
-                            <SidebarMenuButton asChild isActive={page.url.startsWith(item.href)} tooltip={{ children: item.title }}>
-                                <Link href={item.href} prefetch>
-                                    <div className="flex items-center gap-2">
-                                        {icon && <span className="text-gray-600">{icon}</span>}
-                                        <span>{item.title}</span>
-                                    </div>
+                            <SidebarMenuButton asChild isActive={page.url.startsWith(item.href)} tooltip={isCollapsed ? item.title : undefined}>
+                                <Link href={item.href} prefetch className="flex items-center">
+                                    {icon && <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">{icon}</span>}
+                                    <span className="group-data-[collapsible=icon]:sr-only">{item.title}</span>
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -69,54 +75,75 @@ export function NavMain({
 
     // Jika multiple items, render sebagai collapsible group
     return (
-        <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel
-                className={`${shouldBeCollapsible ? 'cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent/50' : ''} ${isGroupActive ? 'text-sidebar-accent-foreground' : ''}`}
-                onClick={toggleGroup}
-            >
-                <div className="flex w-full items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        {icon && <span className="text-gray-600">{icon}</span>}
-                        <h3 className="text-sm font-medium">{title}</h3>
-                    </div>
-                    {shouldBeCollapsible && (
-                        <span className="ml-auto">
-                            {isOpen ? (
-                                <ChevronDown className="h-3 w-3 transition-transform" />
-                            ) : (
-                                <ChevronRight className="h-3 w-3 transition-transform" />
-                            )}
-                        </span>
-                    )}
-                </div>
-            </SidebarGroupLabel>
-
-            {/* Collapsible Content */}
-            <div
-                className={`overflow-hidden transition-all duration-200 ease-in-out ${
-                    shouldBeCollapsible ? (isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0') : 'max-h-screen opacity-100'
-                }`}
-            >
-                <div className="relative ml-3 pl-3">
-                    {/* Vertical line */}
-                    <div className="absolute top-0 bottom-0 left-0 w-px bg-gray-300" />
-
+        <SidebarGroup>
+            {/* Saat collapsed, tampilkan sebagai menu button biasa */}
+            {isCollapsed ? (
+                <SidebarGroupContent>
                     <SidebarMenu>
-                        {items.map((item) => (
-                            <SidebarMenuItem key={item.title}>
-                                <SidebarMenuButton asChild isActive={page.url.startsWith(item.href)} tooltip={{ children: item.title }}>
-                                    <Link href={item.href} prefetch>
-                                        <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2">
-                                            <span>{item.title}</span>
-                                            {/* <Badge variant={'outline'}>9</Badge> */}
-                                        </div>
-                                    </Link>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        ))}
+                        <SidebarMenuItem>
+                            <SidebarMenuButton
+                                onClick={toggleGroup}
+                                isActive={isGroupActive}
+                                tooltip={title}
+                                className="cursor-pointer flex items-center"
+                            >
+                                {icon && <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">{icon}</span>}
+                                <span className="group-data-[collapsible=icon]:sr-only">{title}</span>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
                     </SidebarMenu>
-                </div>
-            </div>
+                </SidebarGroupContent>
+            ) : (
+                // Saat expanded, tampilkan group label dan sub-menu
+                <>
+                    <SidebarGroupLabel
+                        className={`${shouldBeCollapsible ? 'cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent/50' : ''} ${isGroupActive ? 'text-sidebar-accent-foreground' : ''}`}
+                        onClick={toggleGroup}
+                    >
+                        <div className="flex w-full items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                {icon && <span className="text-gray-600">{icon}</span>}
+                                <h3 className="text-sm font-medium">{title}</h3>
+                            </div>
+                            {shouldBeCollapsible && (
+                                <span className="ml-auto">
+                                    {isOpen ? (
+                                        <ChevronDown className="h-3 w-3 transition-transform" />
+                                    ) : (
+                                        <ChevronRight className="h-3 w-3 transition-transform" />
+                                    )}
+                                </span>
+                            )}
+                        </div>
+                    </SidebarGroupLabel>
+
+                    {/* Collapsible Content */}
+                    <div
+                        className={`overflow-hidden transition-all duration-200 ease-in-out ${
+                            shouldBeCollapsible ? (isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0') : 'max-h-screen opacity-100'
+                        }`}
+                    >
+                        <div className="relative ml-3 pl-3">
+                            {/* Vertical line - hanya tampil saat expanded */}
+                            <div className="absolute top-0 bottom-0 left-0 w-px bg-gray-300" />
+
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    {items.map((item) => (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton asChild isActive={page.url.startsWith(item.href)}>
+                                                <Link href={item.href} prefetch>
+                                                    <span>{item.title}</span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </div>
+                    </div>
+                </>
+            )}
         </SidebarGroup>
     );
 }
