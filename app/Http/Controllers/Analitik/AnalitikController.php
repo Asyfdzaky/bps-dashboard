@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Analitik;
 
 use App\Http\Controllers\Controller;
 use App\Models\Book;
+use App\Models\TaskProgress;
+use App\Models\User;
+use App\Models\MasterTask;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AnalitikController extends Controller
 {
@@ -15,88 +19,195 @@ class AnalitikController extends Controller
      */
     public function index()
     {
-        // 1. Kartu Metrik Produksi
+        // 1. Metrik Utama Dashboard
         $totalBooks = Book::count();
-        $publishedBooks = Book::where('status_keseluruhan', 'published')->count();
-        $processedBooks = Book::whereIn('status_keseluruhan', ['editing', 'review', 'completed'])->count();
+        $completedBooks = Book::where('status_keseluruhan', 'published')->count();
+        $inProgressBooks = Book::whereIn('status_keseluruhan', ['editing', 'review'])->count();
+        $draftBooks = Book::where('status_keseluruhan', 'draft')->count();
         
-        // Hitung rata-rata waktu produksi dengan type casting yang tepat
-        $avgProductionTime = Book::whereNotNull('tanggal_realisasi_naik_cetak')
-            ->whereNotNull('created_at')
-            ->selectRaw('AVG(EXTRACT(EPOCH FROM (tanggal_realisasi_naik_cetak::timestamp - created_at::timestamp))/86400) as avg_days')
-            ->first()->avg_days ?? 0;
+        // Total tasks dan completion rate
+        $totalTasks = TaskProgress::count();
+        $completedTasks = TaskProgress::where('status', 'completed')->count();
+        $completionRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
         
-        // Hitung waktu produksi tercepat dan terlama
-        $fastestProduction = Book::whereNotNull('tanggal_realisasi_naik_cetak')
-            ->whereNotNull('created_at')
-            ->selectRaw('MIN(EXTRACT(EPOCH FROM (tanggal_realisasi_naik_cetak::timestamp - created_at::timestamp))/86400) as min_days')
-            ->first()->min_days ?? 0;
-        
-        $slowestProduction = Book::whereNotNull('tanggal_realisasi_naik_cetak')
-            ->whereNotNull('created_at')
-            ->selectRaw('MAX(EXTRACT(EPOCH FROM (tanggal_realisasi_naik_cetak::timestamp - created_at::timestamp))/86400) as max_days')
-            ->first()->max_days ?? 0;
-        
-        // Hitung persentase keterlambatan
-        $overdueBooks = Book::where('tanggal_target_naik_cetak', '<', now())
-            ->whereNotIn('status_keseluruhan', ['published', 'completed'])
+        // Overdue tasks
+        $overdueTasks = TaskProgress::whereNotNull('deadline')
+            ->where('deadline', '<', now())
+            ->where('status', '!=', 'completed')
             ->count();
-        $overduePercentage = $totalBooks > 0 ? ($overdueBooks / $totalBooks) * 100 : 0;
+        $overdueRate = $totalTasks > 0 ? round(($overdueTasks / $totalTasks) * 100, 1) : 0;
         
-        // 2. Grafik Kinerja - Rata-rata waktu per tugas dengan type casting
-        $taskPerformance = DB::table('task_progress')
-            ->join('master_tasks', 'task_progress.tugas_id', '=', 'master_tasks.tugas_id')
-            ->whereNotNull('tanggal_selesai')
-            ->whereNotNull('tanggal_mulai')
-            ->selectRaw('
-                master_tasks.nama_tugas,
-                master_tasks.urutan,
-                AVG(EXTRACT(EPOCH FROM (tanggal_selesai::timestamp - tanggal_mulai::timestamp))/86400) as avg_days
-            ')
+        // Active team members
+        $activeMembers = User::whereHas('taskProgressAsPic', function($query) {
+            $query->where('status', '!=', 'completed');
+        })->count();
+
+        // 2. Distribusi Status Buku (untuk pie chart)
+        $bookStatusDistribution = [
+            ['name' => 'Draft', 'value' => $draftBooks, 'percentage' => $totalBooks > 0 ? round(($draftBooks / $totalBooks) * 100, 1) : 0],
+            ['name' => 'Dalam Proses', 'value' => $inProgressBooks, 'percentage' => $totalBooks > 0 ? round(($inProgressBooks / $totalBooks) * 100, 1) : 0],
+            ['name' => 'Selesai', 'value' => $completedBooks, 'percentage' => $totalBooks > 0 ? round(($completedBooks / $totalBooks) * 100, 1) : 0],
+        ];
+
+        // 3. Produktivitas Tim per Bulan (6 bulan terakhir)
+        $monthlyProductivity = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = Carbon::now()->subMonths($i);
+            $monthName = $month->format('M Y');
+            $startOfMonth = $month->copy()->startOfMonth()->toDateString();
+            $endOfMonth = $month->copy()->endOfMonth()->toDateString();
+            
+            $completedInMonth = TaskProgress::where('status', 'completed')
+                ->whereNotNull('tanggal_selesai')
+                ->whereBetween('tanggal_selesai', [$startOfMonth, $endOfMonth])
+                ->count();
+                
+            $booksCompletedInMonth = Book::where('status_keseluruhan', 'published')
+                ->whereNotNull('tanggal_realisasi_naik_cetak')
+                ->whereBetween('tanggal_realisasi_naik_cetak', [$startOfMonth, $endOfMonth])
+                ->count();
+            
+            $monthlyProductivity[] = [
+                'month' => $monthName,
+                'tasks' => $completedInMonth,
+                'books' => $booksCompletedInMonth,
+            ];
+        }
+
+        // 4. Kinerja per Tahap Produksi
+        $stagePerformance = DB::table('master_tasks')
+            ->leftJoin('task_progress', 'master_tasks.tugas_id', '=', 'task_progress.tugas_id')
+            ->select([
+                'master_tasks.tugas_id',
+                'master_tasks.nama_tugas',
+                'master_tasks.urutan',
+                DB::raw('COUNT(task_progress.progres_id) as total_tasks'),
+                DB::raw("COUNT(CASE WHEN task_progress.status = 'completed' THEN 1 END) as completed_tasks"),
+                DB::raw("COUNT(CASE WHEN task_progress.deadline IS NOT NULL AND task_progress.deadline < NOW() AND task_progress.status != 'completed' THEN 1 END) as overdue_tasks")
+            ])
             ->groupBy('master_tasks.tugas_id', 'master_tasks.nama_tugas', 'master_tasks.urutan')
             ->orderBy('master_tasks.urutan')
-            ->get();
-        
-        // 3. Grafik Beban Kerja Tim - perbaiki quote untuk status
-        $teamWorkload = DB::table('task_progress')
-            ->join('users', 'task_progress.pic_tugas_user_id', '=', 'users.user_id')
-            ->selectRaw("
-                users.nama_lengkap,
-                COUNT(*) as total_tasks,
-                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tasks
-            ")
-            ->whereNotNull('pic_tugas_user_id')
+            ->get()
+            ->map(function($item) {
+                $item->completion_rate = $item->total_tasks > 0 ? round(($item->completed_tasks / $item->total_tasks) * 100, 1) : 0;
+                $item->overdue_rate = $item->total_tasks > 0 ? round(($item->overdue_tasks / $item->total_tasks) * 100, 1) : 0;
+                
+                // Hitung rata-rata hari secara terpisah untuk menghindari masalah PostgreSQL
+                try {
+                    $taskProgressForStage = TaskProgress::where('tugas_id', $item->tugas_id)
+                        ->whereNotNull('tanggal_selesai')
+                        ->whereNotNull('tanggal_mulai')
+                        ->get();
+                    
+                    $avgDays = 0;
+                    if ($taskProgressForStage->count() > 0) {
+                        $totalDays = $taskProgressForStage->sum(function($task) {
+                            return Carbon::parse($task->tanggal_selesai)->diffInDays(Carbon::parse($task->tanggal_mulai));
+                        });
+                        $avgDays = $totalDays / $taskProgressForStage->count();
+                    }
+                    
+                    $item->avg_completion_days = round($avgDays, 1);
+                } catch (\Exception $e) {
+                    $item->avg_completion_days = 0;
+                }
+                return $item;
+            });
+
+        // 5. Top Performers - Tim dengan kinerja terbaik
+        $topPerformers = DB::table('users')
+            ->join('task_progress', 'users.user_id', '=', 'task_progress.pic_tugas_user_id')
+            ->select([
+                'users.user_id',
+                'users.nama_lengkap',
+                DB::raw('COUNT(*) as total_tasks'),
+                DB::raw("COUNT(CASE WHEN task_progress.status = 'completed' THEN 1 END) as completed_tasks"),
+                DB::raw("COUNT(CASE WHEN task_progress.deadline IS NOT NULL AND task_progress.deadline < NOW() AND task_progress.status != 'completed' THEN 1 END) as overdue_tasks"),
+                DB::raw('COUNT(DISTINCT task_progress.buku_id) as books_involved')
+            ])
             ->groupBy('users.user_id', 'users.nama_lengkap')
-            ->get();
-        
-        // 4. Tabel Produktivitas Tim dengan type casting
-        $teamProductivity = DB::table('task_progress')
-            ->join('users', 'task_progress.pic_tugas_user_id', '=', 'users.user_id')
-            ->selectRaw("
-                users.nama_lengkap,
-                COUNT(DISTINCT buku_id) as total_books,
-                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tasks,
-                AVG(CASE WHEN tanggal_selesai IS NOT NULL AND tanggal_mulai IS NOT NULL 
-                    THEN EXTRACT(EPOCH FROM (tanggal_selesai::timestamp - tanggal_mulai::timestamp))/86400 
-                    END) as avg_task_time
-            ")
-            ->whereNotNull('pic_tugas_user_id')
+            ->havingRaw('COUNT(*) >= 3') // Minimal 3 task untuk dianggap
+            ->get()
+            ->map(function($item) {
+                $item->completion_rate = $item->total_tasks > 0 ? round(($item->completed_tasks / $item->total_tasks) * 100, 1) : 0;
+                
+                // Hitung rata-rata hari secara terpisah
+                try {
+                    $userTasks = TaskProgress::where('pic_tugas_user_id', $item->user_id)
+                        ->whereNotNull('tanggal_selesai')
+                        ->whereNotNull('tanggal_mulai')
+                        ->get();
+                    
+                    $avgDays = 0;
+                    if ($userTasks->count() > 0) {
+                        $totalDays = $userTasks->sum(function($task) {
+                            return Carbon::parse($task->tanggal_selesai)->diffInDays(Carbon::parse($task->tanggal_mulai));
+                        });
+                        $avgDays = $totalDays / $userTasks->count();
+                    }
+                    
+                    $item->avg_completion_days = round($avgDays, 1);
+                } catch (\Exception $e) {
+                    $item->avg_completion_days = 0;
+                }
+                $item->efficiency_score = $item->completion_rate - ($item->overdue_tasks * 10); // Score considering completion rate and penalties for overdue
+                return $item;
+            })
+            ->sortByDesc('completion_rate')
+            ->take(10);
+
+        // 6. Workload Distribution - Distribusi beban kerja aktif
+        $workloadDistribution = DB::table('users')
+            ->join('task_progress', 'users.user_id', '=', 'task_progress.pic_tugas_user_id')
+            ->select([
+                'users.nama_lengkap',
+                DB::raw("COUNT(CASE WHEN task_progress.status IN ('pending', 'in_progress') THEN 1 END) as active_tasks"),
+                DB::raw("COUNT(CASE WHEN task_progress.status = 'completed' THEN 1 END) as completed_tasks"),
+                DB::raw("COUNT(CASE WHEN task_progress.deadline IS NOT NULL AND task_progress.deadline < NOW() AND task_progress.status != 'completed' THEN 1 END) as overdue_tasks")
+            ])
             ->groupBy('users.user_id', 'users.nama_lengkap')
+            ->havingRaw("COUNT(CASE WHEN task_progress.status IN ('pending', 'in_progress') THEN 1 END) > 0")
+            ->orderByDesc('active_tasks')
             ->get();
-        
+
+        // 7. Deadline Performance
+        $deadlinePerformance = [
+            'on_time' => TaskProgress::where('status', 'completed')
+                ->whereNotNull('deadline')
+                ->whereNotNull('tanggal_selesai')
+                ->whereRaw('tanggal_selesai <= deadline')
+                ->count(),
+            'late' => TaskProgress::where('status', 'completed')
+                ->whereNotNull('deadline')
+                ->whereNotNull('tanggal_selesai')
+                ->whereRaw('tanggal_selesai > deadline')
+                ->count(),
+            'upcoming' => TaskProgress::whereIn('status', ['pending', 'in_progress'])
+                ->whereNotNull('deadline')
+                ->where('deadline', '>', now())
+                ->where('deadline', '<=', now()->addDays(7))
+                ->count(),
+            'overdue' => $overdueTasks
+        ];
+
         return Inertia::render('analitik/analitik', [
             'metrics' => [
                 'totalBooks' => $totalBooks,
-                'publishedBooks' => $publishedBooks,
-                'processedBooks' => $processedBooks,
-                'avgProductionTime' => round($avgProductionTime, 1),
-                'fastestProduction' => round($fastestProduction, 1),
-                'slowestProduction' => round($slowestProduction, 1),
-                'overduePercentage' => round($overduePercentage, 1),
+                'completedBooks' => $completedBooks,
+                'inProgressBooks' => $inProgressBooks,
+                'totalTasks' => $totalTasks,
+                'completedTasks' => $completedTasks,
+                'completionRate' => $completionRate,
+                'overdueTasks' => $overdueTasks,
+                'overdueRate' => $overdueRate,
+                'activeMembers' => $activeMembers,
             ],
-            'taskPerformance' => $taskPerformance,
-            'teamWorkload' => $teamWorkload,
-            'teamProductivity' => $teamProductivity,
+            'bookStatusDistribution' => $bookStatusDistribution,
+            'monthlyProductivity' => $monthlyProductivity,
+            'stagePerformance' => $stagePerformance,
+            'topPerformers' => $topPerformers->values(),
+            'workloadDistribution' => $workloadDistribution,
+            'deadlinePerformance' => $deadlinePerformance,
         ]);
     }
 
