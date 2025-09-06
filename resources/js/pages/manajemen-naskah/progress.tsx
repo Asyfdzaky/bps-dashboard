@@ -78,6 +78,7 @@ export default function ProgressPage() {
             }] : undefined,
             dueDate: book.tanggal_target_naik_cetak ? formatDate(book.tanggal_target_naik_cetak) : undefined,
             description: book.manuscript?.author?.nama_lengkap ? `Penulis: ${book.manuscript.author.nama_lengkap}` : undefined,
+            buku_id: book.buku_id, // Tambahkan buku_id untuk navigasi
         };
     };
 

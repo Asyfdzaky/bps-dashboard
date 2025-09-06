@@ -96,10 +96,10 @@ export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) 
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="w-36">
                                                         <DropdownMenuItem asChild>
-                                                            <Link href={`/dashboard/book/${b.buku_id}`}>Lihat detail</Link>
+                                                            <Link href={`/manajemen-naskah/${b.buku_id}?from=dashboard`}>Lihat detail</Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem asChild>
-                                                            <Link href={`/dashboard/book/${b.buku_id}/edit`}>Edit</Link>
+                                                            <Link href={`/manajemen-naskah/${b.buku_id}/edit`}>Edit</Link>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
@@ -150,10 +150,10 @@ export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) 
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="w-36">
                                                         <DropdownMenuItem asChild>
-                                                            <Link href={`/dashboard/book/${b.buku_id}`}>Lihat detail</Link>
+                                                            <Link href={`/manajemen-naskah/${b.buku_id}?from=dashboard`}>Lihat detail</Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem asChild>
-                                                            <Link href={`/dashboard/book/${b.buku_id}/edit`}>Edit</Link>
+                                                            <Link href={`/manajemen-naskah/${b.buku_id}/edit`}>Edit</Link>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>

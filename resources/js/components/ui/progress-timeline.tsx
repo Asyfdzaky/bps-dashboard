@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { CheckCircle, Clock, AlertTriangle, Calendar, Eye, ChevronDown, ChevronRight } from "lucide-react";
+import { Link } from "@inertiajs/react";
 
 interface ProgressItem {
     id: string;
@@ -25,6 +26,7 @@ interface ProgressItem {
     };
     dueDate?: string;
     description?: string;
+    buku_id?: string; // ID buku untuk navigasi ke detail
 }
 
 interface ProgressTimelineProps {
@@ -179,14 +181,27 @@ export function ProgressTimeline({
                                                     </div>
                                                 </div>
                                                 
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="sm" 
-                                                    className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                                >
-                                                    <Eye className="h-4 w-4 mr-1" />
-                                                    Lihat
-                                                </Button>
+                                                {item.buku_id ? (
+                                                    <Link href={`/manajemen-naskah/${item.buku_id}?from=progress`}>
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="sm" 
+                                                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        >
+                                                            <Eye className="h-4 w-4 mr-1" />
+                                                            Lihat Detail
+                                                        </Button>
+                                                    </Link>
+                                                ) : (
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="sm" 
+                                                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    >
+                                                        <Eye className="h-4 w-4 mr-1" />
+                                                        Lihat
+                                                    </Button>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -332,15 +347,29 @@ export function StageProgress({
                                                     </div>
                                                     
                                                     {/* Action button */}
-                                                    <Button 
-                                                        variant="outline" 
-                                                        size="sm" 
-                                                        className="text-xs px-2 sm:px-3 py-1 h-7 flex-shrink-0"
-                                                    >
-                                                        <Eye className="h-3 w-3 mr-1" />
-                                                        <span className="hidden sm:inline">Detail</span>
-                                                        <span className="sm:hidden">Lihat</span>
-                                                    </Button>
+                                                    {item.buku_id ? (
+                                                        <Link href={`/manajemen-naskah/${item.buku_id}?from=progress`}>
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm" 
+                                                                className="text-xs px-2 sm:px-3 py-1 h-7 flex-shrink-0"
+                                                            >
+                                                                <Eye className="h-3 w-3 mr-1" />
+                                                                <span className="hidden sm:inline">Detail</span>
+                                                                <span className="sm:hidden">Lihat</span>
+                                                            </Button>
+                                                        </Link>
+                                                    ) : (
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm" 
+                                                            className="text-xs px-2 sm:px-3 py-1 h-7 flex-shrink-0"
+                                                        >
+                                                            <Eye className="h-3 w-3 mr-1" />
+                                                            <span className="hidden sm:inline">Detail</span>
+                                                            <span className="sm:hidden">Lihat</span>
+                                                        </Button>
+                                                    )}
                                                 </div>
                                             </div>
                                         );

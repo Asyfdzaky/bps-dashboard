@@ -137,7 +137,7 @@ export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
-                                <Link href={`/manajemen-naskah/${row.original.buku_id}`}>
+                                <Link href={`/manajemen-naskah/${row.original.buku_id}?from=naskah`}>
                                     <Eye className="mr-2 h-4 w-4" /> Lihat Detail
                                 </Link>
                             </DropdownMenuItem>

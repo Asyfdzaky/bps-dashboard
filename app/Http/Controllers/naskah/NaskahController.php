@@ -55,7 +55,7 @@ class NaskahController extends Controller
         ]);
     }
     
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $book = Book::with([
             'manuscript.author', 
@@ -88,8 +88,22 @@ class NaskahController extends Controller
             }
         }
         
+        // Tentukan referer dan breadcrumb berdasarkan parameter atau referer header
+        $referer = $request->get('from', '');
+        if (!$referer && $request->header('referer')) {
+            $refererUrl = parse_url($request->header('referer'), PHP_URL_PATH);
+            if (str_contains($refererUrl, '/dashboard')) {
+                $referer = 'dashboard';
+            } elseif (str_contains($refererUrl, '/progres-naskah')) {
+                $referer = 'progress';
+            } elseif (str_contains($refererUrl, '/manajemen-naskah')) {
+                $referer = 'naskah';
+            }
+        }
+        
         return Inertia::render('manajemen-naskah/show', [
-            'book' => $book
+            'book' => $book,
+            'referer' => $referer ?: 'naskah' // default ke naskah jika tidak ada referer
         ]);
     }
     public function create()

@@ -46,7 +46,7 @@ export default function ListNaskahDeadline({ books }: Props) {
                 {upcomingDeadlines.length > 0 ? (
                     <div className="space-y-2 p-4">
                         {upcomingDeadlines.map((b) => (
-                            <Link key={b.buku_id} href={`/manajemen-naskah/${b.buku_id}`} className="block rounded-lg border p-3">
+                            <Link key={b.buku_id} href={`/manajemen-naskah/${b.buku_id}?from=dashboard`} className="block rounded-lg border p-3">
                                 <div className="flex items-center justify-between">
                                     {/* Left Section - Name and Status */}
                                     <div className="min-w-0 flex-1">
