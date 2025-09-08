@@ -1,6 +1,7 @@
 <?php
 
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\naskah\NaskahController;
 use App\Http\Controllers\Analitik\AnalitikController;
@@ -9,15 +10,21 @@ use App\Http\Controllers\dashboard\DashboardController;
 use App\Http\Controllers\rolePermission\RoleController;
 use App\Http\Controllers\rolePermission\TeamController;
 use App\Http\Controllers\naskah\ProgresNaskahController;
+use App\Http\Controllers\dashboard\DashboardUserController;
 use App\Http\Controllers\rolePermission\PenggunaController;
+use App\Http\Controllers\naskah\KirimNaskahController;
+
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    if(Auth::check()) {
+        return redirect()->intended(route('dashboard', absolute: false));
+    }
+    return redirect()->route('login');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     Route::get('/manajemen-naskah/create', [NaskahController::class, 'create'])->name('manajemen-naskah.create');
     Route::post('/manajemen-naskah', [NaskahController::class, 'store'])->name('manajemen-naskah.store');
     Route::get('/manajemen-naskah', [NaskahController::class, 'index'])->name('manajemen-naskah');
@@ -25,6 +32,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/manajemen-naskah/{id}/edit', [NaskahController::class, 'edit'])->name('manajemen-naskah.edit');
     Route::put('/manajemen-naskah/{id}', [NaskahController::class, 'update'])->name('manajemen-naskah.update');
     Route::delete('/manajemen-naskah/{id}', [NaskahController::class, 'destroy'])->name('manajemen-naskah.destroy');
+
+    Route::get('/kirim-naskah', [KirimNaskahController::class, 'index'])->name('kirim-naskah');
+    Route::post('/kirim-naskah', [KirimNaskahController::class, 'store'])->name('kirim-naskah.store');
+
 
     Route::get('/analitik', [AnalitikController::class, 'index'])->name('analitik');
     Route::get('/calender', [CalenderController::class, 'index'])->name('calender');

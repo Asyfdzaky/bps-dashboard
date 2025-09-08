@@ -13,8 +13,9 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
-import { BarChart, Calendar, FileText, LayoutGrid, Users } from 'lucide-react';
+import { hasRole } from '@/types/access';
+import { Link, usePage } from '@inertiajs/react';
+import { BarChart, Calendar, FileText, LayoutGrid, PenBox, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -64,9 +65,18 @@ const KalenderNavItems: NavItem[] = [
     },
 ];
 
+const UserNavItems: NavItem[] = [
+    {
+        title: 'Kirim Naskah',
+        href: '/kirim-naskah',
+    },
+];
+
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
+    const { auth } = usePage<{ auth: { user?: { roles?: string[] } } }>().props;
+    const user = auth.user;
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -82,38 +92,57 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                {/* Main Navigation Group */}
+                {/* Menu Utama (semua bisa lihat) */}
+
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <NavMain items={mainNavItems} title="Menu Utama" icon={<LayoutGrid className="h-4 w-4" />} />
                     </SidebarGroupContent>
                 </SidebarGroup>
-                {/* Naskah Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={NaskahNavItems} title="Naskah" collapsible icon={<FileText className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {/* User (penulis, atau role lain yang kamu mau) */}
+                {hasRole(user, 'penulis') && (
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <NavMain items={UserNavItems} title="Kirim Naskah" icon={<PenBox className="h-4 w-4" />} />
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
 
-                {/* Analitik Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={AnalitikNavItems} title="Analitik" collapsible icon={<BarChart className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {/* Naskah (manajer/produksi/penerbit) */}
+                {hasRole(user, ['manajer', 'produksi', 'penerbit']) && (
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <NavMain items={NaskahNavItems} title="Naskah" collapsible icon={<FileText className="h-4 w-4" />} />
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
 
-                {/* Kalender Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={KalenderNavItems} title="Kalender" collapsible icon={<Calendar className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
-                {/* Management Group */}
-                <SidebarGroup>
-                    <SidebarGroupContent>
-                        <NavMain items={ManajemenPenggunaNavItems} title="Manajemen Pengguna" collapsible icon={<Users className="h-4 w-4" />} />
-                    </SidebarGroupContent>
-                </SidebarGroup>
+                {/* Analitik (manajer saja) */}
+                {hasRole(user, ['manajer', 'produksi', 'penerbit']) && (
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <NavMain items={AnalitikNavItems} title="Analitik" collapsible icon={<BarChart className="h-4 w-4" />} />
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
+
+                {/* Kalender (semua role) */}
+                {hasRole(user, ['manajer', 'produksi', 'penerbit']) && (
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <NavMain items={KalenderNavItems} title="Kalender" collapsible icon={<Calendar className="h-4 w-4" />} />
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
+
+                {/* Manajemen Pengguna (manajer saja) */}
+                {hasRole(user, 'manajer') && (
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <NavMain items={ManajemenPenggunaNavItems} title="Manajemen Pengguna" collapsible icon={<Users className="h-4 w-4" />} />
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
             </SidebarContent>
 
             <SidebarFooter>
