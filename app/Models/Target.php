@@ -9,6 +9,7 @@ class Target extends Model
 {
     use HasFactory;
 
+    protected $table = 'target';
     protected $primaryKey = 'target_id';
     public $incrementing = false;
     protected $keyType = 'string';

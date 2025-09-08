@@ -63,7 +63,7 @@ export function NavMain({
     if (items.length === 1) {
         const item = items[0];
         return (
-            <SidebarGroup className="px-2 py-0">
+            <SidebarGroup>
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem>

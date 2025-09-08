@@ -7,20 +7,41 @@ import { type BreadcrumbItem } from '@/types';
 import { type Book } from '@/types/books';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ArrowLeft, Calendar, CheckCircle, FileText, User } from 'lucide-react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-    },
-    {
-        title: 'Detail Buku',
-        href: '#',
-    },
-];
+import { useMemo } from 'react';
 
 export default function ShowDashboard() {
-    const { book } = usePage<{ book: Book }>().props;
+    const { book, referer } = usePage<{ book: Book; referer: string }>().props;
+    
+    // Tentukan breadcrumb dan back link berdasarkan referer
+    const { breadcrumbs, backLink } = useMemo(() => {
+        switch (referer) {
+            case 'dashboard':
+                return {
+                    breadcrumbs: [
+                        { title: 'Dashboard', href: '/dashboard' },
+                        { title: 'Detail Buku', href: '#' },
+                    ] as BreadcrumbItem[],
+                    backLink: '/dashboard'
+                };
+            case 'progress':
+                return {
+                    breadcrumbs: [
+                        { title: 'Progres Naskah', href: '/progres-naskah' },
+                        { title: 'Detail Buku', href: '#' },
+                    ] as BreadcrumbItem[],
+                    backLink: '/progres-naskah'
+                };
+            case 'naskah':
+            default:
+                return {
+                    breadcrumbs: [
+                        { title: 'Naskah', href: '/manajemen-naskah' },
+                        { title: 'Detail Buku', href: '#' },
+                    ] as BreadcrumbItem[],
+                    backLink: '/manajemen-naskah'
+                };
+        }
+    }, [referer]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -77,7 +98,7 @@ export default function ShowDashboard() {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/dashboard">
+                        <Link href={backLink}>
                             <Button variant="ghost" size="sm" className="p-2">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                             </Button>

@@ -14,6 +14,7 @@ use App\Http\Controllers\dashboard\DashboardUserController;
 use App\Http\Controllers\rolePermission\PenggunaController;
 use App\Http\Controllers\naskah\KirimNaskahController;
 
+use App\Http\Controllers\TargetController;
 
 Route::get('/', function () {
     if(Auth::check()) {
@@ -39,6 +40,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/analitik', [AnalitikController::class, 'index'])->name('analitik');
     Route::get('/calender', [CalenderController::class, 'index'])->name('calender');
+    Route::get('/target', [TargetController::class, 'index'])->name('target');
 
 
 
