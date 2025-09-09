@@ -34,8 +34,8 @@ const NaskahNavItems: NavItem[] = [
         href: '/progres-naskah',
     },
     {
-        title: 'Naskah dikirm dari penulis',
-        href: '/manajemen-naskah/create',
+        title: 'Approval Naskah',
+        href: '/manajemen-naskah/approval',
     },
 ];
 const ManajemenPenggunaNavItems: NavItem[] = [

@@ -4,6 +4,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\naskah\NaskahController;
+use App\Http\Controllers\naskah\ApprovalNaskahController;
 use App\Http\Controllers\Analitik\AnalitikController;
 use App\Http\Controllers\calender\CalenderController;
 use App\Http\Controllers\dashboard\DashboardController;
@@ -26,13 +27,24 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/manajemen-naskah/create', [NaskahController::class, 'create'])->name('manajemen-naskah.create');
-    Route::post('/manajemen-naskah', [NaskahController::class, 'store'])->name('manajemen-naskah.store');
-    Route::get('/manajemen-naskah', [NaskahController::class, 'index'])->name('manajemen-naskah');
-    Route::get('/manajemen-naskah/{id}', [NaskahController::class, 'show'])->name('manajemen-naskah.show');
-    Route::get('/manajemen-naskah/{id}/edit', [NaskahController::class, 'edit'])->name('manajemen-naskah.edit');
-    Route::put('/manajemen-naskah/{id}', [NaskahController::class, 'update'])->name('manajemen-naskah.update');
-    Route::delete('/manajemen-naskah/{id}', [NaskahController::class, 'destroy'])->name('manajemen-naskah.destroy');
+   // Grup semua route manajemen-naskah
+    Route::prefix('manajemen-naskah')->group(function () {
+        // Route approval naskah
+        Route::get('/approval', [ApprovalNaskahController::class, 'index'])->name('approval-naskah.index');
+        Route::get('/approval/{naskahId}', [ApprovalNaskahController::class, 'show'])->name('approval-naskah.show');
+        Route::post('/approval/{naskahId}/approve', [ApprovalNaskahController::class, 'approve'])->name('approval-naskah.approve');
+        Route::post('/approval/{naskahId}/reject', [ApprovalNaskahController::class, 'reject'])->name('approval-naskah.reject');
+        Route::post('/approval/bulk-action', [ApprovalNaskahController::class, 'bulkAction'])->name('approval-naskah.bulk');
+        // Route CRUD dasar manajemen naskah
+        Route::get('/', [NaskahController::class, 'index'])->name('manajemen-naskah');
+        Route::get('/create', [NaskahController::class, 'create'])->name('manajemen-naskah.create');
+        Route::post('/', [NaskahController::class, 'store'])->name('manajemen-naskah.store');
+        Route::get('/{id}', [NaskahController::class, 'show'])->name('manajemen-naskah.show');
+        Route::get('/{id}/edit', [NaskahController::class, 'edit'])->name('manajemen-naskah.edit');
+        Route::put('/{id}', [NaskahController::class, 'update'])->name('manajemen-naskah.update');
+        Route::delete('/{id}', [NaskahController::class, 'destroy'])->name('manajemen-naskah.destroy');
+        
+    });
 
     Route::get('/kirim-naskah', [KirimNaskahController::class, 'index'])->name('kirim-naskah');
     Route::post('/kirim-naskah', [KirimNaskahController::class, 'store'])->name('kirim-naskah.store');
@@ -68,7 +80,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('manajemen-pengguna/{id}', [PenggunaController::class, 'destroy'])->name('manajemen-pengguna.destroy')->middleware('role:manajer');
 
     Route::get('progres-naskah', [ProgresNaskahController::class, 'index'])->name('progres-naskah');
+    
 });
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
