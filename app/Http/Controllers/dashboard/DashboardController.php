@@ -64,7 +64,7 @@ class DashboardController extends Controller
             
             $manuscripts = Manuscript::where('penulis_user_id', $user->user_id)
                                     ->latest('tanggal_masuk')
-                                    ->limit(5)
+                                    
                                     ->get();
         
             $activities = $manuscripts->map(function ($m) {

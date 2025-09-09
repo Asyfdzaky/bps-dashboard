@@ -1,10 +1,14 @@
 import { SummaryStats } from '@/components/summary-cards';
+import { DataTable } from '@/components/table-data';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Link } from '@inertiajs/react';
+import { ColumnDef } from '@tanstack/react-table';
 import clsx from 'clsx';
 import { Check, CheckCircle2, Eye, FileText, XCircle } from 'lucide-react';
 import * as React from 'react';
 import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 
 type SummaryDelta = Partial<Record<'total' | 'draft' | 'progres' | 'publish', number>>;
 
@@ -38,6 +42,7 @@ function buildStatusSteps(status: ManuscriptStatus) {
 
     return { steps, currentIndex: isCanceled ? base.length : currentIndex };
 }
+
 function statusBadgeClass(status: ManuscriptStatus) {
     switch (status) {
         case 'approved':
@@ -54,7 +59,7 @@ function statusBadgeClass(status: ManuscriptStatus) {
 }
 
 type ManuscriptActivity = {
-    id: string | number;
+    id?: string | number; // Make id optional to avoid conflict with Manuscript type
     title: string;
     status: ManuscriptStatus; // 'draft' | 'review' | 'approved' | 'canceled'
     updatedAt?: string;
@@ -77,6 +82,20 @@ export default function DashboardPenulis({
 }) {
     const [open, setOpen] = React.useState(false);
     const [selected, setSelected] = React.useState<ManuscriptActivity | null>(null);
+    const [searchQuery, setSearchQuery] = React.useState('');
+    const [filteredActivities, setFilteredActivities] = React.useState<ManuscriptActivity[]>(activities);
+    // Add useEffect to filter activities when search query or activities change
+    React.useEffect(() => {
+        if (!searchQuery.trim()) {
+            setFilteredActivities(activities);
+        } else {
+            const filtered = activities.filter((activity) => activity.title.toLowerCase().includes(searchQuery.toLowerCase()));
+            setFilteredActivities(filtered);
+        }
+    }, [searchQuery, activities]);
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+    };
 
     const openDialog = (a: ManuscriptActivity) => {
         setSelected(a);
@@ -85,9 +104,65 @@ export default function DashboardPenulis({
 
     const closeDialog = () => {
         setOpen(false);
-        // optional: reset selected when closed
-        // setSelected(null);
+        setSelected(null);
     };
+
+    // Define columns for the data table
+    const columns: ColumnDef<ManuscriptActivity>[] = [
+        {
+            accessorKey: 'title',
+            header: 'Judul Naskah',
+            cell: ({ row }) => <div className="flex items-center p-1 font-medium">{row.getValue('title')}</div>,
+        },
+        {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: ({ row }) => {
+                const status = row.getValue('status') as ManuscriptStatus;
+                return (
+                    <div className="flex items-center">
+                        <Badge variant="outline" className={statusBadgeClass(status)}>
+                            {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </Badge>
+                    </div>
+                );
+            },
+        },
+        {
+            accessorKey: 'updatedAt',
+            header: 'Terakhir Diperbarui',
+            cell: ({ row }) => {
+                const updatedAt = row.getValue('updatedAt') as string;
+                return (
+                    <div className="flex items-center">
+                        {updatedAt ? (
+                            <div className="text-sm text-muted-foreground">{updatedAt}</div>
+                        ) : (
+                            <div className="text-sm text-muted-foreground">-</div>
+                        )}
+                    </div>
+                );
+            },
+        },
+        {
+            id: 'actions',
+            header: 'Aksi',
+            cell: ({ row }) => {
+                const manuscript = row.original;
+                return (
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => openDialog(manuscript)}>
+                            Status
+                        </Button>
+
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/kirim-naskah/${manuscript.id}`}>Lihat Detail</Link>
+                        </Button>
+                    </div>
+                );
+            },
+        },
+    ];
 
     return (
         <div className="space-y-6 p-5">
@@ -98,25 +173,9 @@ export default function DashboardPenulis({
                     <h3 className="mb-4 text-base font-semibold tracking-tight">Aktivitas & Progres Naskah</h3>
 
                     {activities.length === 0 ? (
-                        <div className="text-sm text-muted-foreground">Belum ada aktivitas.</div>
+                        <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">Belum ada aktivitas.</div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 lg:grid-cols-1">
-                            {activities.map((a) => {
-                                return (
-                                    <button key={a.id} type="button" onClick={() => openDialog(a)} className="text-left">
-                                        <div className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
-                                            <div className="mb-2 font-medium">{a.title}</div>
-                                            <div className="text-xs">
-                                                <Badge variant="outline" className={statusBadgeClass(a.status)}>
-                                                    {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
-                                                </Badge>
-                                            </div>
-                                            {a.updatedAt ? <div className="mt-2 text-xs text-muted-foreground">Diperbarui: {a.updatedAt}</div> : null}
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
+                        <DataTable columns={columns} data={filteredActivities} searchableColumn="judul naskah" onSearch={handleSearch} />
                     )}
                 </CardContent>
             </Card>
@@ -160,61 +219,120 @@ function VerticalStatusTimeline({ status, updatedAt }: { status: ManuscriptStatu
         return FileText;
     };
 
-    return (
-        <div className="mt-2">
-            <div className="relative pl-12">
-                {/* 1 konektor vertikal terhubung semua step (lebih tebal) */}
-                <div className={clsx('absolute top-0 bottom-0 left-4 w-1.5', isCanceled ? 'bg-red-200' : 'bg-border')} />
-                {/* garis progres sampai step aktif */}
-                {!isCanceled && (
-                    <div className="absolute top-0 left-4 w-1.5 bg-primary transition-[height] duration-300" style={{ height: `${progressPct}%` }} />
-                )}
+    const getStatusText = (step: any, idx: number) => {
+        if (isCanceled && step.name.toLowerCase() === 'canceled') {
+            return 'Dibatalkan';
+        }
+        if (step.completed) {
+            return 'Selesai';
+        }
+        if (step.current) {
+            return 'Sedang berlangsung';
+        }
+        return 'Menunggu';
+    };
 
-                <ol className="space-y-7" aria-label="Timeline status naskah">
-                    {steps.map((s, idx) => {
-                        const isCompleted = !!s.completed && !isCanceled;
-                        const isCurrent = !!s.current && !isCanceled;
+    const getStatusDescription = (step: any) => {
+        const key = step.name.toLowerCase();
+        if (key === 'draft') return 'Naskah sedang ditulis dan disiapkan';
+        if (key === 'review') return 'Naskah sedang ditinjau oleh editor';
+        if (key === 'approved') return 'Naskah telah disetujui untuk publikasi';
+        if (key === 'canceled') return 'Proses dihentikan';
+        return '';
+    };
+
+    return (
+        <div className="mt-4">
+            <div className="relative">
+                {/* Single continuous line */}
+                <div className="absolute top-4 bottom-4 left-4 w-0.5 -translate-x-1/2 bg-gray-300" />
+
+                {/* Progress overlay line */}
+                <div
+                    className={clsx(
+                        'absolute top-4 left-4 w-0.5 -translate-x-1/2 transition-all duration-500',
+                        isCanceled ? 'bg-red-400' : 'bg-blue-400',
+                    )}
+                    style={{
+                        height: `${Math.min(progressPct, 100)}%`,
+                    }}
+                />
+
+                <ol className="space-y-6" aria-label="Timeline status naskah">
+                    {steps.map((step, idx) => {
+                        const isCompleted = !!step.completed && !isCanceled;
+                        const isCurrent = !!step.current && !isCanceled;
                         const isFuture = !isCompleted && !isCurrent && !isCanceled;
-                        const Icon = iconByStep(s.name);
+                        const isCanceledStep = isCanceled && step.name.toLowerCase() === 'canceled';
+                        const Icon = iconByStep(step.name);
 
                         return (
-                            <li key={`${s.name}-${idx}`} className="relative">
-                                {/* Dot + icon (lebih besar) */}
+                            <li key={`${step.name}-${idx}`} className="relative flex items-start space-x-4">
+                                {/* Icon circle */}
                                 <div
                                     className={clsx(
-                                        'absolute top-0 left-4 z-10 flex h-6 w-6 -translate-x-1/2 items-center justify-center rounded-full border-2',
-                                        isCanceled && s.name.toLowerCase() === 'canceled' && 'border-red-600 bg-red-600 text-white',
-                                        !isCanceled && isCompleted && 'border-green-600 bg-green-600 text-white',
-                                        !isCanceled && isCurrent && 'border-primary bg-primary text-primary-foreground',
-                                        !isCanceled && isFuture && 'border-border bg-background text-muted-foreground',
+                                        'relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2',
+                                        isCanceledStep && 'border-red-500 bg-red-500 text-white',
+                                        !isCanceled && isCompleted && 'border-green-500 bg-green-500 text-white',
+                                        !isCanceled && isCurrent && 'border-blue-500 bg-blue-500 text-white',
+                                        !isCanceled && isFuture && 'border-gray-300 bg-white text-gray-400',
                                     )}
                                     aria-current={isCurrent ? 'step' : undefined}
                                 >
-                                    {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                                    {isCompleted && !isCanceledStep ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                                 </div>
 
-                                {/* Label + sub-info (lebih besar) */}
-                                <div
-                                    className={clsx(
-                                        'ml-8',
-                                        isCanceled && s.name.toLowerCase() === 'canceled' && 'text-red-700',
-                                        !isCanceled && (isCompleted || isCurrent) ? 'text-foreground' : 'text-muted-foreground',
-                                    )}
-                                >
-                                    <div className="text-base leading-snug font-medium">{s.name}</div>
+                                {/* Content */}
+                                <div className="min-w-0 flex-1 pb-6">
+                                    <div className="flex items-center justify-between">
+                                        <h4
+                                            className={clsx(
+                                                'text-lg font-semibold',
+                                                isCanceledStep && 'text-red-700',
+                                                !isCanceled && (isCompleted || isCurrent) ? 'text-gray-900' : 'text-gray-500',
+                                            )}
+                                        >
+                                            {step.name}
+                                        </h4>
+                                        <span
+                                            className={clsx(
+                                                'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+                                                isCanceledStep && 'bg-red-100 text-red-800',
+                                                !isCanceled && isCompleted && 'bg-green-100 text-green-800',
+                                                !isCanceled && isCurrent && 'bg-blue-100 text-blue-800',
+                                                !isCanceled && isFuture && 'bg-gray-100 text-gray-600',
+                                            )}
+                                        >
+                                            {getStatusText(step, idx)}
+                                        </span>
+                                    </div>
 
-                                    {isCompleted && <div className="text-sm font-medium text-green-700">Sudah selesai</div>}
-                                    {!isCanceled && isCurrent && !isCompleted && <div className="text-sm font-medium text-blue-700">On Progress</div>}
-                                    {!isCanceled && !isCurrent && !isCompleted && s.name.toLowerCase() === 'review' && (
-                                        <div className="text-sm font-medium text-blue-700">On Progress</div>
-                                    )}
+                                    <p
+                                        className={clsx(
+                                            'mt-1 text-sm',
+                                            isCanceledStep && 'text-red-600',
+                                            !isCanceled && (isCompleted || isCurrent) ? 'text-gray-600' : 'text-gray-400',
+                                        )}
+                                    >
+                                        {getStatusDescription(step)}
+                                    </p>
                                 </div>
                             </li>
                         );
                     })}
                 </ol>
             </div>
-            {updatedAt ? <div className="mt-4 text-sm text-muted-foreground">Diperbarui: {updatedAt}</div> : null}
+
+            {updatedAt && (
+                <div className="mt-6 border-t border-gray-100 pt-4">
+                    <div className="flex items-center text-sm text-gray-500">
+                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Terakhir diperbarui: {updatedAt}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -147,7 +147,13 @@ export default function KirimNaskahPage() {
     function doSubmit() {
         // final guard (should already be valid)
         if (!validateAll()) return;
-        post(route('kirim-naskah.store'), { forceFormData: true, onSuccess: () => reset() });
+        post(route('kirim-naskah.store'), {
+            forceFormData: true,
+            onSuccess: () => {
+                reset();
+                setSuccessOpen(true);
+            },
+        });
         setConfirmOpen(false);
     }
 
@@ -237,34 +243,80 @@ export default function KirimNaskahPage() {
             { id: 4, name: 'Rencana Promosi' },
         ] as const;
 
+        // Function to check if a step is accessible (clickable)
+        const isStepAccessible = (stepId: number): boolean => {
+            // Current step is always accessible
+            if (stepId === step) return true;
+
+            // Can only go to previous completed steps
+            if (stepId < step) return true;
+
+            // For future steps, check if all previous steps are valid
+            for (let i = 1; i < stepId; i++) {
+                // Temporarily clear errors to get clean validation
+                const tempErrors = errors;
+                setErrors({});
+                const isValid = validateStep(i as Step);
+                setErrors(tempErrors);
+
+                if (!isValid) return false;
+            }
+
+            return true;
+        };
+
         return (
-            <div className="mb-4 w-full py-2">
+            <div className="w-full py-2">
                 <div className="flex items-center">
                     {items.map((it, idx) => {
                         const isActive = step === it.id;
                         const isDone = step > it.id;
+                        const isAccessible = isStepAccessible(it.id);
 
                         return (
                             <div key={it.id} className="flex flex-1 items-center">
-                                <button type="button" onClick={() => setStep(it.id as Step)} className="flex items-center">
+                                <button
+                                    type="button"
+                                    onClick={() => isAccessible && setStep(it.id as Step)}
+                                    disabled={!isAccessible}
+                                    className={[
+                                        'flex flex-col items-center text-center transition-all',
+                                        isAccessible ? 'cursor-pointer hover:opacity-80' : 'cursor-not-allowed opacity-50',
+                                    ].join(' ')}
+                                >
                                     <div
                                         className={[
-                                            'flex h-7 w-7 items-center justify-center rounded-full border text-xs',
+                                            'flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-all',
                                             isDone
                                                 ? 'border-green-600 bg-green-600 text-white'
                                                 : isActive
                                                   ? 'border-blue-600 bg-blue-600 text-white'
-                                                  : 'border-border bg-background text-muted-foreground',
+                                                  : isAccessible
+                                                    ? 'border-border bg-background text-muted-foreground hover:border-muted-foreground/70'
+                                                    : 'border-muted bg-muted text-muted-foreground/50',
                                         ].join(' ')}
                                     >
                                         {isDone ? '✓' : it.id}
                                     </div>
-                                    <div className={['ml-2 text-xs', isActive ? 'font-medium text-foreground' : 'text-muted-foreground'].join(' ')}>
+                                    <div
+                                        className={[
+                                            'mt-1 text-xs transition-all',
+                                            isActive
+                                                ? 'font-medium text-foreground'
+                                                : isAccessible
+                                                  ? 'text-muted-foreground hover:text-foreground'
+                                                  : 'text-muted-foreground/50',
+                                        ].join(' ')}
+                                    >
                                         {it.name}
                                     </div>
                                 </button>
                                 {idx < items.length - 1 && (
-                                    <div className={['mx-2 h-[2px] flex-1 rounded', step > it.id ? 'bg-green-600' : 'bg-border'].join(' ')} />
+                                    <div
+                                        className={['mx-2 h-[2px] flex-1 rounded transition-all', step > it.id ? 'bg-green-600' : 'bg-border'].join(
+                                            ' ',
+                                        )}
+                                    />
                                 )}
                             </div>
                         );
@@ -296,25 +348,27 @@ export default function KirimNaskahPage() {
                     <AlertDialogContent>
                         <AlertDialogHeader>
                             <AlertDialogTitle>Kirim Naskah?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                Pastikan data sudah benar. Ringkasan singkat:
-                                <ul className="mt-2 list-disc pl-5">
-                                    <li>
-                                        <b>Judul:</b> {data.judul_naskah || '-'}
-                                    </li>
-                                    <li>
-                                        <b>Penerbit prioritas:</b> {[data.penerbit_id, data.penerbit_id_2].filter(Boolean).length || '-'}
-                                    </li>
-                                    <li>
-                                        <b>Segmen:</b> {data.segmen_pembaca || '-'}
-                                    </li>
-                                    <li>
-                                        <b>Penulis:</b> {data.nama_penulis_1 || '-'}
-                                    </li>
-                                    <li>
-                                        <b>Email:</b> {data.email || '-'}
-                                    </li>
-                                </ul>
+                            <AlertDialogDescription asChild>
+                                <div>
+                                    Pastikan data sudah benar. Ringkasan singkat:
+                                    <ul className="mt-2 list-disc pl-5">
+                                        <li>
+                                            <b>Judul:</b> {data.judul_naskah || '-'}
+                                        </li>
+                                        <li>
+                                            <b>Penerbit prioritas:</b> {[data.penerbit_id, data.penerbit_id_2].filter(Boolean).length || '-'}
+                                        </li>
+                                        <li>
+                                            <b>Segmen:</b> {data.segmen_pembaca || '-'}
+                                        </li>
+                                        <li>
+                                            <b>Penulis:</b> {data.nama_penulis_1 || '-'}
+                                        </li>
+                                        <li>
+                                            <b>Email:</b> {data.email || '-'}
+                                        </li>
+                                    </ul>
+                                </div>
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -332,8 +386,10 @@ export default function KirimNaskahPage() {
 
                 <Card className="rounded-2xl">
                     <CardContent className="p-4 sm:p-6">
-                        <div className="align-center justify-center">
-                            <Stepper />
+                        <div className="mb-6 flex justify-center">
+                            <div className="w-full max-w-2xl">
+                                <Stepper />
+                            </div>
                         </div>
 
                         {step === 1 && (

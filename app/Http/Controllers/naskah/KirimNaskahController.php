@@ -132,9 +132,22 @@ public function store(Request $request)
     /**
      * Display the specified resource.
      */
-    public function show(Book $book)
+    public function show($naskahId)
     {
-        //
+        $user = Auth::user();
+        
+        // Get manuscript with related data
+        $manuscript = \App\Models\Manuscript::with([
+            'author:user_id,nama_lengkap,email',
+            'targetPublishers.publisher:penerbit_id,nama_penerbit'
+        ])
+        ->where('naskah_id', $naskahId)
+        ->where('penulis_user_id', $user->user_id) // Ensure user can only see their own manuscripts
+        ->firstOrFail();
+
+        return Inertia::render('kirim-naskah/show', [
+            'manuscript' => $manuscript,
+        ]);
     }
 
     /**

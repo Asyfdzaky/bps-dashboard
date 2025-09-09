@@ -5,6 +5,8 @@ import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
@@ -24,12 +26,16 @@ const mainNavItems: NavItem[] = [
 ];
 const NaskahNavItems: NavItem[] = [
     {
-        title: 'Naskah',
+        title: 'Semua Naskah',
         href: '/manajemen-naskah',
     },
     {
         title: 'Progres',
         href: '/progres-naskah',
+    },
+    {
+        title: 'Naskah dikirm dari penulis',
+        href: '/manajemen-naskah/create',
     },
 ];
 const ManajemenPenggunaNavItems: NavItem[] = [
@@ -91,7 +97,6 @@ export function AppSidebar() {
 
             <SidebarContent>
                 {/* Menu Utama (semua bisa lihat) */}
-
                 <SidebarGroup>
                     <SidebarGroupContent>
                         <NavMain items={mainNavItems} title="Menu Utama" icon={<LayoutGrid className="h-4 w-4" />} />

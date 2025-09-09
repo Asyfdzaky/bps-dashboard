@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/kirim-naskah', [KirimNaskahController::class, 'index'])->name('kirim-naskah');
     Route::post('/kirim-naskah', [KirimNaskahController::class, 'store'])->name('kirim-naskah.store');
+    Route::get('/kirim-naskah/{id}', [KirimNaskahController::class, 'show'])->name('kirim-naskah.show');
 
 
     Route::get('/analitik', [AnalitikController::class, 'index'])->name('analitik');
