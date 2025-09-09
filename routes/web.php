@@ -34,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/approval/{naskahId}', [ApprovalNaskahController::class, 'show'])->name('approval-naskah.show');
         Route::post('/approval/{naskahId}/approve', [ApprovalNaskahController::class, 'approve'])->name('approval-naskah.approve');
         Route::post('/approval/{naskahId}/reject', [ApprovalNaskahController::class, 'reject'])->name('approval-naskah.reject');
+         Route::post('/approval/{naskahId}/review', [ApprovalNaskahController::class, 'review'])->name('approval-naskah.review'); 
         Route::post('/approval/bulk-action', [ApprovalNaskahController::class, 'bulkAction'])->name('approval-naskah.bulk');
         // Route CRUD dasar manajemen naskah
         Route::get('/', [NaskahController::class, 'index'])->name('manajemen-naskah');

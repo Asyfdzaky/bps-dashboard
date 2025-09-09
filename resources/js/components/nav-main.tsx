@@ -74,7 +74,7 @@ export function NavMain({
                             >
                                 <Link href={item.href} prefetch>
                                     <div className="flex items-center gap-2">
-                                        {icon && <span className="text-gray-600">{icon}</span>}
+                                        {icon && <span>{icon}</span>}
                                         <span>{item.title}</span>
                                     </div>
                                 </Link>
@@ -94,11 +94,15 @@ export function NavMain({
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem>
-                            <SidebarMenuButton asChild tooltip={{ children: title }}>
+                            <SidebarMenuButton
+                                asChild
+                                tooltip={{ children: title }}
+                                className="h-auto p-2" // Match the padding/height of SidebarGroupLabel
+                            >
                                 <div className="flex items-center gap-2">
-                                    {icon && <span className="text-gray-600">{icon}</span>}
-                                    {/* label otomatis disembunyikan oleh Sidebar saat collapsed */}
-                                    <span>{title}</span>
+                                    {icon && <span>{icon}</span>} {/* TAMBAHKAN text-gray-600 */}
+                                    {/* Use the same text styling as SidebarGroupLabel */}
+                                    <span className="text-sm font-medium">{title}</span>
                                 </div>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -115,7 +119,7 @@ export function NavMain({
                     >
                         <div className="flex w-full items-center justify-between">
                             <div className="flex items-center gap-2">
-                                {icon && <span className="text-gray-600">{icon}</span>}
+                                {icon && <span>{icon}</span>} {/* Sudah ada text-gray-600 */}
                                 <h3 className="text-sm font-medium">{title}</h3>
                             </div>
                             {shouldBeCollapsible && (

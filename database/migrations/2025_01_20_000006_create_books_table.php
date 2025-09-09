@@ -16,7 +16,7 @@ return new class extends Migration
             $table->uuid('buku_id')->primary()->default(DB::raw('uuid_generate_v4()'));
             $table->uuid('naskah_id')->unique();
             $table->string('judul_buku');
-            $table->uuid('pic_user_id');
+            $table->uuid('pic_user_id')->nullable();
             $table->unsignedBigInteger('penerbit_id');
             $table->string('status_keseluruhan', 50)->default('Belum Mulai');
             $table->date('tanggal_target_naik_cetak');

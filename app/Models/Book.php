@@ -14,6 +14,7 @@ class Book extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'buku_id',
         'naskah_id',
         'judul_buku',
         'pic_user_id',

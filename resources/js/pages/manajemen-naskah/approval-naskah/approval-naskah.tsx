@@ -2,20 +2,19 @@ import { DataTable } from '@/components/table-data';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { CheckCircle, Eye, Filter, Search, XCircle } from 'lucide-react';
-import { useState } from 'react';
+import { CheckCircle, Eye, FileText, XCircle } from 'lucide-react';
+import { useMemo, useState } from 'react';
 
 interface Manuscript {
     naskah_id: string;
     judul_naskah: string;
     genre: string;
-    status: 'draft' | 'review' | 'approved' | 'canceled';
+    status: 'draft' | 'review' | 'cancelled' | 'approved';
     created_at: string;
     author: {
         user_id: string;
@@ -32,6 +31,7 @@ interface Manuscript {
 }
 
 interface Stats {
+    draft: number;
     pending: number;
     approved: number;
     rejected: number;
@@ -60,10 +60,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 function getStatusBadge(status: string) {
     switch (status) {
-        case 'review':
+        case 'draft':
+            return (
+                <Badge variant="outline" className="border-blue-200 bg-blue-100 text-blue-800">
+                    Draft
+                </Badge>
+            );
+        case 'pending':
             return (
                 <Badge variant="outline" className="border-yellow-200 bg-yellow-100 text-yellow-800">
-                    Menunggu Review
+                    Sedang Review
                 </Badge>
             );
         case 'approved':
@@ -72,10 +78,16 @@ function getStatusBadge(status: string) {
                     Disetujui
                 </Badge>
             );
-        case 'canceled':
+        case 'cancelled':
             return (
                 <Badge variant="outline" className="border-red-200 bg-red-100 text-red-800">
                     Ditolak
+                </Badge>
+            );
+        case 'review':
+            return (
+                <Badge variant="outline" className="border-yellow-200 bg-yellow-100 text-yellow-800">
+                    Sedang Review
                 </Badge>
             );
         default:
@@ -83,27 +95,42 @@ function getStatusBadge(status: string) {
     }
 }
 
-export default function ApprovalNaskah({ manuscripts, stats, filters }: Props) {
-    const [search, setSearch] = useState(filters.search);
-    const [status, setStatus] = useState(filters.status);
+export default function ApprovalNaskah({ manuscripts, stats }: Props) {
+    // State untuk filter status
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [searchTerm, setSearchTerm] = useState('');
 
-    const handleFilter = () => {
-        router.get(
-            '/manajemen-naskah/approval',
-            {
-                search,
-                status,
-            },
-            {
-                preserveState: true,
-            },
-        );
-    };
+    // Filter data berdasarkan status dan search
+    const filteredManuscripts = useMemo(() => {
+        let filtered = manuscripts;
+
+        // Filter berdasarkan status
+        if (statusFilter !== 'all') {
+            filtered = filtered.filter((manuscript) => manuscript.status === statusFilter);
+        }
+
+        // Filter berdasarkan search term (dari DataTable)
+        if (searchTerm) {
+            filtered = filtered.filter(
+                (manuscript) =>
+                    manuscript.judul_naskah.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    manuscript.author.nama_lengkap.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    manuscript.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    manuscript.target_publishers.some((target) => target.publisher.nama_penerbit.toLowerCase().includes(searchTerm.toLowerCase())),
+            );
+        }
+
+        return filtered;
+    }, [manuscripts, statusFilter, searchTerm]);
 
     const handleReset = () => {
-        setSearch('');
-        setStatus('review');
-        router.get('/manajemen-naskah/approval');
+        setSearchTerm('');
+        setStatusFilter('all');
+    };
+
+    // Handle search dari DataTable
+    const handleSearch = (searchValue: string) => {
+        setSearchTerm(searchValue);
     };
 
     const columns: ColumnDef<Manuscript>[] = [
@@ -191,17 +218,17 @@ export default function ApprovalNaskah({ manuscripts, stats, filters }: Props) {
             <Head title="Approval Naskah" />
 
             <div className="m-8 space-y-6">
-                {/* Stats Cards */}
+                {/* Stats Cards - Tampilkan stats dari data yang difilter */}
                 <div className="grid gap-4 md:grid-cols-4">
                     <Card>
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-600">Menunggu Review</p>
-                                    <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+                                    <p className="text-sm font-medium text-gray-600">Draft</p>
+                                    <p className="text-2xl font-bold text-blue-600">{stats.draft}</p>
                                 </div>
-                                <div className="rounded-full bg-yellow-100 p-2">
-                                    <Filter className="h-5 w-5 text-yellow-600" />
+                                <div className="rounded-full bg-blue-100 p-2">
+                                    <FileText className="h-5 w-5 text-blue-600" />
                                 </div>
                             </div>
                         </CardContent>
@@ -210,11 +237,11 @@ export default function ApprovalNaskah({ manuscripts, stats, filters }: Props) {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-600">Disetujui</p>
-                                    <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
+                                    <p className="text-sm font-medium text-gray-600">Sedang Review</p>
+                                    <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
                                 </div>
-                                <div className="rounded-full bg-green-100 p-2">
-                                    <CheckCircle className="h-5 w-5 text-green-600" />
+                                <div className="rounded-full bg-yellow-100 p-2">
+                                    <Eye className="h-5 w-5 text-yellow-600" />
                                 </div>
                             </div>
                         </CardContent>
@@ -236,62 +263,52 @@ export default function ApprovalNaskah({ manuscripts, stats, filters }: Props) {
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-600">Total Naskah</p>
-                                    <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
+                                    <p className="text-sm font-medium text-gray-600">Total Aktif</p>
+                                    <p className="text-2xl font-bold text-green-600">{stats.total}</p>
                                 </div>
-                                <div className="rounded-full bg-blue-100 p-2">
-                                    <Eye className="h-5 w-5 text-blue-600" />
+                                <div className="rounded-full bg-green-100 p-2">
+                                    <CheckCircle className="h-5 w-5 text-green-600" />
                                 </div>
                             </div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Filters */}
+                {/* Filter Controls - Hanya Status Filter */}
                 <Card>
                     <CardContent className="p-4">
-                        <div className="flex flex-col gap-4 sm:flex-row">
-                            <div className="flex-1">
-                                <Input
-                                    placeholder="Cari berdasarkan judul atau penulis..."
-                                    value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
-                                    className="w-full"
-                                />
-                            </div>
-                            <div className="w-full sm:w-48">
-                                <Select value={status} onValueChange={setStatus}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Pilih Status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">Semua Status</SelectItem>
-                                        <SelectItem value="review">Menunggu Review</SelectItem>
-                                        <SelectItem value="approved">Disetujui</SelectItem>
-                                        <SelectItem value="canceled">Ditolak</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button onClick={handleFilter}>
-                                    <Search className="mr-2 h-4 w-4" />
-                                    Filter
-                                </Button>
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                            <div className="flex items-center gap-4">
+                                <label className="text-sm font-medium text-gray-700">Filter Status:</label>
+                                <div className="w-48">
+                                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Pilih Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">Semua Status</SelectItem>
+                                            <SelectItem value="draft">Draft</SelectItem>
+                                            <SelectItem value="review">Sedang Review</SelectItem>
+                                            <SelectItem value="canceled">Ditolak</SelectItem>
+                                            <SelectItem value="approved">Disetujui</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 <Button variant="outline" onClick={handleReset}>
-                                    Reset
+                                    Reset Filter
                                 </Button>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* Data Table */}
+                {/* Data Table - Search dari sini */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Daftar Naskah untuk Approval</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <DataTable columns={columns} data={manuscripts} />
+                        <DataTable columns={columns} data={filteredManuscripts} searchableColumn="judul_naskah" onSearch={handleSearch} />
                     </CardContent>
                 </Card>
             </div>
