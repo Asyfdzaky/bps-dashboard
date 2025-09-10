@@ -38,7 +38,7 @@ interface Props {
             };
         }>;
     };
-    publishers?: Array<{ penerbit_id: string; nama_penerbit: string }>;
+    publishers?: Array<{ penerbit_id: string; nama_penerbit: string }>; // Optional but we'll handle it
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -70,7 +70,14 @@ function getStatusBadge(status: string) {
                     Sedang Review
                 </Badge>
             );
+        case 'approved':
+            return (
+                <Badge variant="outline" className="border-green-200 bg-green-100 text-green-800">
+                    Disetujui
+                </Badge>
+            );
         case 'canceled':
+        case 'cancelled':
             return (
                 <Badge variant="outline" className="border-red-200 bg-red-100 text-red-800">
                     Ditolak
@@ -118,10 +125,11 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [showPdfPreview, setShowPdfPreview] = useState(false);
 
-    // Form untuk approve (simplified - tanpa PIC dan target date)
+    // Form untuk approve - hanya pilih 1 penerbit
     const approveForm = useForm({
         catatan_approval: '',
-        target_dates: {} as Record<string, string>,
+        target_date: '', // 1 target date
+        selected_publisher: '', // Hanya 1 penerbit
     });
 
     // Form untuk reject
@@ -132,20 +140,58 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
     // Form untuk review (ubah status dari draft ke review)
     const reviewForm = useForm({});
 
+    // Ambil publishers dari target_publishers naskah, bukan dari props publishers
+    const availablePublishers =
+        manuscript.target_publishers
+            ?.map((target) => ({
+                penerbit_id: target.publisher.penerbit_id,
+                nama_penerbit: target.publisher.nama_penerbit,
+                prioritas: target.prioritas,
+            }))
+            .sort((a, b) => a.prioritas - b.prioritas) || [];
+
     const handleApprove = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (availablePublishers.length === 0) {
+            alert('Naskah ini tidak memiliki target penerbit. Silakan hubungi penulis untuk menambahkan target penerbit.');
+            return;
+        }
+
+        if (!approveForm.data.selected_publisher) {
+            alert('Silakan pilih penerbit terlebih dahulu.');
+            return;
+        }
+
+        if (!approveForm.data.target_date) {
+            alert('Silakan pilih target tanggal naik cetak.');
+            return;
+        }
+
+        // ✅ Validasi tanggal tidak boleh di masa lalu
+        const selectedDate = new Date(approveForm.data.target_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        if (selectedDate < today) {
+            alert('Target tanggal tidak boleh di masa lalu.');
+            return;
+        }
+
         approveForm.post(`/manajemen-naskah/approval/${manuscript.naskah_id}/approve`, {
             onSuccess: (response) => {
-                console.log('Approval success:', response); // Debug
+                console.log('Approval success:', response);
                 setShowApproveModal(false);
                 router.visit('/manajemen-naskah/approval');
             },
             onError: (errors) => {
-                console.error('Approval errors:', errors); // Debug
-                // Tampilkan error di UI jika perlu
+                console.error('Approval errors:', errors);
+                // ✅ Tampilkan error yang lebih informatif
+                const errorMessage = Object.values(errors).flat().join(', ');
+                alert(`Error: ${errorMessage}`);
             },
             onFinish: () => {
-                console.log('Approval request finished'); // Debug
+                console.log('Approval request finished');
             },
         });
     };
@@ -223,13 +269,17 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
     };
 
     // Function untuk handle date change
-    const handleDateChange = (publisherId: string, date: Date | undefined) => {
+    const handleDateChange = (date: Date | undefined) => {
         const dateString = date ? date.toISOString().split('T')[0] : '';
-        approveForm.setData('target_dates', {
-            ...approveForm.data.target_dates,
-            [publisherId]: dateString,
-        });
+        approveForm.setData('target_date', dateString);
     };
+
+    const handlePublisherChange = (publisherId: string) => {
+        approveForm.setData('selected_publisher', publisherId);
+    };
+
+    // Get selected publisher info for display - dengan null safety
+    const selectedPublisher = availablePublishers.find((p) => p.penerbit_id === approveForm.data.selected_publisher);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -420,158 +470,302 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
                     </DialogContent>
                 </Dialog>
 
-                {/* Modal Approve dengan Calendar */}
+                {/* Modal Approve - Clean Version */}
                 <Dialog open={showApproveModal} onOpenChange={setShowApproveModal}>
-                    <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
-                        <DialogHeader>
-                            <DialogTitle>Approve Naskah</DialogTitle>
+                    <DialogContent className="max-h-[95vh] max-w-3xl overflow-hidden border-0">
+                        <DialogHeader className="border-b border-border pb-4">
+                            <DialogTitle className="text-xl font-semibold text-foreground">Approve Naskah: {manuscript.judul_naskah}</DialogTitle>
+                            <p className="text-sm text-muted-foreground">Pilih penerbit dan tetapkan target tanggal untuk proses approval</p>
                         </DialogHeader>
-                        <form onSubmit={handleApprove}>
-                            <div className="space-y-6">
-                                {/* Target Penerbit dengan Date Picker */}
-                                {manuscript.target_publishers && manuscript.target_publishers.length > 0 ? (
-                                    <div>
-                                        <Label className="text-base font-semibold">Penerbit dan Target Naik Cetak</Label>
-                                        <p className="mb-4 text-sm text-gray-500">
-                                            Tentukan target tanggal naik cetak untuk setiap penerbit yang akan menerima naskah
-                                        </p>
-                                        <div className="space-y-4">
-                                            {manuscript.target_publishers
-                                                .sort((a, b) => a.prioritas - b.prioritas)
-                                                .map((target, index) => (
-                                                    <div
-                                                        key={target.publisher.penerbit_id}
-                                                        className="space-y-3 rounded-lg border border-green-200 bg-green-50 p-4"
-                                                    >
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-200">
-                                                                    <CheckCircle className="h-4 w-4 text-green-600" />
-                                                                </div>
-                                                                <div>
-                                                                    <h4 className="font-medium text-gray-900">{target.publisher.nama_penerbit}</h4>
-                                                                    {index === 0 && <p className="text-sm text-green-700">Prioritas utama penulis</p>}
-                                                                </div>
+
+                        <form onSubmit={handleApprove} className="flex h-full flex-col">
+                            <div className="flex-1 space-y-6 overflow-y-auto py-4">
+                                {/* Publisher Selection Section */}
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-base font-medium text-foreground">Pilih Penerbit</h3>
+                                        <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                                            {availablePublishers.length} Penerbit Tersedia
+                                        </span>
+                                    </div>
+
+                                    {availablePublishers.length === 0 ? (
+                                        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+                                            <div className="flex items-start gap-3">
+                                                <XCircle className="mt-0.5 h-5 w-5 text-destructive" />
+                                                <div>
+                                                    <h4 className="text-sm font-medium text-destructive">Target Penerbit Tidak Ditemukan</h4>
+                                                    <p className="text-sm text-destructive/80">
+                                                        Naskah ini belum memiliki target penerbit. Hubungi penulis untuk menambahkan target penerbit
+                                                        terlebih dahulu.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="grid gap-3">
+                                            {availablePublishers.map((publisher) => (
+                                                <button
+                                                    key={publisher.penerbit_id}
+                                                    type="button"
+                                                    onClick={() => handlePublisherChange(publisher.penerbit_id)}
+                                                    className={cn(
+                                                        'group w-full rounded-lg border-2 p-4 text-left transition-all duration-150',
+                                                        approveForm.data.selected_publisher === publisher.penerbit_id
+                                                            ? 'border-primary bg-primary/5'
+                                                            : 'border-border bg-card hover:border-primary/30 hover:bg-primary/5',
+                                                    )}
+                                                >
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            {/* Radio Button */}
+                                                            <div
+                                                                className={cn(
+                                                                    'relative h-4 w-4 rounded-full border-2 transition-colors',
+                                                                    approveForm.data.selected_publisher === publisher.penerbit_id
+                                                                        ? 'border-primary bg-primary'
+                                                                        : 'border-muted-foreground group-hover:border-primary',
+                                                                )}
+                                                            >
+                                                                {approveForm.data.selected_publisher === publisher.penerbit_id && (
+                                                                    <div className="absolute inset-1 rounded-full bg-primary-foreground" />
+                                                                )}
                                                             </div>
-                                                            <Badge variant="outline" className="border-green-300 text-green-700">
-                                                                Prioritas {target.prioritas}
-                                                            </Badge>
+
+                                                            {/* Publisher Info */}
+                                                            <div>
+                                                                <h4 className="font-medium text-foreground">{publisher.nama_penerbit}</h4>
+                                                                <p className="text-sm text-muted-foreground">
+                                                                    Prioritas {publisher.prioritas}
+                                                                    {publisher.prioritas === 1 && ' • Pilihan Utama'}
+                                                                </p>
+                                                            </div>
                                                         </div>
 
-                                                        {/* PERBAIKI Date Picker untuk setiap publisher */}
-                                                        <div>
-                                                            <Label className="flex items-center gap-1 text-sm font-medium">
-                                                                <CalendarIcon className="h-4 w-4" />
-                                                                Target Naik Cetak
-                                                            </Label>
-                                                            <div className="mt-2">
-                                                                <DatePicker
-                                                                    date={
-                                                                        approveForm.data.target_dates[target.publisher.penerbit_id]
-                                                                            ? new Date(approveForm.data.target_dates[target.publisher.penerbit_id])
-                                                                            : undefined
-                                                                    }
-                                                                    onDateChange={(date) => handleDateChange(target.publisher.penerbit_id, date)}
-                                                                    placeholder="Pilih target tanggal naik cetak"
-                                                                />
-                                                            </div>
-                                                            <p className="mt-1 text-xs text-gray-600">
-                                                                Tanggal target ketika buku akan naik ke percetakan
-                                                            </p>
+                                                        {/* Priority Badge */}
+                                                        <div
+                                                            className={cn(
+                                                                'rounded-full px-2.5 py-1 text-xs font-medium',
+                                                                publisher.prioritas === 1
+                                                                    ? 'border border-secondary/30 bg-secondary/20 text-secondary-foreground'
+                                                                    : 'bg-muted text-muted-foreground',
+                                                            )}
+                                                        >
+                                                            P{publisher.prioritas}
                                                         </div>
                                                     </div>
-                                                ))}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Selected Publisher Details */}
+                                {selectedPublisher && (
+                                    <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                                        <div className="mb-4 flex items-center gap-3">
+                                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                                                <CheckCircle className="h-4 w-4 text-primary" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-medium text-foreground">{selectedPublisher.nama_penerbit}</h4>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Prioritas {selectedPublisher.prioritas}
+                                                    {selectedPublisher.prioritas === 1 && ' • Pilihan utama penulis'}
+                                                </p>
+                                            </div>
                                         </div>
 
-                                        <div className="mt-4 rounded-lg bg-blue-50 p-3">
-                                            <p className="text-sm text-blue-800">
-                                                <strong>Total:</strong> Naskah akan masuk ke {manuscript.target_publishers.length} penerbit dengan
-                                                target tanggal masing-masing.
-                                            </p>
+                                        {/* Date Picker Section */}
+                                        <div className="space-y-2">
+                                            <Label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                                                <CalendarIcon className="h-4 w-4" />
+                                                Target Tanggal Naik Cetak
+                                            </Label>
+                                            <DatePicker
+                                                date={approveForm.data.target_date ? new Date(approveForm.data.target_date) : undefined}
+                                                onDateChange={handleDateChange}
+                                                placeholder="Pilih target tanggal naik cetak"
+                                            />
+                                            <p className="text-xs text-muted-foreground">Tanggal estimasi buku akan mulai proses percetakan</p>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <div className="rounded-lg border border-red-200 bg-red-50 p-3">
-                                        <p className="text-sm text-red-700">
-                                            Tidak ada target penerbit untuk naskah ini. Tidak dapat melanjutkan approval.
-                                        </p>
                                     </div>
                                 )}
 
-                                {/* Catatan Approval */}
-                                <div>
-                                    <Label htmlFor="catatan_approval">Catatan Approval (Opsional)</Label>
+                                {/* Notes Section */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="catatan_approval" className="text-sm font-medium text-foreground">
+                                        Catatan Approval (Opsional)
+                                    </Label>
                                     <Textarea
                                         id="catatan_approval"
                                         value={approveForm.data.catatan_approval}
                                         onChange={(e) => approveForm.setData('catatan_approval', e.target.value)}
-                                        placeholder="Tambahkan catatan untuk penulis..."
+                                        placeholder="Tambahkan catatan untuk penulis dan tim produksi..."
                                         rows={3}
+                                        className="resize-none"
                                     />
-                                </div>
-
-                                <div className="rounded-lg bg-green-50 p-3">
-                                    <p className="text-sm text-green-800">
-                                        <strong>Perhatian:</strong> Naskah yang diapprove akan langsung masuk ke sistem manajemen buku dengan target
-                                        tanggal yang telah ditentukan.
-                                    </p>
                                 </div>
                             </div>
 
-                            <DialogFooter className="mt-6">
-                                <Button type="button" variant="outline" onClick={() => setShowApproveModal(false)}>
+                            {/* Footer Actions */}
+                            <DialogFooter className="flex-shrink-0 border-t border-border pt-4">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setShowApproveModal(false)}
+                                    className="border-border text-muted-foreground hover:text-foreground"
+                                >
                                     Batal
                                 </Button>
                                 <Button
                                     type="submit"
-                                    disabled={approveForm.processing || !manuscript.target_publishers || manuscript.target_publishers.length === 0}
+                                    disabled={
+                                        approveForm.processing ||
+                                        !approveForm.data.selected_publisher ||
+                                        !approveForm.data.target_date ||
+                                        availablePublishers.length === 0
+                                    }
+                                    className="bg-primary text-primary-foreground hover:bg-primary/90"
                                 >
-                                    {approveForm.processing ? 'Memproses...' : `Approve ke ${manuscript.target_publishers?.length || 0} Penerbit`}
+                                    {approveForm.processing ? (
+                                        <>
+                                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                                            Memproses...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle className="mr-2 h-4 w-4" />
+                                            Approve ke {selectedPublisher?.nama_penerbit || 'Penerbit'}
+                                        </>
+                                    )}
                                 </Button>
                             </DialogFooter>
                         </form>
                     </DialogContent>
                 </Dialog>
 
-                {/* Modal Reject */}
+                {/* Modal Reject - Clean Version */}
                 <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
-                    <DialogContent className="max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Tolak Naskah</DialogTitle>
+                    <DialogContent className="max-w-lg border-0">
+                        <DialogHeader className="border-b border-border pb-4">
+                            <DialogTitle className="text-lg font-semibold text-foreground">Tolak Naskah</DialogTitle>
+                            <p className="text-sm text-muted-foreground">Berikan alasan penolakan untuk naskah "{manuscript.judul_naskah}"</p>
                         </DialogHeader>
-                        <form onSubmit={handleReject}>
-                            <div className="space-y-4">
-                                <div>
-                                    <Label htmlFor="alasan_penolakan">Alasan Penolakan</Label>
-                                    <Textarea
-                                        id="alasan_penolakan"
-                                        value={rejectForm.data.alasan_penolakan}
-                                        onChange={(e) => rejectForm.setData('alasan_penolakan', e.target.value)}
-                                        placeholder="Jelaskan alasan mengapa naskah ditolak..."
-                                        rows={4}
-                                        required
-                                    />
-                                    {rejectForm.errors.alasan_penolakan && (
-                                        <p className="text-sm text-red-600">{rejectForm.errors.alasan_penolakan}</p>
-                                    )}
-                                </div>
 
-                                <div className="rounded-lg bg-red-50 p-3">
-                                    <p className="text-sm text-red-800">
-                                        <strong>Perhatian:</strong> Tindakan ini tidak dapat dibatalkan. Naskah akan ditolak secara permanen.
+                        <form onSubmit={handleReject} className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="alasan_penolakan" className="text-sm font-medium text-foreground">
+                                    Alasan Penolakan
+                                </Label>
+                                <Textarea
+                                    id="alasan_penolakan"
+                                    value={rejectForm.data.alasan_penolakan}
+                                    onChange={(e) => rejectForm.setData('alasan_penolakan', e.target.value)}
+                                    placeholder="Jelaskan alasan mengapa naskah ditolak dengan detail..."
+                                    rows={4}
+                                    required
+                                    className="resize-none"
+                                />
+                                {rejectForm.errors.alasan_penolakan && (
+                                    <p className="text-sm text-destructive">{rejectForm.errors.alasan_penolakan}</p>
+                                )}
+                            </div>
+
+                            <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3">
+                                <div className="flex items-start gap-2">
+                                    <XCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-destructive" />
+                                    <p className="text-sm text-destructive">
+                                        <strong>Peringatan:</strong> Tindakan ini tidak dapat dibatalkan. Naskah akan ditolak secara permanen dan
+                                        penulis akan menerima notifikasi.
                                     </p>
                                 </div>
                             </div>
 
-                            <DialogFooter className="mt-6">
-                                <Button type="button" variant="outline" onClick={() => setShowRejectModal(false)}>
+                            <DialogFooter className="border-t border-border pt-4">
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setShowRejectModal(false)}
+                                    className="border-border text-muted-foreground hover:text-foreground"
+                                >
                                     Batal
                                 </Button>
-                                <Button type="submit" variant="destructive" disabled={rejectForm.processing}>
-                                    {rejectForm.processing ? 'Memproses...' : 'Tolak Naskah'}
+                                <Button
+                                    type="submit"
+                                    variant="destructive"
+                                    disabled={rejectForm.processing}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                    {rejectForm.processing ? (
+                                        <>
+                                            <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-destructive-foreground border-t-transparent" />
+                                            Memproses...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <XCircle className="mr-2 h-4 w-4" />
+                                            Tolak Naskah
+                                        </>
+                                    )}
                                 </Button>
                             </DialogFooter>
                         </form>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Modal Review - Clean Version */}
+                <Dialog open={showReviewModal} onOpenChange={setShowReviewModal}>
+                    <DialogContent className="max-w-lg border-0">
+                        <DialogHeader className="border-b border-border pb-4">
+                            <DialogTitle className="text-lg font-semibold text-foreground">Mulai Review Naskah</DialogTitle>
+                        </DialogHeader>
+
+                        <div className="space-y-4 py-4">
+                            <div className="rounded-lg border border-accent/20 bg-accent/5 p-4">
+                                <h4 className="mb-2 text-sm font-medium text-foreground">Naskah yang akan direview:</h4>
+                                <p className="text-sm font-medium text-primary">{manuscript.judul_naskah}</p>
+                                <p className="text-sm text-muted-foreground">oleh {manuscript.author.nama_lengkap}</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <p className="text-sm text-muted-foreground">
+                                    Status naskah akan berubah menjadi <span className="font-medium text-foreground">"Sedang Review"</span>
+                                    dan Anda dapat melakukan evaluasi lebih lanjut.
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    Setelah review selesai, Anda dapat memilih untuk approve atau tolak naskah.
+                                </p>
+                            </div>
+                        </div>
+
+                        <DialogFooter className="border-t border-border pt-4">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setShowReviewModal(false)}
+                                className="border-border text-muted-foreground hover:text-foreground"
+                            >
+                                Batal
+                            </Button>
+                            <Button
+                                onClick={handleReview}
+                                disabled={reviewForm.processing}
+                                className="bg-secondary text-secondary-foreground hover:bg-secondary/90"
+                            >
+                                {reviewForm.processing ? (
+                                    <>
+                                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-secondary-foreground border-t-transparent" />
+                                        Memproses...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        Mulai Review
+                                    </>
+                                )}
+                            </Button>
+                        </DialogFooter>
                     </DialogContent>
                 </Dialog>
             </div>

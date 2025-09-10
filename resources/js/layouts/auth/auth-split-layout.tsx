@@ -15,7 +15,7 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
         <div className="grid min-h-screen lg:grid-cols-2">
             {/* Left Side - Auth Form */}
             <div className="flex flex-col justify-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24">
-                <div className="mx-auto w-full max-w-sm lg:w-96">
+                <div className="mx-auto w-full lg:w-120">
                     {/* Logo */}
                     <div className="absolute top-6 left-6">
                         <Link href={route('home')} className="flex items-center">
@@ -24,14 +24,17 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                         </Link>
                     </div>
 
-                    {/* Title & Description */}
-                    <div className="mb-8">
-                        <h1 className="mb-2 text-center text-3xl font-bold text-foreground">{title}</h1>
-                        <p className="text-center text-sm leading-relaxed text-muted-foreground">{description}</p>
-                    </div>
+                    {/* Card Wrapper */}
+                    <div className="rounded-xl border bg-card p-8">
+                        {/* Title & Description */}
+                        <div className="mb-8">
+                            <h1 className="mb-2 text-3xl font-bold text-foreground">{title}</h1>
+                            <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
+                        </div>
 
-                    {/* Auth Form */}
-                    <div className="space-y-6">{children}</div>
+                        {/* Auth Form */}
+                        <div className="space-y-6">{children}</div>
+                    </div>
                 </div>
             </div>
 
@@ -48,7 +51,7 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                     ></div>
                 </div>
 
-                <div className="relative z-10 flex h-full flex-col justify-center rounded-2xl p-12 text-primary-foreground">
+                <div className="relative z-10 flex h-full flex-col items-center justify-center rounded-2xl p-12 text-primary-foreground">
                     {/* Marketing Content */}
                     <div className="max-w-md">
                         <h2 className="mb-4 text-4xl font-bold">Effortlessly manage your publishing workflow.</h2>

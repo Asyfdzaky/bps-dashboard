@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers\naskah;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use App\Models\Manuscript;
 use App\Models\Book;
-use App\Models\Publisher;
 use App\Models\User;
+use Inertia\Inertia;
+use App\Models\Publisher;
+use App\Models\Manuscript;
 use App\Models\MasterTask;
-use App\Models\TaskProgress;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Models\TaskProgress;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class ApprovalNaskahController extends Controller
 {
@@ -92,8 +93,7 @@ class ApprovalNaskahController extends Controller
 
         // Buat entry book untuk setiap target publisher
         foreach ($manuscript->targetPublishers as $target) {
-            $publisherId = $target->publisher->penerbit_id;
-            
+           $publisherId = $request->selected_publisher;
             // Ambil target date dari request, atau default 30 hari dari sekarang
             $targetDate = isset($request->target_dates[$publisherId]) && $request->target_dates[$publisherId]
                 ? $request->target_dates[$publisherId]
@@ -125,7 +125,7 @@ class ApprovalNaskahController extends Controller
 
     } catch (\Exception $e) {
         DB::rollBack();
-        \Log::error('Approve Naskah Error', [
+        Log::error('Approve Naskah Error', [
             'naskah_id' => $naskahId,
             'message' => $e->getMessage(),
             'trace' => $e->getTraceAsString()

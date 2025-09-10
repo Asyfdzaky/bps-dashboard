@@ -17,6 +17,31 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '#',
     },
 ];
+interface Props {
+    manuscript: {
+        naskah_id: string;
+        judul_naskah: string;
+        sinopsis: string;
+        genre: string;
+        status: 'draft' | 'review' | 'cancelled' | 'approved';
+        created_at: string;
+        file_naskah_url: string;
+        info_tambahan?: any;
+        author: {
+            user_id: string;
+            nama_lengkap: string;
+            email: string;
+        };
+        target_publishers: Array<{
+            prioritas: number;
+            publisher: {
+                penerbit_id: string;
+                nama_penerbit: string;
+            };
+        }>;
+    };
+    publishers?: Array<{ penerbit_id: string; nama_penerbit: string }>;
+}
 
 function getStatusBadge(status: string) {
     switch (status) {
@@ -56,6 +81,9 @@ function getStatusBadge(status: string) {
 export default function KirimNaskahShow({ manuscript }: { manuscript: Manuscript }) {
     const [showPdfPreview, setShowPdfPreview] = useState(false);
     const pdfUrl = `/storage/${manuscript.file_naskah_url}`;
+
+    // Safe access to info_tambahan with fallback
+    const info = manuscript.info_tambahan || {};
 
     const handleDownloadPdf = () => {
         const link = document.createElement('a');
@@ -143,10 +171,10 @@ export default function KirimNaskahShow({ manuscript }: { manuscript: Manuscript
                         <div className="p-6">
                             <dl className="space-y-0">
                                 <DataField label="Genre/Kategori" value={manuscript.genre} />
-                                <DataField label="Kata Kunci" value={manuscript.info_tambahan.kata_kunci} />
-                                <DataField label="Tebal Naskah" value={manuscript.info_tambahan.tebal_naskah} />
+                                <DataField label="Kata Kunci" value={info.kata_kunci} />
+                                <DataField label="Tebal Naskah" value={info.tebal_naskah} />
                                 <DataField label="Sinopsis" value={manuscript.sinopsis} multiline />
-                                <DataField label="Selling Point" value={manuscript.info_tambahan.selling_point} multiline />
+                                <DataField label="Selling Point" value={info.selling_point} multiline />
                             </dl>
                         </div>
                     </div>
@@ -158,9 +186,9 @@ export default function KirimNaskahShow({ manuscript }: { manuscript: Manuscript
                         </div>
                         <div className="p-6">
                             <dl className="space-y-0">
-                                <DataField label="Target Pembaca Primer" value={manuscript.info_tambahan.target_pembaca_primer} />
-                                <DataField label="Target Pembaca Sekunder" value={manuscript.info_tambahan.target_pembaca_sekunder} />
-                                <DataField label="Segmen Pembaca" value={manuscript.info_tambahan.segmen_pembaca} />
+                                <DataField label="Target Pembaca Primer" value={info.target_pembaca_primer} />
+                                <DataField label="Target Pembaca Sekunder" value={info.target_pembaca_sekunder} />
+                                <DataField label="Segmen Pembaca" value={info.segmen_pembaca} />
                             </dl>
                         </div>
                     </div>
@@ -177,12 +205,12 @@ export default function KirimNaskahShow({ manuscript }: { manuscript: Manuscript
                             <dl className="space-y-0">
                                 <DataField
                                     label="Nama Penulis"
-                                    value={`${manuscript.info_tambahan.nama_penulis_1}${manuscript.info_tambahan.nama_penulis_2 ? `, ${manuscript.info_tambahan.nama_penulis_2}` : ''}`}
+                                    value={`${info.nama_penulis_1 || ''}${info.nama_penulis_2 ? `, ${info.nama_penulis_2}` : ''}`}
                                 />
-                                <DataField label="Email" value={manuscript.info_tambahan.email} />
-                                <DataField label="No. HP" value={manuscript.info_tambahan.no_hp} />
-                                <DataField label="Pendidikan" value={manuscript.info_tambahan.pendidikan} />
-                                <DataField label="Alamat" value={manuscript.info_tambahan.alamat} multiline />
+                                <DataField label="Email" value={info.email} />
+                                <DataField label="No. HP" value={info.no_hp} />
+                                <DataField label="Pendidikan" value={info.pendidikan} />
+                                <DataField label="Alamat" value={info.alamat} multiline />
                             </dl>
                         </div>
                     </div>
@@ -226,10 +254,10 @@ export default function KirimNaskahShow({ manuscript }: { manuscript: Manuscript
                     </div>
                     <div className="p-6">
                         <dl className="space-y-0">
-                            <DataField label="Rencana Promosi" value={manuscript.info_tambahan.rencana_promosi} multiline />
-                            <DataField label="Rencana Penjualan" value={manuscript.info_tambahan.rencana_penjualan} multiline />
-                            <DataField label="Media Sosial" value={manuscript.info_tambahan.media_sosial} />
-                            <DataField label="Jejaring" value={manuscript.info_tambahan.jejaring} />
+                            <DataField label="Rencana Promosi" value={info.rencana_promosi} multiline />
+                            <DataField label="Rencana Penjualan" value={info.rencana_penjualan} multiline />
+                            <DataField label="Media Sosial" value={info.media_sosial} />
+                            <DataField label="Jejaring" value={info.jejaring} />
                         </dl>
                     </div>
                 </div>
