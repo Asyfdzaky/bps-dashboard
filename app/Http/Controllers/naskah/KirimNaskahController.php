@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\naskah;
 
-use App\Http\Controllers\Controller;
 use App\Models\Book;
-use App\Models\UserProfile;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use App\Models\Manuscript;
+use App\Models\UserProfile;
 use Illuminate\Support\Str;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class KirimNaskahController extends Controller
 {
@@ -187,19 +188,19 @@ private function saveTargetPublishers($naskahId, array $validated)
 /**
  * Display the specified resource.
  */
-public function show($naskahId)
+public function show($naskah_id)
 {
     $user = Auth::user();
     
     // Get manuscript with related data INCLUDING user profile
-    $manuscript = \App\Models\Manuscript::with([
-        'author:user_id,nama_lengkap,email',
-        'author.profile', // Load user profile
-        'targetPublishers.publisher:penerbit_id,nama_penerbit'
-    ])
-    ->where('naskah_id', $naskahId)
-    ->where('penulis_user_id', $user->user_id)
-    ->firstOrFail();
+   $manuscript = Manuscript::with([
+            'author:user_id,nama_lengkap,email',
+            'author.profile', // Add this to load user profile
+            'targetPublishers.publisher:penerbit_id,nama_penerbit'
+        ])
+        ->where('naskah_id', $naskah_id) // Use where instead of findOrFail
+        ->where('penulis_user_id', $user->user_id) // Security: only show user's own manuscripts
+        ->first();
 
     return Inertia::render('kirim-naskah/show', [
         'manuscript' => $manuscript,

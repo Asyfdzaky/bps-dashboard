@@ -289,18 +289,21 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
                 {/* Header */}
                 <div className="flex items-start justify-between">
                     <div>
-                        <Button variant="ghost" size="sm" onClick={() => router.visit('/manajemen-naskah/approval')} className="mb-4">
+                        <Button variant="default" size="sm" onClick={() => router.visit('/manajemen-naskah/approval')} className="mb-4">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Kembali ke List
                         </Button>
-                        <h1 className="text-2xl font-bold text-gray-900">{manuscript.judul_naskah}</h1>
-                        <div className="mt-2 flex items-center gap-4">
-                            {getStatusBadge(manuscript.status)}
-                            <span className="text-sm text-gray-500">Dikirim pada {formatDate(manuscript.created_at)}</span>
-                        </div>
                     </div>
-
                     {manuscript.status !== 'cancelled' && renderActionButtons()}
+                </div>
+
+                {/* Border full width dengan title di dalam */}
+                <div className="border-t border-border pt-6">
+                    <h1 className="text-2xl font-bold text-foreground">{manuscript.judul_naskah}</h1>
+                    <div className="mt-2 flex items-center gap-4">
+                        {getStatusBadge(manuscript.status)}
+                        <span className="text-sm text-muted-foreground">Dikirim pada {formatDate(manuscript.created_at)}</span>
+                    </div>
                 </div>
 
                 {/* PDF Preview Toggle */}
@@ -309,7 +312,7 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
                         <Eye className="mr-2 h-4 w-4" />
                         {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
                     </Button>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" className="text-primary hover:bg-accent" size="sm" asChild>
                         <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
                             <Download className="mr-2 h-4 w-4" />
                             Download PDF

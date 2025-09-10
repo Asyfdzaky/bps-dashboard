@@ -33,7 +33,7 @@ class DashboardController extends Controller
         
         $books = $booksQuery->get();
         
-        // Get statistics with publisher filtering
+        // Get statistics with publisher filtering  
         $statsQuery = Book::query();
         if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
             $statsQuery = $statsQuery->where('penerbit_id', $user->penerbit_id);
@@ -66,27 +66,14 @@ class DashboardController extends Controller
                                     ->latest('tanggal_masuk')
                                     ->get();
         
-            $activities = $manuscripts->map(function ($m) {
-                $book = $m->book;
-                
-                // Pastikan status selalu dikirim
-                $status = $m->status ?? 'draft';
-                
-                if (!$book) {
+      
+                $activities = $manuscripts->map(function ($m) {
                     return [
-                        'id' => $m->naskah_id,
+                        'naskah_id' => $m->naskah_id,
                         'title' => $m->judul_naskah ?? 'Naskah',
-                        'status' => $status, // ← PENTING: Tambahkan ini
-                        'updatedAt' => optional($m->updated_at)->format('Y-m-d H:i:s'),
+                        'status' => $m->status ?? 'draft',
+                        'updatedAt' => optional($m->updated_at)->format('d M Y'),
                     ];
-                }
-        
-                return [
-                    'id' => $book->buku_id ?? $m->naskah_id,
-                    'title' => ($m->judul_naskah ?? $book->judul_buku) ?: 'Naskah',
-                    'status' => $status, // ← PENTING: Tambahkan ini
-                    'updatedAt' => optional($book->updated_at ?? $m->updated_at)->format('Y-m-d H:i:s'),
-                ];
             });
         
             $penulis = [

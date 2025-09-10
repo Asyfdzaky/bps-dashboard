@@ -27,7 +27,7 @@ function statusBadgeClass(status: ManuscriptStatus) {
 }
 
 type ManuscriptActivity = {
-    id?: string | number; // Make id optional to avoid conflict with Manuscript type
+    naskah_id?: string | number; // Make id optional to avoid conflict with Manuscript type
     title: string;
     status: ManuscriptStatus; // 'draft' | 'review' | 'approved' | 'canceled'
     updatedAt?: string;
@@ -107,7 +107,7 @@ export default function DashboardPenulis({
                 const manuscript = row.original;
                 return (
                     <Button variant="outline" size="sm" asChild>
-                        <Link href={`/kirim-naskah/${manuscript.id}`}>Lihat Detail</Link>
+                        <Link href={`/kirim-naskah/${manuscript.naskah_id}`}>Lihat Detail</Link>
                     </Button>
                 );
             },
