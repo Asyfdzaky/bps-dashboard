@@ -8,6 +8,7 @@ use App\Models\TaskProgress;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ProgresNaskahController extends Controller
 {
@@ -77,12 +78,15 @@ class ProgresNaskahController extends Controller
         $booksByStage = collect($orderedStageNames)->mapWithKeys(function ($stageName) use ($grouped) {
             return [$stageName => $grouped->get($stageName, collect())];
         });
-
+        
+        $user = Auth::user();
+       
         return Inertia::render('manajemen-naskah/progress', [
             // Untuk tampilan "per stage"
             'BooksByStage' => $booksByStage,
             // Kalau butuh juga data flat:
             'StageOrder' => $orderedStageNames,
+            'user' => $user,
         ]);
     }
 

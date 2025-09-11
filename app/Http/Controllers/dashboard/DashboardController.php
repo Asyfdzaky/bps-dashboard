@@ -9,6 +9,8 @@ use App\Models\Book;
 use App\Models\Publisher;
 use App\Models\User;
 use App\Models\MasterTask;
+use App\Models\Manuscript;
+use App\Models\TaskProgress;
 
 class DashboardController extends Controller
 {
@@ -31,7 +33,7 @@ class DashboardController extends Controller
         
         $books = $booksQuery->get();
         
-        // Get statistics with publisher filtering
+        // Get statistics with publisher filtering  
         $statsQuery = Book::query();
         if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
             $statsQuery = $statsQuery->where('penerbit_id', $user->penerbit_id);
@@ -48,6 +50,44 @@ class DashboardController extends Controller
             'Selesai' => $statsQuery->clone()->where('status_keseluruhan', 'published')->count(),
         ];
         
+        // Hitung data khusus PENULIS (hanya jika user berperan 'penulis')
+        $penulis = null;
+        if ($user && $user->hasRole('penulis')) {
+            $total = Manuscript::where('penulis_user_id', $user->user_id)->count();
+            $draft = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'draft')->count();
+            $review = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'review')->count();
+            $approved = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'approved')->count();
+            $canceled = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'canceled')->count();
+            
+            // Untuk publish, kita bisa menggunakan approved atau status lain yang menunjukkan published
+            $publish = $approved; // atau buat status 'published' terpisah
+            
+            $manuscripts = Manuscript::where('penulis_user_id', $user->user_id)
+                                    ->latest('tanggal_masuk')
+                                    ->get();
+        
+      
+                $activities = $manuscripts->map(function ($m) {
+                    return [
+                        'naskah_id' => $m->naskah_id,
+                        'title' => $m->judul_naskah ?? 'Naskah',
+                        'status' => $m->status ?? 'draft',
+                        'updatedAt' => optional($m->updated_at)->format('d M Y'),
+                    ];
+            });
+        
+            $penulis = [
+                'stats' => [
+                    'total' => $total,
+                    'draft' => $draft,
+                    'progres' => $review, // review = progres
+                    'publish' => $publish,
+                    'delta' => ['total'=>0,'draft'=>0,'progres'=>0,'publish'=>0],
+                ],
+                'activities' => $activities->toArray(),
+            ];
+        }
+        
         return Inertia::render('dashboard/dashboard', [
             'books' => $books,
             'TargetTahunan' => $TargetTahunan,
@@ -56,6 +96,7 @@ class DashboardController extends Controller
             'Published' => $Published,
             'ChartData' => $ChartData,
             'userPublisher' => $user && $user->hasPublisherRole() ? $user->publisher : null,
+            'penulis' => $penulis, // null untuk non-penulis, berisi data untuk penulis
         ]);
     }
     

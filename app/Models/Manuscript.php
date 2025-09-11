@@ -14,6 +14,7 @@ class Manuscript extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'naskah_id',
         'penulis_user_id',
         'judul_naskah',
         'sinopsis',

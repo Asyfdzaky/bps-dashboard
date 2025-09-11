@@ -1,9 +1,16 @@
-import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
+import {
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    useSidebar,
+} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useEffect, useState } from 'react';
-// import { Badge } from './ui/badge';
+import { useEffect, useMemo, useState } from 'react';
 
 export function NavMain({
     items = [],
@@ -19,40 +26,40 @@ export function NavMain({
     collapsible?: boolean;
 }) {
     const page = usePage();
-    const { state, setOpen } = useSidebar();
-    const [isOpen, setIsOpen] = useState(defaultOpen);
-    const [hasBeenManuallyClosed, setHasBeenManuallyClosed] = useState(false);
-    const isGroupActive = items.some((item) => page.url.startsWith(item.href));
-    const shouldBeCollapsible = collapsible && items.length > 1;
+    const { state } = useSidebar(); // { open, collapsed }
     const isCollapsed = state === 'collapsed';
 
-    // Auto-open if any item is active
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    const [hasBeenManuallyClosed, setHasBeenManuallyClosed] = useState(false);
+
+    const isGroupActive = useMemo(() => items.some((item) => page.url.startsWith(item.href)), [items, page.url]);
+
+    const shouldBeCollapsible = collapsible && items.length > 1;
+
+    // Tutup paksa saat sidebar collapsed
     useEffect(() => {
-        if (isGroupActive && !isOpen && !hasBeenManuallyClosed) {
+        if (isCollapsed) {
+            setIsOpen(false);
+            // jangan tandai "manually closed" — ini state UI karena collapsed
+        }
+    }, [isCollapsed]);
+
+    // Auto-open kalau ada item aktif (kecuali saat collapsed)
+    useEffect(() => {
+        if (!isCollapsed && isGroupActive && !isOpen && !hasBeenManuallyClosed) {
             setIsOpen(true);
         }
-    }, [isGroupActive, isOpen, hasBeenManuallyClosed]);
+    }, [isCollapsed, isGroupActive, isOpen, hasBeenManuallyClosed]);
 
     const toggleGroup = () => {
-        // Jika sidebar collapsed dan group diklik, buka sidebar terlebih dahulu
-        if (isCollapsed) {
-            setOpen(true);
-            return;
-        }
-        
-        if (shouldBeCollapsible) {
-            const newState = !isOpen;
-            setIsOpen(newState);
-
-            if (!newState) {
-                setHasBeenManuallyClosed(true);
-            } else {
-                setHasBeenManuallyClosed(false);
-            }
+        if (shouldBeCollapsible && !isCollapsed) {
+            const next = !isOpen;
+            setIsOpen(next);
+            setHasBeenManuallyClosed(!next);
         }
     };
 
-    // Jika hanya 1 item, render langsung sebagai single menu item
+    // === Single item: biarkan seperti sebelumnya (sudah bagus & tooltip jalan saat collapsed)
     if (items.length === 1) {
         const item = items[0];
         return (
@@ -60,10 +67,16 @@ export function NavMain({
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem>
-                            <SidebarMenuButton asChild isActive={page.url.startsWith(item.href)} tooltip={isCollapsed ? item.title : undefined}>
-                                <Link href={item.href} prefetch className="flex items-center">
-                                    {icon && <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">{icon}</span>}
-                                    <span className="group-data-[collapsible=icon]:sr-only">{item.title}</span>
+                            <SidebarMenuButton
+                                asChild
+                                isActive={page.url.startsWith(item.href)}
+                                tooltip={{ children: item.title }} // tooltip muncul saat collapsed
+                            >
+                                <Link href={item.href} prefetch>
+                                    <div className="flex items-center gap-2">
+                                        {icon && <span>{icon}</span>}
+                                        <span>{item.title}</span>
+                                    </div>
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -73,36 +86,40 @@ export function NavMain({
         );
     }
 
-    // Jika multiple items, render sebagai collapsible group
+    // === Multiple items
     return (
-        <SidebarGroup>
-            {/* Saat collapsed, tampilkan sebagai menu button biasa */}
+        <SidebarGroup className="px-2 py-0">
+            {/* Saat COLLAPSED: render header sebagai SidebarMenuButton agar tooltip & icon-only bekerja */}
             {isCollapsed ? (
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton
-                                onClick={toggleGroup}
-                                isActive={isGroupActive}
-                                tooltip={title}
-                                className="cursor-pointer flex items-center"
+                                asChild
+                                tooltip={{ children: title }}
+                                className="h-auto p-2" // Match the padding/height of SidebarGroupLabel
                             >
-                                {icon && <span className="flex-shrink-0 w-4 h-4 flex items-center justify-center">{icon}</span>}
-                                <span className="group-data-[collapsible=icon]:sr-only">{title}</span>
+                                <div className="flex items-center gap-2">
+                                    {icon && <span>{icon}</span>} {/* TAMBAHKAN text-gray-600 */}
+                                    {/* Use the same text styling as SidebarGroupLabel */}
+                                    <span className="text-sm font-medium">{title}</span>
+                                </div>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarGroupContent>
             ) : (
-                // Saat expanded, tampilkan group label dan sub-menu
                 <>
+                    {/* Expanded state: pakai label clickable + chevron */}
                     <SidebarGroupLabel
-                        className={`${shouldBeCollapsible ? 'cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent/50' : ''} ${isGroupActive ? 'text-sidebar-accent-foreground' : ''}`}
+                        className={`${shouldBeCollapsible ? 'cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent/50' : ''} ${
+                            isGroupActive ? 'text-sidebar-accent-foreground' : ''
+                        }`}
                         onClick={toggleGroup}
                     >
                         <div className="flex w-full items-center justify-between">
                             <div className="flex items-center gap-2">
-                                {icon && <span className="text-gray-600">{icon}</span>}
+                                {icon && <span>{icon}</span>} {/* Sudah ada text-gray-600 */}
                                 <h3 className="text-sm font-medium">{title}</h3>
                             </div>
                             {shouldBeCollapsible && (
@@ -117,31 +134,29 @@ export function NavMain({
                         </div>
                     </SidebarGroupLabel>
 
-                    {/* Collapsible Content */}
-                    <div
-                        className={`overflow-hidden transition-all duration-200 ease-in-out ${
-                            shouldBeCollapsible ? (isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0') : 'max-h-screen opacity-100'
-                        }`}
-                    >
-                        <div className="relative ml-3 pl-3">
-                            {/* Vertical line - hanya tampil saat expanded */}
-                            <div className="absolute top-0 bottom-0 left-0 w-px bg-gray-300" />
-
-                            <SidebarGroupContent>
+                    {/* Konten group: JANGAN render saat collapsed */}
+                    {(!shouldBeCollapsible || isOpen) && (
+                        <div className="max-h-screen overflow-hidden opacity-100 transition-all duration-200 ease-in-out">
+                            <div className="relative ml-3 pl-3">
+                                {/* Vertical line */}
+                                <div className="absolute top-0 bottom-0 left-0 w-px bg-gray-300" />
                                 <SidebarMenu>
                                     {items.map((item) => (
                                         <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton asChild isActive={page.url.startsWith(item.href)}>
+                                            <SidebarMenuButton asChild isActive={page.url.startsWith(item.href)} tooltip={{ children: item.title }}>
                                                 <Link href={item.href} prefetch>
-                                                    <span>{item.title}</span>
+                                                    <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2">
+                                                        <span>{item.title}</span>
+                                                        {/* badge dsb di sini */}
+                                                    </div>
                                                 </Link>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>
                                     ))}
                                 </SidebarMenu>
-                            </SidebarGroupContent>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </>
             )}
         </SidebarGroup>

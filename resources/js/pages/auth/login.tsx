@@ -17,7 +17,6 @@ export default function Login({ status, canResetPassword }: LoginProps) {
     return (
         <AuthLayout title="Masuk Kedalam Akun Anda" description="Masukkan email dan password anda di bawah ini untuk masuk">
             <Head title="Masuk" />
-
             <Form method="post" action={route('login')} resetOnSuccess={['password']} className="flex flex-col gap-6">
                 {({ processing, errors }) => (
                     <>
