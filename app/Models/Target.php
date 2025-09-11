@@ -17,6 +17,7 @@ class Target extends Model
     protected $fillable = [
         'penerbit_id',
         'tipe_target',
+        'kategori',
         'tahun',
         'bulan',
         'jumlah_target',

@@ -30,7 +30,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/analitik', [AnalitikController::class, 'index'])->name('analitik');
     Route::get('/calender', [CalenderController::class, 'index'])->name('calender');
     Route::get('/target', [TargetController::class, 'index'])->name('target');
-
+    Route::get('/target/create', [TargetController::class, 'create'])->name('target.create');
+    Route::post('/target', [TargetController::class, 'store'])->name('target.store');
+    Route::get('/target/{year}/{publisherId}/{kategori}/detail', [TargetController::class, 'showYearlyDetail'])->name('target.yearly.detail');
+    Route::get('/target/{year}/{publisherId}/{kategori}/edit', [TargetController::class, 'editYearlyTargets'])->name('target.yearly.edit');
+    Route::put('/target/{year}/{publisherId}/{kategori}', [TargetController::class, 'updateYearlyTargets'])->name('target.yearly.update');
+    Route::delete('/target/{year}/{publisherId}', [TargetController::class, 'destroyYearlyTargets'])->name('target.yearly.destroy');
+    Route::get('/target/available-years', [TargetController::class, 'getAvailableYears'])->name('target.availableYears');
 
 
     Route::get('/manajemen-role', [RoleController::class, 'index'])->name('roles.index')
