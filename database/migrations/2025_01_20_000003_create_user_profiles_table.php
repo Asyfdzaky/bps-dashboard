@@ -17,17 +17,12 @@ return new class extends Migration
             $table->text('alamat')->nullable();
             $table->string('nomor_hp', 25)->nullable();
             $table->string('pendidikan')->nullable();
-            $table->text('kegiatan_aktif')->nullable();
-            $table->text('karya_tulis')->nullable();
-            $table->text('buku_lain')->nullable();
-            $table->json('media_sosial')->nullable();
-            $table->text('jejaring')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')
-                  ->references('user_id')
-                  ->on('users')
-                  ->onDelete('cascade');
+                ->references('user_id')
+                ->on('users')
+                ->onDelete('cascade');
         });
     }
 

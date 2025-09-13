@@ -15,7 +15,7 @@ import {
 import { type NavItem } from '@/types';
 import { hasRole } from '@/types/access';
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart, Calendar, FileText, LayoutGrid, PenBox, Users } from 'lucide-react';
+import { BarChart, Calendar, FileText, LayoutGrid, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -69,12 +69,7 @@ const KalenderNavItems: NavItem[] = [
     },
 ];
 
-const UserNavItems: NavItem[] = [
-    {
-        title: 'Kirim Naskah',
-        href: '/kirim-naskah',
-    },
-];
+const UserNavItems: NavItem[] = [];
 
 const footerNavItems: NavItem[] = [];
 
@@ -102,14 +97,6 @@ export function AppSidebar() {
                         <NavMain items={mainNavItems} title="Menu Utama" icon={<LayoutGrid className="h-4 w-4" />} />
                     </SidebarGroupContent>
                 </SidebarGroup>
-                {/* User (penulis, atau role lain yang kamu mau) */}
-                {hasRole(user, 'penulis') && (
-                    <SidebarGroup>
-                        <SidebarGroupContent>
-                            <NavMain items={UserNavItems} title="Kirim Naskah" icon={<PenBox className="h-4 w-4" />} />
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                )}
 
                 {/* Naskah (manajer/produksi/penerbit) */}
                 {hasRole(user, ['manajer', 'produksi', 'penerbit']) && (

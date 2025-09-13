@@ -115,7 +115,7 @@ export default function DashboardPenulis({
     ];
 
     return (
-        <div className="space-y-6 p-5">
+        <div className="w-full space-y-6 px-4 py-4">
             <SummaryStats total={total} draft={draft} progres={progres} publish={publish} delta={delta} />
 
             <Card className="rounded-2xl">

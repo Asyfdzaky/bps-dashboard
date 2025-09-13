@@ -11,83 +11,51 @@ use App\Models\User;
 use App\Models\MasterTask;
 use App\Models\Manuscript;
 use App\Models\TaskProgress;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
-        
+        $user = Auth::user();
+
+        // Jika user adalah penulis, redirect ke dashboard penulis
+        if ($user && $user->hasRole('penulis')) {
+            return $this->penulisdashboard();
+        }
+
         // Base query for books
         $booksQuery = Book::with([
-            'publisher', 
-            'pic', 
+            'publisher',
+            'pic',
             'taskProgress.masterTask',
             'taskProgress.pic'
         ]);
-        
+
         // Apply publisher filtering if user has publisher role
         if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
             $booksQuery = $booksQuery->where('penerbit_id', $user->penerbit_id);
         }
-        
+
         $books = $booksQuery->get();
-        
+
         // Get statistics with publisher filtering  
         $statsQuery = Book::query();
         if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
             $statsQuery = $statsQuery->where('penerbit_id', $user->penerbit_id);
         }
-        
+
         $TargetTahunan = $statsQuery->clone()->whereYear('tanggal_target_naik_cetak', now()->year)->count();
         $SedangDikerjakan = $statsQuery->clone()->whereIn('status_keseluruhan', ['editing', 'review'])->count();
         $MendekatiDeadline = $statsQuery->clone()->where('tanggal_target_naik_cetak', '<', now()->addDays(7))->count();
         $Published = $statsQuery->clone()->where('status_keseluruhan', 'published')->count();
-        
+
         $ChartData = [
             'Belum Mulai' => $statsQuery->clone()->where('status_keseluruhan', 'draft')->count(),
             'Dalam Proses' => $statsQuery->clone()->whereIn('status_keseluruhan', ['editing', 'review'])->count(),
             'Selesai' => $statsQuery->clone()->where('status_keseluruhan', 'published')->count(),
         ];
-        
-        // Hitung data khusus PENULIS (hanya jika user berperan 'penulis')
-        $penulis = null;
-        if ($user && $user->hasRole('penulis')) {
-            $total = Manuscript::where('penulis_user_id', $user->user_id)->count();
-            $draft = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'draft')->count();
-            $review = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'review')->count();
-            $approved = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'approved')->count();
-            $canceled = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'canceled')->count();
-            
-            // Untuk publish, kita bisa menggunakan approved atau status lain yang menunjukkan published
-            $publish = $approved; // atau buat status 'published' terpisah
-            
-            $manuscripts = Manuscript::where('penulis_user_id', $user->user_id)
-                                    ->latest('tanggal_masuk')
-                                    ->get();
-        
-      
-                $activities = $manuscripts->map(function ($m) {
-                    return [
-                        'naskah_id' => $m->naskah_id,
-                        'title' => $m->judul_naskah ?? 'Naskah',
-                        'status' => $m->status ?? 'draft',
-                        'updatedAt' => optional($m->updated_at)->format('d M Y'),
-                    ];
-            });
-        
-            $penulis = [
-                'stats' => [
-                    'total' => $total,
-                    'draft' => $draft,
-                    'progres' => $review, // review = progres
-                    'publish' => $publish,
-                    'delta' => ['total'=>0,'draft'=>0,'progres'=>0,'publish'=>0],
-                ],
-                'activities' => $activities->toArray(),
-            ];
-        }
-        
+
         return Inertia::render('dashboard/dashboard', [
             'books' => $books,
             'TargetTahunan' => $TargetTahunan,
@@ -96,10 +64,48 @@ class DashboardController extends Controller
             'Published' => $Published,
             'ChartData' => $ChartData,
             'userPublisher' => $user && $user->hasPublisherRole() ? $user->publisher : null,
-            'penulis' => $penulis, // null untuk non-penulis, berisi data untuk penulis
         ]);
     }
-    
+
+    private function penulisdashboard()
+    {
+        $user = Auth::user();
+
+        $total = Manuscript::where('penulis_user_id', $user->user_id)->count();
+        $draft = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'draft')->count();
+        $review = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'review')->count();
+        $approved = Manuscript::where('penulis_user_id', $user->user_id)->where('status', 'approved')->count();
+
+        $manuscripts = Manuscript::where('penulis_user_id', $user->user_id)
+            ->latest('updated_at')
+            ->limit(10)
+            ->get();
+
+        $activities = $manuscripts->map(function ($m) {
+            return [
+                'naskah_id' => $m->naskah_id,
+                'title' => $m->judul_naskah ?? 'Naskah',
+                'status' => $m->status ?? 'draft',
+                'updatedAt' => optional($m->updated_at)->format('d M Y'),
+            ];
+        });
+
+        return Inertia::render('dashboard/dashboard-penulis', [
+            'stats' => [
+                'total' => $total,
+                'draft' => $draft,
+                'progres' => $review,
+                'publish' => $approved,
+                'delta' => ['total' => 0, 'draft' => 0, 'progres' => 0, 'publish' => 0],
+            ],
+            'activities' => $activities->toArray(),
+            'user' => [
+                'nama_lengkap' => $user->nama_lengkap,
+                'email' => $user->email,
+            ],
+        ]);
+    }
+
     // public function show($id)
     // {
     //     $book = Book::with([
@@ -109,7 +115,7 @@ class DashboardController extends Controller
     //         'taskProgress.masterTask',
     //         'taskProgress.pic'
     //     ])->findOrFail($id);
-        
+
     //     // Hitung progress percentage untuk setiap task berdasarkan status
     //     if ($book->taskProgress) {
     //         foreach ($book->taskProgress as $task) {
@@ -132,12 +138,12 @@ class DashboardController extends Controller
     //             }
     //         }
     //     }
-        
+
     //     return Inertia::render('dashboard/show-dashboard', [
     //         'book' => $book
     //     ]);
     // }
-    
+
     // public function edit($id)
     // {
     //     $book = Book::with([
@@ -147,12 +153,12 @@ class DashboardController extends Controller
     //         'taskProgress.masterTask',
     //         'taskProgress.pic'
     //     ])->findOrFail($id);
-        
+
     //     // Get data needed for edit page
     //     $users = \App\Models\User::select('user_id', 'nama_lengkap', 'email')->get();
     //     $publishers = \App\Models\Publisher::select('penerbit_id', 'nama_penerbit')->get();
     //     $masterTasks = \App\Models\MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
-        
+
     //     return Inertia::render('dashboard/edit-dashboard', [
     //         'book' => $book,
     //         'users' => $users,
@@ -160,11 +166,11 @@ class DashboardController extends Controller
     //         'masterTasks' => $masterTasks
     //     ]);
     // }
-    
+
     // public function update(Request $request, $id)   
     // {
     //     $book = Book::findOrFail($id);
-        
+
     //     // Update book information
     //     $book->update([
     //         'judul_buku' => $request->input('judul_buku'),
@@ -174,7 +180,7 @@ class DashboardController extends Controller
     //         'tanggal_target_naik_cetak' => $request->input('tanggal_target_naik_cetak'),
     //         'tanggal_realisasi_naik_cetak' => $request->input('tanggal_realisasi_naik_cetak'),
     //     ]);
-        
+
     //     // Update task progress if provided
     //     if ($request->has('task_progress')) {
     //         foreach ($request->input('task_progress') as $taskData) {
@@ -208,10 +214,10 @@ class DashboardController extends Controller
     //             }
     //         }
     //     }
-        
+
     //     return redirect()->route('dashboard');
     // }
-    
+
     // public function destroy($id)
     // {
     //     $book = Book::findOrFail($id);

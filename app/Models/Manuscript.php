@@ -53,4 +53,21 @@ class Manuscript extends Model
     {
         return $this->hasOne(Book::class, 'naskah_id', 'naskah_id');
     }
+    public function authors()
+    {
+        return $this->belongsToMany(Author::class, 'manuscript_authors', 'naskah_id', 'author_id')
+            ->withPivot('role', 'order_position')
+            ->withTimestamps()
+            ->orderBy('manuscript_authors.order_position');
+    }
+
+    public function primaryAuthor()
+    {
+        return $this->authors()->wherePivot('role', 'primary')->first();
+    }
+
+    public function coAuthors()
+    {
+        return $this->authors()->wherePivot('role', 'co_author')->get();
+    }
 }

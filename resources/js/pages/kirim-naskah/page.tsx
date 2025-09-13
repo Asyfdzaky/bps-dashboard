@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import AppLayout from '@/layouts/app-layout';
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import { type BreadcrumbItem } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
 import * as React from 'react';
@@ -327,7 +327,7 @@ export default function KirimNaskahPage() {
     }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <div className="w-full px-4 py-4">
                 {/* SUCCESS dialog (existing) */}
                 <AlertDialog open={successOpen} onOpenChange={setSuccessOpen}>
@@ -769,6 +769,6 @@ export default function KirimNaskahPage() {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
+        </AppHeaderLayout>
     );
 }
