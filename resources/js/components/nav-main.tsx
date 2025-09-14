@@ -112,8 +112,8 @@ export function NavMain({
                 <>
                     {/* Expanded state: pakai label clickable + chevron */}
                     <SidebarGroupLabel
-                        className={`${shouldBeCollapsible ? 'cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent/50' : ''} ${
-                            isGroupActive ? 'text-sidebar-accent-foreground' : ''
+                        className={`${shouldBeCollapsible ? 'cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent' : ''} ${
+                            isGroupActive ? 'text-white' : ''
                         }`}
                         onClick={toggleGroup}
                     >

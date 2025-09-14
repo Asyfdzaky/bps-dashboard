@@ -1,6 +1,9 @@
-import { BookOpen } from 'lucide-react';
-import { SVGAttributes } from 'react';
+import { ImgHTMLAttributes } from 'react';
 
-export default function AppLogoIcon(props: SVGAttributes<SVGElement> & { className?: string }) {
-    return <BookOpen {...props} />;
+interface AppLogoIconProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
+    className?: string;
+}
+
+export default function AppLogoIcon({ className, alt = 'BPS Dashboard Logo', ...props }: AppLogoIconProps) {
+    return <img src="/image/logo-Rene-Turos-group.png" alt={alt} className={className} {...props} />;
 }

@@ -26,7 +26,7 @@ class ApprovalNaskahController extends Controller
         ]);
 
 
-       
+
 
         $manuscripts = $query->orderBy('created_at', 'desc')->get();
 
@@ -37,111 +37,110 @@ class ApprovalNaskahController extends Controller
             'approved' => Manuscript::where('status', 'approved')->count(),
             'rejected' => Manuscript::where('status', 'cancelled')->count(),
             'total' => Manuscript::count(),
-        ];  
+        ];
 
         return Inertia::render('manajemen-naskah/approval-naskah/approval-naskah', [
             'manuscripts' => $manuscripts,
             'stats' => $stats,
-           
+
         ]);
     }
 
-    public function show($naskahId)
+    public function show($naskah_id)
     {
         $manuscript = Manuscript::with([
             'author:user_id,nama_lengkap,email',
             'targetPublishers.publisher:penerbit_id,nama_penerbit'
-        ])->findOrFail($naskahId);
+        ])->findOrFail($naskah_id);
 
         return Inertia::render('manajemen-naskah/approval-naskah/approval-detail', [
             'manuscript' => $manuscript,
         ]);
     }
 
-   public function approve(Request $request, $naskahId)
-{
-    $request->validate([
-        'catatan_approval' => 'nullable|string|max:1000',
-        'target_dates' => 'nullable|array',
-        'target_dates.*' => 'nullable|date|after:today',
-    ]);
-
-    try {
-        DB::beginTransaction();
-
-        $manuscript = Manuscript::with('targetPublishers.publisher')->findOrFail($naskahId);
-        
-        // Validasi status
-        if (!in_array($manuscript->status, ['draft', 'review'])) {
-            return back()->with('error', 'Hanya naskah dengan status draft atau review yang dapat diapprove.');
-        }
-
-        // Validasi target publishers
-        if ($manuscript->targetPublishers->isEmpty()) {
-            return back()->with('error', 'Naskah harus memiliki target penerbit sebelum dapat diapprove.');
-        }
-
-        // Update status manuscript
-        $manuscript->update([
-            'status' => 'approved',
-            'info_tambahan' => array_merge($manuscript->info_tambahan ?? [], [
-                'approved_by' => Auth::id(),
-                'approved_at' => now()->toISOString(),
-                'catatan_approval' => $request->catatan_approval,
-            ])
+    public function approve(Request $request, $naskah_id)
+    {
+        $request->validate([
+            'catatan_approval' => 'nullable|string|max:1000',
+            'target_dates' => 'nullable|array',
+            'target_dates.*' => 'nullable|date|after:today',
         ]);
 
-        // Buat entry book untuk setiap target publisher
-        foreach ($manuscript->targetPublishers as $target) {
-           $publisherId = $request->selected_publisher;
-            // Ambil target date dari request, atau default 30 hari dari sekarang
-            $targetDate = isset($request->target_dates[$publisherId]) && $request->target_dates[$publisherId]
-                ? $request->target_dates[$publisherId]
-                : now()->addDays(30)->format('Y-m-d');
+        try {
+            DB::beginTransaction();
 
-            // Cek jika book sudah ada untuk kombinasi naskah + publisher ini
-            $existingBook = Book::where('naskah_id', $manuscript->naskah_id)
-                               ->where('penerbit_id', $publisherId)
-                               ->first();
+            $manuscript = Manuscript::with('targetPublishers.publisher')->findOrFail($naskah_id);
 
-            if (!$existingBook) {
-                Book::create([
-                    'buku_id' => (string) Str::uuid(),
-                    'naskah_id' => $manuscript->naskah_id,
-                    'judul_buku' => $manuscript->judul_naskah,
-                    'pic_user_id' => null,
-                    'penerbit_id' => $publisherId,
-                    'status_keseluruhan' => 'draft',
-                    'tanggal_target_naik_cetak' => $targetDate,
-                    'tanggal_realisasi_naik_cetak' => null,
-                ]);
+            // Validasi status
+            if (!in_array($manuscript->status, ['draft', 'review'])) {
+                return back()->with('error', 'Hanya naskah dengan status draft atau review yang dapat diapprove.');
             }
+
+            // Validasi target publishers
+            if ($manuscript->targetPublishers->isEmpty()) {
+                return back()->with('error', 'Naskah harus memiliki target penerbit sebelum dapat diapprove.');
+            }
+
+            // Update status manuscript
+            $manuscript->update([
+                'status' => 'approved',
+                'info_tambahan' => array_merge($manuscript->info_tambahan ?? [], [
+                    'approved_by' => Auth::id(),
+                    'approved_at' => now()->toISOString(),
+                    'catatan_approval' => $request->catatan_approval,
+                ])
+            ]);
+
+            // Buat entry book untuk setiap target publisher
+            foreach ($manuscript->targetPublishers as $target) {
+                $publisherId = $request->selected_publisher;
+                // Ambil target date dari request, atau default 30 hari dari sekarang
+                $targetDate = isset($request->target_dates[$publisherId]) && $request->target_dates[$publisherId]
+                    ? $request->target_dates[$publisherId]
+                    : now()->addDays(30)->format('Y-m-d');
+
+                // Cek jika book sudah ada untuk kombinasi naskah + publisher ini
+                $existingBook = Book::where('naskah_id', $manuscript->naskah_id)
+                    ->where('penerbit_id', $publisherId)
+                    ->first();
+
+                if (!$existingBook) {
+                    Book::create([
+                        'buku_id' => (string) Str::uuid(),
+                        'naskah_id' => $manuscript->naskah_id,
+                        'judul_buku' => $manuscript->judul_naskah,
+                        'pic_user_id' => null,
+                        'penerbit_id' => $publisherId,
+                        'status_keseluruhan' => 'draft',
+                        'tanggal_target_naik_cetak' => $targetDate,
+                        'tanggal_realisasi_naik_cetak' => null,
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('approval-naskah.index')
+                ->with('success', "Naskah '{$manuscript->judul_naskah}' berhasil diapprove dan masuk ke {$manuscript->targetPublishers->count()} penerbit.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Approve Naskah Error', [
+                'naskah_id' => $naskah_id,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('error', 'Terjadi kesalahan saat approve naskah: ' . $e->getMessage());
         }
-
-        DB::commit();
-
-        return redirect()->route('approval-naskah.index')
-            ->with('success', "Naskah '{$manuscript->judul_naskah}' berhasil diapprove dan masuk ke {$manuscript->targetPublishers->count()} penerbit.");
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Approve Naskah Error', [
-            'naskah_id' => $naskahId,
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
-        return back()->with('error', 'Terjadi kesalahan saat approve naskah: ' . $e->getMessage());
     }
-}
 
 
-    public function reject(Request $request, $naskahId)
+    public function reject(Request $request, $naskah_id)
     {
         $request->validate([
             'alasan_penolakan' => 'required|string|min:10',
         ]);
 
-        $manuscript = Manuscript::findOrFail($naskahId);
+        $manuscript = Manuscript::findOrFail($naskah_id);
         $manuscript->update([
             'status' => 'cancelled',
             'info_tambahan' => array_merge($manuscript->info_tambahan ?? [], [
@@ -155,30 +154,29 @@ class ApprovalNaskahController extends Controller
             ->with('success', 'Naskah berhasil ditolak.');
     }
 
-  
-    public function review(Request $request, $naskahId)
-{
-    try {
-        $manuscript = Manuscript::findOrFail($naskahId);
-        
-        // Validasi status harus draft
-        if ($manuscript->status !== 'draft') {
-            return back()->with('error', 'Hanya naskah dengan status draft yang dapat direview.');
+
+    public function review(Request $request, $naskah_id)
+    {
+        try {
+            $manuscript = Manuscript::findOrFail($naskah_id);
+
+            // Validasi status harus draft
+            if ($manuscript->status !== 'draft') {
+                return back()->with('error', 'Hanya naskah dengan status draft yang dapat direview.');
+            }
+
+            $manuscript->update([
+                'status' => 'review',
+                'info_tambahan' => array_merge($manuscript->info_tambahan ?? [], [
+                    'reviewed_by' => Auth::id(),
+                    'reviewed_at' => now(),
+                ])
+            ]);
+
+            return redirect()->route('approval-naskah.index')
+                ->with('success', "Naskah '{$manuscript->judul_naskah}' berhasil diubah ke status review.");
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat memulai review: ' . $e->getMessage());
         }
-        
-        $manuscript->update([
-            'status' => 'review',
-            'info_tambahan' => array_merge($manuscript->info_tambahan ?? [], [
-                'reviewed_by' => Auth::id(),
-                'reviewed_at' => now(),
-            ])
-        ]);
-
-        return redirect()->route('approval-naskah.index')
-            ->with('success', "Naskah '{$manuscript->judul_naskah}' berhasil diubah ke status review.");
-
-    } catch (\Exception $e) {
-        return back()->with('error', 'Terjadi kesalahan saat memulai review: ' . $e->getMessage());
     }
-}
 }

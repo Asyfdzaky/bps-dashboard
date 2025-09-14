@@ -1,11 +1,20 @@
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import type { EventClickArg, EventInput } from '@fullcalendar/core';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import type { DateSelectArg, EventClickArg, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import { router } from '@inertiajs/react';
+import { Calendar as CalendarIcon, CalendarPlus, Clock, User } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 type CalendarStatus = 'proses' | 'selesai' | 'mendekati-deadline';
@@ -13,47 +22,83 @@ type CalendarStatus = 'proses' | 'selesai' | 'mendekati-deadline';
 type CalendarEvent = {
     id?: string | number;
     title: string;
-    tahap: number;
-    task_name: string;
-    pic_name: string;
+    pic_name?: string;
     start: string;
     end?: string;
     status: CalendarStatus;
     description?: string;
     allDay?: boolean;
+    source?: string;
+    created_by?: string;
+};
+
+type User = {
+    user_id: string;
+    nama_lengkap: string;
+};
+
+type NewEventForm = {
+    title: string;
+    description: string;
+    start: string;
+    end: string;
+    status: CalendarStatus;
+    pic_name: string;
+    allDay: boolean;
+    pic_user_id: string | null;
 };
 
 const STATUS_COLOR: Record<CalendarStatus, string> = {
-    proses: '#f59e0b',
-    selesai: '#10b981',
-    'mendekati-deadline': '#ef4444',
+    proses: '#f59e0b', // Orange
+    selesai: '#10b981', // Green
+    'mendekati-deadline': '#ef4444', // Red
 };
 
 const STATUS_BADGE_CLASS = (status: CalendarStatus): string => {
     switch (status) {
         case 'proses':
-            return 'bg-orange-100 text-orange-700 border-orange-200';
+            return 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200';
         case 'selesai':
-            return 'bg-green-100 text-green-700 border-green-200';
+            return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
         case 'mendekati-deadline':
-            return 'bg-red-100 text-red-700 border-red-200';
+            return 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200';
         default:
             return 'bg-gray-100 text-gray-700 border-gray-200';
     }
 };
 
-export default function Calendar({ events }: { events: CalendarEvent[] }) {
+const STATUS_LABEL: Record<CalendarStatus, string> = {
+    proses: 'Sedang Berlangsung',
+    selesai: 'Selesai',
+    'mendekati-deadline': 'Mendekati Deadline',
+};
+
+export default function Calendar({ events, users = [] }: { events: CalendarEvent[]; users?: User[] }) {
     const [open, setOpen] = useState(false);
+    const [sheetOpen, setSheetOpen] = useState(false);
     const [clicked, setClicked] = useState<{
         title: string;
         startStr: string;
         endStr?: string;
         status: CalendarStatus;
         description?: string;
-        tahap: number;
-        task_name: string;
-        pic_name: string;
+        pic_name?: string;
+        source?: string;
+        created_by?: string;
     } | null>(null);
+
+    const [newEvent, setNewEvent] = useState<NewEventForm>({
+        title: '',
+        description: '',
+        start: '',
+        end: '',
+        status: 'proses',
+        pic_name: '',
+        allDay: true,
+        pic_user_id: null,
+    });
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Map props -> event FullCalendar + pewarnaan
     const fcEvents = useMemo<EventInput[]>(
@@ -64,13 +109,15 @@ export default function Calendar({ events }: { events: CalendarEvent[] }) {
                 start: e.start,
                 end: e.end,
                 allDay: e.allDay ?? true,
-                color: STATUS_COLOR[e.status],
+                backgroundColor: STATUS_COLOR[e.status],
+                borderColor: STATUS_COLOR[e.status],
+                textColor: '#ffffff',
                 extendedProps: {
                     status: e.status,
                     description: e.description,
-                    tahap: e.tahap,
-                    task_name: e.task_name,
                     pic_name: e.pic_name,
+                    source: e.source,
+                    created_by: e.created_by,
                 },
             })),
         [events],
@@ -84,85 +131,356 @@ export default function Calendar({ events }: { events: CalendarEvent[] }) {
             endStr: arg.event.endStr || undefined,
             status,
             description: (arg.event.extendedProps?.description as string | undefined) ?? undefined,
-            tahap: (arg.event.extendedProps?.tahap as number) ?? 0,
-            task_name: (arg.event.extendedProps?.task_name as string) ?? '',
-            pic_name: (arg.event.extendedProps?.pic_name as string) ?? '',
+            pic_name: (arg.event.extendedProps?.pic_name as string) ?? undefined,
+            source: (arg.event.extendedProps?.source as string) ?? undefined,
+            created_by: (arg.event.extendedProps?.created_by as string) ?? undefined,
         });
         setOpen(true);
     };
 
+    const onDateSelect = (selectInfo: DateSelectArg) => {
+        const startDate = selectInfo.start;
+        const endDate = selectInfo.end;
+
+        // Format dates for input fields
+        const startStr = startDate.toISOString().split('T')[0];
+        const endStr = new Date(endDate.getTime() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+        setNewEvent((prev) => ({
+            ...prev,
+            start: startStr,
+            end: endStr,
+            allDay: selectInfo.allDay,
+        }));
+
+        setSheetOpen(true);
+        selectInfo.view.calendar.unselect();
+    };
+
+    const handleInputChange = (field: keyof NewEventForm, value: string | boolean | null) => {
+        setNewEvent((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+
+    const handlePicUserChange = (userId: string) => {
+        if (userId === 'none') {
+            setNewEvent((prev) => ({
+                ...prev,
+                pic_user_id: null,
+                pic_name: '',
+            }));
+            return;
+        }
+        const selectedUser = users.find((user) => user.user_id === userId);
+        if (selectedUser) {
+            setNewEvent((prev) => ({
+                ...prev,
+                pic_user_id: selectedUser.user_id,
+                pic_name: selectedUser.nama_lengkap,
+            }));
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!newEvent.title.trim()) {
+            alert('Judul kegiatan harus diisi');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            router.post(
+                '/calendar/events',
+                {
+                    title: newEvent.title,
+                    description: newEvent.description,
+                    start: newEvent.start,
+                    end: newEvent.end,
+                    status: newEvent.status,
+                    pic_name: newEvent.pic_name,
+                    all_day: newEvent.allDay,
+                    pic_user_id: newEvent.pic_user_id,
+                },
+                {
+                    onSuccess: () => {
+                        setNewEvent({
+                            title: '',
+                            description: '',
+                            start: '',
+                            end: '',
+                            status: 'proses',
+                            pic_name: '',
+                            allDay: true,
+                            pic_user_id: null,
+                        });
+                        setSheetOpen(false);
+                    },
+                    onError: (errors) => {
+                        console.error('Error creating event:', errors);
+                        alert('Gagal menambahkan kegiatan');
+                    },
+                    onFinish: () => setIsSubmitting(false),
+                },
+            );
+        } catch (error) {
+            console.error('Error:', error);
+            setIsSubmitting(false);
+        }
+    };
+
     return (
         <>
-            <div className="p-6">
-                <FullCalendar
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-                    initialView="dayGridMonth"
-                    headerToolbar={{
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
-                    }}
-                    buttonText={{
-                        today: 'Today',
-                        month: 'Month',
-                        week: 'Week',
-                        day: 'Day',
-                        list: 'List',
-                    }}
-                    views={{
-                        listMonth: { buttonText: 'List' },
-                    }}
-                    events={fcEvents}
-                    eventClick={onEventClick}
-                    height="80vh"
-                />
+            <div className="space-y-6 p-6">
+                <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                        <h1 className="text-2xl font-bold text-foreground">Kalender Kegiatan</h1>
+                        <p className="text-sm text-muted-foreground">Kelola jadwal dan pantau progres kegiatan Anda</p>
+                    </div>
+                    <Button onClick={() => setSheetOpen(true)} className="flex items-center gap-2 bg-primary hover:bg-primary/90">
+                        <CalendarPlus className="h-4 w-4" />
+                        Tambah Kegiatan
+                    </Button>
+                </div>
+
+                <div className="rounded-lg border bg-card shadow-sm">
+                    <FullCalendar
+                        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                        initialView="dayGridMonth"
+                        headerToolbar={{
+                            left: 'prev,next today',
+                            center: 'title',
+                            right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth',
+                        }}
+                        buttonText={{
+                            today: 'Hari Ini',
+                            month: 'Bulan',
+                            week: 'Minggu',
+                            day: 'Hari',
+                            list: 'Daftar',
+                        }}
+                        views={{
+                            listMonth: { buttonText: 'Daftar' },
+                        }}
+                        events={fcEvents}
+                        eventClick={onEventClick}
+                        selectable={true}
+                        selectMirror={true}
+                        select={onDateSelect}
+                        height="75vh"
+                        locale="id"
+                        dayMaxEvents={3}
+                        moreLinkText="lainnya"
+                    />
+                </div>
             </div>
 
+            {/* Detail Event Dialog */}
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent>
+                <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{clicked?.title ?? 'Detail Event'}</DialogTitle>
-                        {clicked?.description ? <DialogDescription>{clicked.description}</DialogDescription> : null}
+                        <DialogTitle className="flex items-center gap-2">
+                            <CalendarIcon className="h-5 w-5 text-primary" />
+                            {clicked?.title ?? 'Detail Kegiatan'}
+                        </DialogTitle>
+                        {clicked?.description && (
+                            <DialogDescription className="text-sm text-muted-foreground">{clicked.description}</DialogDescription>
+                        )}
                     </DialogHeader>
 
-                    <div className="mt-2 space-y-2 text-sm">
-                        {clicked?.status ? (
+                    <div className="space-y-4">
+                        {/* Status Badge */}
+                        {clicked?.status && (
                             <div className="flex items-center gap-2">
-                                <span>Status:</span>
-                                <Badge className={STATUS_BADGE_CLASS(clicked.status)}>{clicked.status}</Badge>
+                                <span className="text-sm font-medium text-muted-foreground">Status:</span>
+                                <Badge className={STATUS_BADGE_CLASS(clicked.status)}>{STATUS_LABEL[clicked.status]}</Badge>
                             </div>
-                        ) : null}
-                        <div className="flex items-center gap-2">
-                            <span>Mulai:</span>
-                            <span>{clicked?.startStr ?? '-'}</span>
+                        )}
+
+                        {/* Date Information */}
+                        <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium text-muted-foreground">Mulai:</span>
+                                <span>{clicked?.startStr ?? '-'}</span>
+                            </div>
+                            {clicked?.endStr && (
+                                <div className="flex items-center gap-2 text-sm">
+                                    <Clock className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium text-muted-foreground">Selesai:</span>
+                                    <span>{clicked.endStr}</span>
+                                </div>
+                            )}
                         </div>
-                        {clicked?.endStr ? (
-                            <div className="flex items-center gap-2">
-                                <span>Selesai:</span>
-                                <span>{clicked.endStr}</span>
-                            </div>
-                        ) : null}
-                        {clicked?.tahap ? (
-                            <div className="flex items-center gap-2">
-                                <span>Tahap:</span>
-                                <span>{clicked.tahap}</span>
-                            </div>
-                        ) : null}
-                        {clicked?.task_name ? (
-                            <div className="flex items-center gap-2">
-                                <span>Tugas:</span>
-                                <span>{clicked.task_name}</span>
-                            </div>
-                        ) : null}
-                        {clicked?.pic_name ? (
-                            <div className="flex items-center gap-2">
-                                <span>PIC:</span>
-                                <span>{clicked.pic_name}</span>
-                            </div>
-                        ) : null}
+
+                        {/* Additional Information */}
+                        <div className="space-y-2">
+                            {clicked?.pic_name && (
+                                <div className="flex items-center gap-2 text-sm">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium text-muted-foreground">PIC:</span>
+                                    <span>{clicked.pic_name}</span>
+                                </div>
+                            )}
+                            {clicked?.created_by && (
+                                <div className="flex items-center gap-2 text-sm">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium text-muted-foreground">Dibuat oleh:</span>
+                                    <span>{clicked.created_by}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>
+
+            {/* Add Event Sheet */}
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+                <SheetContent className="w-[450px] overflow-y-auto p-3 sm:max-w-[450px]">
+                    <SheetHeader className="space-y-2 pb-6">
+                        <SheetTitle className="flex items-center gap-2 text-xl">
+                            <CalendarPlus className="h-5 w-5 text-primary" />
+                            Tambah Kegiatan Baru
+                        </SheetTitle>
+                        <SheetDescription>Isi form di bawah untuk menambahkan kegiatan baru ke kalender</SheetDescription>
+                    </SheetHeader>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Basic Information */}
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-medium text-muted-foreground">Informasi Kegiatan</h4>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="title" className="text-sm font-medium">
+                                    Judul Kegiatan *
+                                </Label>
+                                <Input
+                                    id="title"
+                                    value={newEvent.title}
+                                    onChange={(e) => handleInputChange('title', e.target.value)}
+                                    placeholder="Masukkan judul kegiatan"
+                                    required
+                                    className="w-full"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="description" className="text-sm font-medium">
+                                    Deskripsi
+                                </Label>
+                                <Textarea
+                                    id="description"
+                                    value={newEvent.description}
+                                    onChange={(e) => handleInputChange('description', e.target.value)}
+                                    placeholder="Masukkan deskripsi kegiatan"
+                                    rows={3}
+                                    className="resize-none"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="status" className="text-sm font-medium">
+                                    Status
+                                </Label>
+                                <Select value={newEvent.status} onValueChange={(value) => handleInputChange('status', value as CalendarStatus)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Pilih status" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="proses">Sedang Berlangsung</SelectItem>
+                                        <SelectItem value="selesai">Selesai</SelectItem>
+                                        <SelectItem value="mendekati-deadline">Mendekati Deadline</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+
+                        {/* Date & Time */}
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-medium text-muted-foreground">Tanggal & Waktu</h4>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="start" className="text-sm font-medium">
+                                        Tanggal Mulai *
+                                    </Label>
+                                    <Input
+                                        id="start"
+                                        type="date"
+                                        value={newEvent.start}
+                                        onChange={(e) => handleInputChange('start', e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="end" className="text-sm font-medium">
+                                        Tanggal Selesai
+                                    </Label>
+                                    <Input id="end" type="date" value={newEvent.end} onChange={(e) => handleInputChange('end', e.target.value)} />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="allDay" className="text-sm font-medium">
+                                    Sepanjang Hari
+                                </Label>
+                                <Switch id="allDay" checked={newEvent.allDay} onCheckedChange={(checked) => handleInputChange('allDay', checked)} />
+                            </div>
+                        </div>
+
+                        {/* PIC Information */}
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-medium text-muted-foreground">Person in Charge (PIC)</h4>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="pic_user" className="text-sm font-medium">
+                                    Pilih PIC
+                                </Label>
+                                <Select value={newEvent.pic_user_id || 'none'} onValueChange={handlePicUserChange}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Pilih PIC (opsional)" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="none">Tidak ada PIC</SelectItem>
+                                        {users.map((user) => (
+                                            <SelectItem key={user.user_id} value={user.user_id}>
+                                                {user.nama_lengkap}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="pic_name" className="text-sm font-medium">
+                                    Nama PIC
+                                </Label>
+                                <Input
+                                    id="pic_name"
+                                    value={newEvent.pic_name}
+                                    onChange={(e) => handleInputChange('pic_name', e.target.value)}
+                                    placeholder="Masukkan nama PIC atau pilih dari dropdown di atas"
+                                    disabled={!!newEvent.pic_user_id}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-end gap-3 border-t pt-6">
+                            <Button type="button" variant="outline" onClick={() => setSheetOpen(false)} disabled={isSubmitting} className="px-6">
+                                Batal
+                            </Button>
+                            <Button type="submit" disabled={isSubmitting} className="bg-primary px-6 hover:bg-primary/90">
+                                {isSubmitting ? 'Menyimpan...' : 'Simpan Kegiatan'}
+                            </Button>
+                        </div>
+                    </form>
+                </SheetContent>
+            </Sheet>
         </>
     );
 }
