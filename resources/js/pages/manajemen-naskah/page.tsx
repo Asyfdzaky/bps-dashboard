@@ -1,5 +1,5 @@
 import ListNaskah from '@/components/list-naskah';
-import { SummaryStats } from '@/components/summary-cards';
+import { KPIGrid } from '@/components/ui/progress-summary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -7,7 +7,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { type Book } from '@/types/books';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Plus } from 'lucide-react';
+import { Plus, Book as BookIcon, FileText, CheckCircle, Clock } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -71,8 +71,35 @@ export default function ManajemenNaskah() {
                 </div>
 
                 <div className="mb-6">
-                    {/* Stats Cards */}
-                    <SummaryStats total={totalBooks} draft={draftBooks} progres={inProgressBooks} publish={publishedBooks} />
+                    {/* KPI Cards */}
+                    <KPIGrid
+                        items={[
+                            {
+                                title: "Total Naskah",
+                                value: totalBooks,
+                                icon: <BookIcon className="h-5 w-5 sm:h-6 sm:w-6" />,
+                                color: "primary",
+                            },
+                            {
+                                title: "Draft",
+                                value: draftBooks,
+                                icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
+                                color: "chart-2",
+                            },
+                            {
+                                title: "Sedang Diproses",
+                                value: inProgressBooks,
+                                icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
+                                color: "chart-3",
+                            },
+                            {
+                                title: "Terbit",
+                                value: publishedBooks,
+                                icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
+                                color: "destructive",
+                            },
+                        ]}
+                    />
                 </div>
 
                 {/* Main Content */}

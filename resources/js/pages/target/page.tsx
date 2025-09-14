@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, Link } from '@inertiajs/react';
-import { BookCopy, TrendingUp, Calendar, Award, BarChart3, Plus, Eye, Edit, Trash2, Search, Filter } from 'lucide-react';
+import { BookCopy, TrendingUp, Calendar, Award, BarChart3, Plus, Eye, Edit, Trash2, Search} from 'lucide-react';
 import ApexCharts from 'apexcharts';
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 
@@ -41,11 +41,6 @@ type MonthlyProgressData = {
 
 type FilterOption = {
     value: number;
-    label: string;
-};
-
-type KategoriOption = {
-    value: string;
     label: string;
 };
 

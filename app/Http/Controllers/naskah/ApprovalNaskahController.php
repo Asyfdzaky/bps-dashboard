@@ -39,7 +39,7 @@ class ApprovalNaskahController extends Controller
             'total' => Manuscript::count(),
         ];  
 
-        return Inertia::render('manajemen-naskah/approval-naskah/approval-naskah', [
+        return Inertia::render('approval-naskah/approval-naskah', [
             'manuscripts' => $manuscripts,
             'stats' => $stats,
            
@@ -53,7 +53,7 @@ class ApprovalNaskahController extends Controller
             'targetPublishers.publisher:penerbit_id,nama_penerbit'
         ])->findOrFail($naskahId);
 
-        return Inertia::render('manajemen-naskah/approval-naskah/approval-detail', [
+        return Inertia::render('approval-naskah/approval-detail', [
             'manuscript' => $manuscript,
         ]);
     }

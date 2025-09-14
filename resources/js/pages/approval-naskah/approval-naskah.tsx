@@ -1,13 +1,13 @@
-import { DataTable } from '@/components/table-data';
+import { ApprovalDataTable } from '@/components/approval-data-table';
+import { KPIGrid } from '@/components/ui/progress-summary';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { CheckCircle, Eye, FileText, XCircle } from 'lucide-react';
+import { CheckCircle, Eye, FileText, XCircle, Clock } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface Manuscript {
@@ -49,12 +49,8 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Manajemen Naskah',
-        href: '/manajemen-naskah',
-    },
-    {
         title: 'Approval Naskah',
-        href: '/manajemen-naskah/approval',
+        href: '/approval-naskah',
     },
 ];
 
@@ -203,7 +199,7 @@ export default function ApprovalNaskah({ manuscripts, stats }: Props) {
             cell: ({ row }) => (
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" asChild>
-                        <Link href={`/manajemen-naskah/approval/${row.original.naskah_id}`}>
+                        <Link href={`/approval-naskah/${row.original.naskah_id}`}>
                             <Eye className="mr-1 h-4 w-4" />
                             Detail
                         </Link>
@@ -218,97 +214,51 @@ export default function ApprovalNaskah({ manuscripts, stats }: Props) {
             <Head title="Approval Naskah" />
 
             <div className="m-8 space-y-6">
-                {/* Stats Cards - Tampilkan stats dari data yang difilter */}
-                <div className="grid gap-4 md:grid-cols-4">
-                    <Card>
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">Draft</p>
-                                    <p className="text-2xl font-bold text-blue-600">{stats.draft}</p>
-                                </div>
-                                <div className="rounded-full bg-blue-100 p-2">
-                                    <FileText className="h-5 w-5 text-blue-600" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">Sedang Review</p>
-                                    <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-                                </div>
-                                <div className="rounded-full bg-yellow-100 p-2">
-                                    <Eye className="h-5 w-5 text-yellow-600" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">Ditolak</p>
-                                    <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
-                                </div>
-                                <div className="rounded-full bg-red-100 p-2">
-                                    <XCircle className="h-5 w-5 text-red-600" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardContent className="p-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">Total Aktif</p>
-                                    <p className="text-2xl font-bold text-green-600">{stats.total}</p>
-                                </div>
-                                <div className="rounded-full bg-green-100 p-2">
-                                    <CheckCircle className="h-5 w-5 text-green-600" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                {/* KPI Cards */}
+                <KPIGrid
+                    items={[
+                        {
+                            title: "Draft",
+                            value: stats.draft,
+                            icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
+                            color: "chart-2",
+                        },
+                        {
+                            title: "Sedang Review",
+                            value: stats.pending,
+                            icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
+                            color: "chart-3",
+                        },
+                        {
+                            title: "Ditolak",
+                            value: stats.rejected,
+                            icon: <XCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
+                            color: "destructive",
+                        },
+                        {
+                            title: "Total Aktif",
+                            value: stats.total,
+                            icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
+                            color: "primary",
+                        },
+                    ]}
+                />
 
-                {/* Filter Controls - Hanya Status Filter */}
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                            <div className="flex items-center gap-4">
-                                <label className="text-sm font-medium text-gray-700">Filter Status:</label>
-                                <div className="w-48">
-                                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Pilih Status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Semua Status</SelectItem>
-                                            <SelectItem value="draft">Draft</SelectItem>
-                                            <SelectItem value="review">Sedang Review</SelectItem>
-                                            <SelectItem value="canceled">Ditolak</SelectItem>
-                                            <SelectItem value="approved">Disetujui</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <Button variant="outline" onClick={handleReset}>
-                                    Reset Filter
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Data Table - Search dari sini */}
+                {/* Data Table dengan Filter Status */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Daftar Naskah untuk Approval</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <DataTable columns={columns} data={filteredManuscripts} searchableColumn="judul_naskah" onSearch={handleSearch} />
+                        <ApprovalDataTable 
+                            columns={columns} 
+                            data={filteredManuscripts} 
+                            searchableColumn="judul_naskah" 
+                            onSearch={handleSearch}
+                            statusFilter={statusFilter}
+                            onStatusFilterChange={setStatusFilter}
+                            onResetFilters={handleReset}
+                        />
                     </CardContent>
                 </Card>
             </div>

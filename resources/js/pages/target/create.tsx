@@ -8,7 +8,6 @@ import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { Save, Calendar, BookCopy } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import axios from 'axios'; // Added axios import
 
 type Publisher = {
@@ -101,8 +100,8 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Tambah Target Penerbitan" />
 
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
-                <div className="mb-6">
+            <div className="flex h-full flex-1 flex-col gap-2 overflow-x-auto rounded-xl p-4">
+                <div>
                     <h1 className="text-3xl font-bold tracking-tight">Tambah Target Penerbitan</h1>
                     <p className="text-muted-foreground">Tetapkan target penerbitan untuk penerbit</p>
                 </div>
@@ -118,7 +117,7 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
                             <CardDescription>Pilih penerbit dan tahun untuk menetapkan target</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 {userPublisher ? (
                                     <div>
                                         <Label>Penerbit</Label>
@@ -171,7 +170,7 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
                                 <div>
                                     <Label htmlFor="kategori">Kategori Target *</Label>
                                     <Select

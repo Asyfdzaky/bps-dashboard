@@ -1,12 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm} from '@inertiajs/react';
 import { BookCopy, Calendar, TrendingUp, ArrowLeft, Save, Edit3 } from 'lucide-react';
 import { useState } from 'react';
 

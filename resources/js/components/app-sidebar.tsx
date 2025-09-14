@@ -1,3 +1,5 @@
+import LogoHorizontal from '@/assets/logo_horizontal.svg';
+import LogoIcon from '@/assets/logo.svg';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -11,12 +13,12 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { hasRole } from '@/types/access';
 import { Link, usePage } from '@inertiajs/react';
 import { BarChart, Calendar, FileText, LayoutGrid, Users } from 'lucide-react';
-import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
@@ -34,8 +36,8 @@ const NaskahNavItems: NavItem[] = [
         href: '/progres-naskah',
     },
     {
-        title: 'Approval Naskah',
-        href: '/manajemen-naskah/approval',
+        title: 'Kiriman Naskah',
+        href: '/approval-naskah',
     },
 ];
 const ManajemenPenggunaNavItems: NavItem[] = [
@@ -68,22 +70,25 @@ const KalenderNavItems: NavItem[] = [
         href: '/calender',
     },
 ];
-
-const UserNavItems: NavItem[] = [];
-
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const { auth } = usePage<{ auth: { user?: { roles?: string[] } } }>().props;
     const user = auth.user;
+    const { state } = useSidebar();
+    const isCollapsed = state === 'collapsed';
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
-                                <AppLogo />
+                        <SidebarMenuButton size="lg" asChild className={isCollapsed ? 'mx-auto' : undefined}>
+                            <Link href="/dashboard" prefetch className="flex h-full w-full items-center justify-center">
+                                {isCollapsed ? (
+                                    <img src={LogoIcon} alt="Logo" className="h-8 w-8" />
+                                ) : (
+                                    <img src={LogoHorizontal} alt="Logo" className="h-8 w-auto" />
+                                )}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
