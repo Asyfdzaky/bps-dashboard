@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import { Book } from '@/types/books';
 import { Link } from '@inertiajs/react';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal, Calendar, User, Building } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 type Props = { books: Book[]; title?: string };
 
@@ -18,14 +18,18 @@ export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const recentBooks = sortedBooks.slice(startIndex, startIndex + itemsPerPage);
 
-    const statusPill = (status: Book['status_keseluruhan']) => {
-        const map: Record<string, string> = {
-            published: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-            draft: 'bg-neutral-100 text-neutral-700 border-neutral-200',
-            review: 'bg-blue-100 text-blue-700 border-blue-200',
-            editing: 'bg-amber-100 text-amber-700 border-amber-200',
-            cancelled: 'bg-red-100 text-red-700 border-red-200',
+    const getStatusVariant = (status: Book['status_keseluruhan']) => {
+        const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+            published: 'default',
+            draft: 'secondary',
+            review: 'outline',
+            editing: 'secondary',
+            cancelled: 'destructive',
         };
+        return variants[status] ?? 'outline';
+    };
+
+    const getStatusText = (status: Book['status_keseluruhan']) => {
         const text: Record<string, string> = {
             published: 'Published',
             draft: 'Draft',
@@ -33,141 +37,102 @@ export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) 
             editing: 'Editing',
             cancelled: 'Cancelled',
         };
-        return (
-            <span
-                className={`inline-flex items-center rounded-full border px-2 py-1 text-xs font-medium ${map[status] ?? 'border-neutral-200 bg-neutral-100 text-neutral-700'}`}
-            >
-                {text[status] ?? 'Unknown'}
-            </span>
-        );
+        return text[status] ?? 'Unknown';
     };
 
     const formatDate = (s?: string) => (s ? new Date(s).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
 
     return (
-        <Card className="bg-gray-50">
-            <CardHeader>
-                <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-2">
+        <Card className="border border-border/50 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+            {title && (
+                <CardHeader className="pb-4 border-b border-border/50">
+                    <CardTitle className="text-lg font-semibold text-foreground">{title}</CardTitle>
+                </CardHeader>
+            )}
+            <CardContent className={title ? "p-0" : "p-0"}>
                 {recentBooks.length > 0 ? (
                     <>
-                        {/* Desktop Table View */}
-                        <div className="hidden md:block bg-white rounded-lg">
-                            <Table className="w-full table-fixed">
-                                <TableHeader>
-                                    <TableRow className="bg-white">
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 w-[35%]">Judul Buku</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 w-[18%]">Penerbit</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 w-[15%]">PIC</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 w-[15%]">Created</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 w-[12%]">Status</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 w-[5%]"></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {recentBooks.map((b) => (
-                                        <TableRow key={b.buku_id} className="border-lg bg-gray-100">
-                                            <TableCell className="py-2.5">
-                                                <div className="text-xs font-medium text-gray-900 truncate" title={b.judul_buku}>
-                                                    {b.judul_buku}
+                        {/* Card Grid Layout - Responsive */}
+                        <div className="grid gap-4 p-6 pt-4">
+                            {recentBooks.map((book) => (
+                                <Card key={book.buku_id} className="group hover:shadow-xl hover:scale-[1.02] transition-all duration-300 border border-border/30 bg-gradient-to-r from-background to-background/95 hover:from-background hover:to-primary/5">
+                                    <CardContent className="p-5">
+                                        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                            {/* Main Content */}
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex flex-col gap-2">
+                                                    {/* Book Title */}
+                                                    <h4 className="font-semibold text-base lg:text-lg text-primary group-hover:text-primary/90 line-clamp-2 leading-tight transition-colors">
+                                                        {book.judul_buku}
+                                                    </h4>
+                                                    
+                                                    {/* Meta Information */}
+                                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 text-sm text-muted-foreground">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="p-1.5 rounded-full bg-secondary/20">
+                                                                <Building className="h-3.5 w-3.5 text-secondary-foreground" />
+                                                            </div>
+                                                            <span className="truncate font-medium">{book.publisher?.nama_penerbit || 'N/A'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="p-1.5 rounded-full bg-chart-2/20">
+                                                                <User className="h-3.5 w-3.5 text-chart-2" />
+                                                            </div>
+                                                            <span className="truncate">{book.pic?.nama_lengkap || 'N/A'}</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="p-1.5 rounded-full bg-chart-3/20">
+                                                                <Calendar className="h-3.5 w-3.5 text-chart-3" />
+                                                            </div>
+                                                            <span>{formatDate(book.created_at)}</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                            </TableCell>
-                                            <TableCell className="py-2.5">
-                                                <div className="text-xs font-medium text-gray-600 truncate" title={b.publisher?.nama_penerbit || 'N/A'}>
-                                                    {b.publisher?.nama_penerbit || 'N/A'}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-2.5">
-                                                <div className="text-xs text-gray-600 truncate" title={b.pic?.nama_lengkap || 'N/A'}>
-                                                    {b.pic?.nama_lengkap || 'N/A'}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-2.5">
-                                                <div className="text-xs text-gray-600">{formatDate(b.created_at)}</div>
-                                            </TableCell>
-                                            <TableCell className="py-2.5 text-center">{statusPill(b.status_keseluruhan)}</TableCell>
-                                            <TableCell className="py-2.5">
+                                            </div>
+                                            
+                                            {/* Status and Actions */}
+                                            <div className="flex items-center justify-between sm:justify-end gap-4">
+                                                <Badge 
+                                                    variant={getStatusVariant(book.status_keseluruhan)} 
+                                                    className="text-sm px-3 py-1 font-medium"
+                                                >
+                                                    {getStatusText(book.status_keseluruhan)}
+                                                </Badge>
+                                                
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                                                            <MoreHorizontal className="h-3.5 w-3.5" />
+                                                        <Button 
+                                                            variant="ghost" 
+                                                            size="icon" 
+                                                            className="h-9 w-9 opacity-60 group-hover:opacity-100 hover:bg-primary/10 transition-all duration-200"
+                                                        >
+                                                            <MoreHorizontal className="h-4 w-4 text-primary" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-36">
+                                                    <DropdownMenuContent align="end" className="w-44 shadow-lg border-border/50">
                                                         <DropdownMenuItem asChild>
-                                                            <Link href={`/manajemen-naskah/${b.buku_id}?from=dashboard`}>Lihat detail</Link>
+                                                            <Link href={`/manajemen-naskah/${book.buku_id}?from=dashboard`} className="cursor-pointer">
+                                                                Lihat detail
+                                                            </Link>
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem asChild>
-                                                            <Link href={`/manajemen-naskah/${b.buku_id}/edit`}>Edit</Link>
+                                                            <Link href={`/manajemen-naskah/${book.buku_id}/edit`} className="cursor-pointer">
+                                                                Edit
+                                                            </Link>
                                                         </DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
-
-                        {/* Mobile Table View with Horizontal Scroll */}
-                        <div className="md:hidden overflow-x-auto bg-white rounded-lg">
-                            <Table className="min-w-full">
-                                <TableHeader>
-                                    <TableRow className="bg-white">
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 min-w-[180px]">Judul Buku</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 min-w-[120px] whitespace-nowrap">Penerbit</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 min-w-[120px] whitespace-nowrap">PIC</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 min-w-[100px] whitespace-nowrap">Created</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 min-w-[100px] whitespace-nowrap">Status</TableHead>
-                                        <TableHead className="py-2.5 text-xs font-medium text-gray-700 min-w-[50px]"></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {recentBooks.map((b) => (
-                                        <TableRow key={b.buku_id} className="border-lg bg-gray-100">
-                                            <TableCell className="py-2.5 min-w-[180px]">
-                                                <div className="text-xs font-medium text-gray-900 leading-tight" title={b.judul_buku}>
-                                                    {b.judul_buku}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="py-2.5 whitespace-nowrap min-w-[120px]">
-                                                <div className="text-xs font-medium text-gray-600">{b.publisher?.nama_penerbit || 'N/A'}</div>
-                                            </TableCell>
-                                            <TableCell className="py-2.5 whitespace-nowrap min-w-[120px]">
-                                                <div className="text-xs text-gray-600">{b.pic?.nama_lengkap || 'N/A'}</div>
-                                            </TableCell>
-                                            <TableCell className="py-2.5 whitespace-nowrap min-w-[100px]">
-                                                <div className="text-xs text-gray-600">{formatDate(b.created_at)}</div>
-                                            </TableCell>
-                                            <TableCell className="py-2.5 text-center whitespace-nowrap min-w-[100px]">{statusPill(b.status_keseluruhan)}</TableCell>
-                                            <TableCell className="py-2.5 min-w-[50px]">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-7 w-7">
-                                                            <MoreHorizontal className="h-3.5 w-3.5" />
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end" className="w-36">
-                                                        <DropdownMenuItem asChild>
-                                                            <Link href={`/manajemen-naskah/${b.buku_id}?from=dashboard`}>Lihat detail</Link>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem asChild>
-                                                            <Link href={`/manajemen-naskah/${b.buku_id}/edit`}>Edit</Link>
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
                         </div>
 
                         {/* Pagination */}
                         {totalPages > 1 && (
-                            <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 rounded-b-lg">
-                                <div className="text-xs text-gray-500">
+                            <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-muted/30 to-muted/50 border-t border-border/30">
+                                <div className="text-sm text-muted-foreground font-medium">
                                     Menampilkan {startIndex + 1}-{Math.min(startIndex + itemsPerPage, sortedBooks.length)} dari {sortedBooks.length} item
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -179,7 +144,7 @@ export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) 
                                         className="h-8 px-3 text-xs"
                                     >
                                         <ChevronLeft className="h-3.5 w-3.5 mr-1" />
-                                        Previous
+                                        <span className="hidden sm:inline">Previous</span>
                                     </Button>
                                     
                                     <div className="flex items-center gap-1">
@@ -216,7 +181,7 @@ export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) 
                                         disabled={currentPage === totalPages}
                                         className="h-8 px-3 text-xs"
                                     >
-                                        Next
+                                        <span className="hidden sm:inline">Next</span>
                                         <ChevronRight className="h-3.5 w-3.5 ml-1" />
                                     </Button>
                                 </div>
@@ -225,7 +190,9 @@ export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) 
                     </>
                 
                 ) : (
-                    <div className="px-4 py-8 text-center text-sm text-gray-500">Tidak ada naskah terkini</div>
+                    <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                        Tidak ada naskah terkini
+                    </div>
                 )}
             </CardContent>
         </Card>

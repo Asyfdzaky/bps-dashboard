@@ -1,5 +1,3 @@
-import LogoHorizontal from '@/assets/logo_horizontal.svg';
-import LogoIcon from '@/assets/logo.svg';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';

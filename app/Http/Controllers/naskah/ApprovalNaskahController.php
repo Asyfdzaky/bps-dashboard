@@ -25,12 +25,9 @@ class ApprovalNaskahController extends Controller
             'targetPublishers.publisher:penerbit_id,nama_penerbit'
         ]);
 
-
-
-
         $manuscripts = $query->orderBy('created_at', 'desc')->get();
 
-        // Statistics
+        // Statistik
         $stats = [
             'draft' => Manuscript::where('status', 'draft')->count(),
             'pending' => Manuscript::where('status', 'review')->count(),
@@ -42,7 +39,6 @@ class ApprovalNaskahController extends Controller
         return Inertia::render('approval-naskah/approval-naskah', [
             'manuscripts' => $manuscripts,
             'stats' => $stats,
-
         ]);
     }
 
@@ -73,12 +69,12 @@ class ApprovalNaskahController extends Controller
 
             // Validasi status
             if (!in_array($manuscript->status, ['draft', 'review'])) {
-                return back()->with('error', 'Hanya naskah dengan status draft atau review yang dapat diapprove.');
+                return redirect()->route('approval-naskah.index')->with('error', 'Hanya naskah dengan status draft atau review yang dapat diapprove.');
             }
 
             // Validasi target publishers
             if ($manuscript->targetPublishers->isEmpty()) {
-                return back()->with('error', 'Naskah harus memiliki target penerbit sebelum dapat diapprove.');
+                return redirect()->route('approval-naskah.index')->with('error', 'Naskah harus memiliki target penerbit sebelum dapat diapprove.');
             }
 
             // Update status manuscript
@@ -129,10 +125,9 @@ class ApprovalNaskahController extends Controller
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return back()->with('error', 'Terjadi kesalahan saat approve naskah: ' . $e->getMessage());
+            return redirect()->route('approval-naskah.index')->with('error', 'Terjadi kesalahan saat approve naskah: ' . $e->getMessage());
         }
     }
-
 
     public function reject(Request $request, $naskah_id)
     {
@@ -154,7 +149,6 @@ class ApprovalNaskahController extends Controller
             ->with('success', 'Naskah berhasil ditolak.');
     }
 
-
     public function review(Request $request, $naskah_id)
     {
         try {
@@ -162,7 +156,7 @@ class ApprovalNaskahController extends Controller
 
             // Validasi status harus draft
             if ($manuscript->status !== 'draft') {
-                return back()->with('error', 'Hanya naskah dengan status draft yang dapat direview.');
+                return redirect()->route('approval-naskah.index')->with('error', 'Hanya naskah dengan status draft yang dapat direview.');
             }
 
             $manuscript->update([
@@ -176,7 +170,7 @@ class ApprovalNaskahController extends Controller
             return redirect()->route('approval-naskah.index')
                 ->with('success', "Naskah '{$manuscript->judul_naskah}' berhasil diubah ke status review.");
         } catch (\Exception $e) {
-            return back()->with('error', 'Terjadi kesalahan saat memulai review: ' . $e->getMessage());
+            return redirect()->route('approval-naskah.index')->with('error', 'Terjadi kesalahan saat memulai review: ' . $e->getMessage());
         }
     }
 }
