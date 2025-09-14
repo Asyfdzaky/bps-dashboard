@@ -128,10 +128,10 @@ export default function KirimNaskahShow({ manuscript }: Props) {
         );
     };
 
-    const formatMediaSosial = (mediaSosial: Record<string, string> | null) => {
-        if (!mediaSosial) return null;
+    const formatMediaSosial = (mediaSosial: Record<string, string> | null | undefined): string | null => {
+        if (!mediaSosial || mediaSosial === undefined) return null;
 
-        if (mediaSosial.raw) {
+        if ('raw' in mediaSosial && mediaSosial.raw) {
             return mediaSosial.raw;
         }
 
@@ -146,19 +146,19 @@ export default function KirimNaskahShow({ manuscript }: Props) {
 
             <div className="space-y-6">
                 {/* Header */}
-                <div className="rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="mb-2 text-2xl font-bold">{manuscript.judul_naskah}</h1>
-                            <div className="flex items-center gap-4">
-                                {getStatusBadge(manuscript.status)}
-                                <span className="text-indigo-100">Dikirim pada {formatDate(manuscript.created_at)}</span>
-                            </div>
-                        </div>
+                <div className="rounded-lg bg-primary p-6 text-white">
+                    <div className="flex items-center justify-start gap-8">
                         <Button variant="secondary" onClick={() => router.visit('/dashboard')}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Kembali
                         </Button>
+                        <div>
+                            <h1 className="mb-2 text-2xl font-bold">{manuscript.judul_naskah}</h1>
+                            <div className="flex items-center gap-2">
+                                {getStatusBadge(manuscript.status)}
+                                <span className="text-indigo-100">Dikirim pada {formatDate(manuscript.created_at)}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 

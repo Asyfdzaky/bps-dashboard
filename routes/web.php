@@ -18,7 +18,7 @@ use App\Http\Controllers\naskah\KirimNaskahController;
 use App\Http\Controllers\TargetController;
 
 Route::get('/', function () {
-    if(Auth::check()) {
+    if (Auth::check()) {
         return redirect()->intended(route('dashboard', absolute: false));
     }
     return redirect()->route('login');
@@ -27,18 +27,15 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Route approval naskah (terpisah dari manajemen-naskah)
-    Route::prefix('approval-naskah')->group(function () {
-        Route::get('/', [ApprovalNaskahController::class, 'index'])->name('approval-naskah.index');
-        Route::get('/{naskahId}', [ApprovalNaskahController::class, 'show'])->name('approval-naskah.show');
-        Route::post('/{naskahId}/approve', [ApprovalNaskahController::class, 'approve'])->name('approval-naskah.approve');
-        Route::post('/{naskahId}/reject', [ApprovalNaskahController::class, 'reject'])->name('approval-naskah.reject');
-        Route::post('/{naskahId}/review', [ApprovalNaskahController::class, 'review'])->name('approval-naskah.review'); 
-        Route::post('/bulk-action', [ApprovalNaskahController::class, 'bulkAction'])->name('approval-naskah.bulk');
-    });
-
-    // Grup route manajemen-naskah (tanpa approval)
+    // Grup semua route manajemen-naskah
+    Route::get('/approval', [ApprovalNaskahController::class, 'index'])->name('approval-naskah.index');
+    Route::get('/approval/{naskah_id}', [ApprovalNaskahController::class, 'show'])->name('approval-naskah.show');
+    Route::post('/approval/{naskah_id}/approve', [ApprovalNaskahController::class, 'approve'])->name('approval-naskah.approve');
+    Route::post('/approval/{naskah_id}/reject', [ApprovalNaskahController::class, 'reject'])->name('approval-naskah.reject');
+    Route::post('/approval/{naskah_id}/review', [ApprovalNaskahController::class, 'review'])->name('approval-naskah.review');
+    Route::post('/approval/bulk-action', [ApprovalNaskahController::class, 'bulkAction'])->name('approval-naskah.bulk');
     Route::prefix('manajemen-naskah')->group(function () {
+        // Route approval naskah
         // Route CRUD dasar manajemen naskah
         Route::get('/', [NaskahController::class, 'index'])->name('manajemen-naskah');
         Route::get('/create', [NaskahController::class, 'create'])->name('manajemen-naskah.create');
@@ -55,7 +52,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 
     Route::get('/analitik', [AnalitikController::class, 'index'])->name('analitik');
-    Route::get('/calender', [CalenderController::class, 'index'])->name('calender');
+    // Calendar routes
+    Route::get('/calender', [CalenderController::class, 'index'])->name('calender.index');
+    Route::post('/calendar/events', [CalenderController::class, 'store'])->name('calendar.events.store');
+    Route::put('/calendar/events/{id}', [CalenderController::class, 'update'])->name('calendar.events.update');
+    Route::delete('/calendar/events/{id}', [CalenderController::class, 'destroy'])->name('calendar.events.destroy');
+
     Route::get('/target', [TargetController::class, 'index'])->name('target');
     Route::get('/target/create', [TargetController::class, 'create'])->name('target.create');
     Route::post('/target', [TargetController::class, 'store'])->name('target.store');
@@ -81,7 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('manajemen-tim', [TeamController::class, 'store'])->name('manajemen-tim.store')->middleware('role:manajer');
     Route::put('manajemen-tim/{id}', [TeamController::class, 'update'])->name('manajemen-tim.update')->middleware('role:manajer');
     Route::delete('manajemen-tim/{id}', [TeamController::class, 'destroy'])->name('manajemen-tim.destroy')->middleware('role:manajer');
-    
+
 
     Route::get('manajemen-pengguna', [PenggunaController::class, 'index'])->name('manajemen-pengguna')->middleware('role:manajer');
     Route::post('manajemen-pengguna', [PenggunaController::class, 'store'])->name('manajemen-pengguna.store')->middleware('role:manajer');
@@ -89,9 +91,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('manajemen-pengguna/{id}', [PenggunaController::class, 'destroy'])->name('manajemen-pengguna.destroy')->middleware('role:manajer');
 
     Route::get('progres-naskah', [ProgresNaskahController::class, 'index'])->name('progres-naskah');
-    
 });
 
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

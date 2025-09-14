@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
-import { type BreadcrumbItem } from '@/types';
+import { SharedData, type BreadcrumbItem } from '@/types';
 import { router, useForm, usePage } from '@inertiajs/react';
 import * as React from 'react';
 
@@ -33,6 +33,7 @@ export default function KirimNaskahPage() {
     const [step, setStep] = React.useState<Step>(1);
     const [errors, setErrors] = React.useState<Record<string, string>>({});
     const [confirmOpen, setConfirmOpen] = React.useState(false); // <— NEW: confirm dialog state
+    const { auth } = usePage<SharedData>().props;
 
     const { data, setData, post, processing, reset } = useForm({
         // Step 1
@@ -380,8 +381,9 @@ export default function KirimNaskahPage() {
                     </AlertDialogContent>
                 </AlertDialog>
 
-                <div className="mb-4">
-                    <h1 className="text-2xl font-bold">Kirim Naskah</h1>
+                <div className="mb-4 rounded-lg bg-primary p-6 text-white">
+                    <h1 className="mb-2 text-2xl font-bold">Selamat datang, {auth.user.nama_lengkap}! 👋</h1>
+                    <p className="text-blue-100">Kirim naskah anda</p>
                 </div>
 
                 <Card className="rounded-2xl">

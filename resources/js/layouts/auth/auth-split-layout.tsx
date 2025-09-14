@@ -19,8 +19,7 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                     {/* Logo */}
                     <div className="absolute top-6 left-6">
                         <Link href={route('home')} className="flex items-center">
-                            <AppLogoIcon className="mr-3 h-16 w-16 text-primary" />
-                            <span className="text-2xl font-semibold text-foreground">{name}</span>
+                            <AppLogoIcon className="h-16 w-auto" />
                         </Link>
                     </div>
 

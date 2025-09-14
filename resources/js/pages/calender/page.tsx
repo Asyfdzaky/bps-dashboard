@@ -4,6 +4,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 
 type CalendarStatus = 'proses' | 'selesai' | 'mendekati-deadline';
+
 type CalendarEvent = {
     id?: string | number;
     title: string;
@@ -12,20 +13,28 @@ type CalendarEvent = {
     status: CalendarStatus;
     description?: string;
     allDay?: boolean;
-    tahap: number;
-    task_name: string;
-    pic_name: string;
+    pic_name?: string;
+    source?: string;
+    created_by?: string;
+};
+
+type User = {
+    user_id: string;
+    nama_lengkap: string;
 };
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Calender', href: '/calender' }];
 
 export default function Calender() {
-    const { events } = usePage<{ events: CalendarEvent[] }>().props;
+    const { events, users } = usePage<{
+        events: CalendarEvent[];
+        users: User[];
+    }>().props;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Calender" />
-            <Calendar events={events} />
+            <Calendar events={events} users={users} />
         </AppLayout>
     );
 }

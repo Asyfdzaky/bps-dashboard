@@ -51,6 +51,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Approval Naskah',
         href: '/approval-naskah',
+        href: '/approval',
     },
 ];
 
@@ -200,6 +201,7 @@ export default function ApprovalNaskah({ manuscripts, stats }: Props) {
                 <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" asChild>
                         <Link href={`/approval-naskah/${row.original.naskah_id}`}>
+                        <Link href={`approval/${row.original.naskah_id}`}>
                             <Eye className="mr-1 h-4 w-4" />
                             Detail
                         </Link>

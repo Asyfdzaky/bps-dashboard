@@ -44,7 +44,7 @@ interface Props {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Approval Naskah',
-        href: '/approval-naskah',
+        href: '/approval',
     },
     {
         title: 'Detail Naskah',
@@ -174,11 +174,11 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
             return;
         }
 
-        approveForm.post(`/manajemen-naskah/approval/${manuscript.naskah_id}/approve`, {
+        approveForm.post(`/approval/${manuscript.naskah_id}/approve`, {
             onSuccess: (response) => {
                 console.log('Approval success:', response);
                 setShowApproveModal(false);
-                router.visit('/approval-naskah');
+                router.visit('approval');
             },
             onError: (errors) => {
                 console.error('Approval errors:', errors);
@@ -194,20 +194,20 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
 
     const handleReject = (e: React.FormEvent) => {
         e.preventDefault();
-        rejectForm.post(`/manajemen-naskah/approval/${manuscript.naskah_id}/reject`, {
+        rejectForm.post(`/approval/${manuscript.naskah_id}/reject`, {
             onSuccess: () => {
                 setShowRejectModal(false);
-                router.visit('/approval-naskah');
+                router.visit('approval');
             },
         });
     };
 
     const handleReview = (e: React.FormEvent) => {
         e.preventDefault();
-        reviewForm.post(`/manajemen-naskah/approval/${manuscript.naskah_id}/review`, {
+        reviewForm.post(`/approval/${manuscript.naskah_id}/review`, {
             onSuccess: () => {
                 setShowReviewModal(false);
-                router.visit('/approval-naskah');
+                router.visit('approval');
             },
         });
     };
@@ -285,7 +285,7 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
                 {/* Header */}
                 <div className="flex items-start justify-between">
                     <div>
-                        <Button variant="default" size="sm" onClick={() => router.visit('/approval-naskah')} className="mb-4">
+                        <Button variant="default" size="sm" onClick={() => router.visit('/approval')} className="mb-4">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Kembali ke List
                         </Button>

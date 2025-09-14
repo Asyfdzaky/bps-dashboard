@@ -137,4 +137,25 @@ class User extends Authenticatable
     {
         return $this->penerbit_id;
     }
+
+    public function createdCalendarEvents()
+    {
+        return $this->hasMany(Calendar::class, 'created_by', 'user_id');
+    }
+
+    /**
+     * Calendar events last updated by this user
+     */
+    public function updatedCalendarEvents()
+    {
+        return $this->hasMany(Calendar::class, 'updated_by', 'user_id');
+    }
+
+    /**
+     * Calendar events where this user is the PIC
+     */
+    public function picCalendarEvents()
+    {
+        return $this->hasMany(Calendar::class, 'pic_user_id', 'user_id');
+    }
 }

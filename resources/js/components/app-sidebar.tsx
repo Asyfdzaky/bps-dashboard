@@ -3,22 +3,12 @@ import LogoIcon from '@/assets/logo.svg';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    useSidebar,
-} from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, useSidebar } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { hasRole } from '@/types/access';
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart, Calendar, FileText, LayoutGrid, Users } from 'lucide-react';
+import { BarChart, BookOpen, Calendar, FileText, LayoutGrid, Users } from 'lucide-react';
+import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
@@ -28,7 +18,7 @@ const mainNavItems: NavItem[] = [
 ];
 const NaskahNavItems: NavItem[] = [
     {
-        title: 'Semua Naskah',
+        title: 'Bank Naskah',
         href: '/manajemen-naskah',
     },
     {
@@ -36,8 +26,8 @@ const NaskahNavItems: NavItem[] = [
         href: '/progres-naskah',
     },
     {
-        title: 'Kiriman Naskah',
-        href: '/approval-naskah',
+        title: 'Approval Naskah',
+        href: '/approval',
     },
 ];
 const ManajemenPenggunaNavItems: NavItem[] = [
@@ -70,29 +60,28 @@ const KalenderNavItems: NavItem[] = [
         href: '/calender',
     },
 ];
+
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const { auth } = usePage<{ auth: { user?: { roles?: string[] } } }>().props;
     const user = auth.user;
-    const { state } = useSidebar();
+    const { state } = useSidebar(); // Get sidebar state
     const isCollapsed = state === 'collapsed';
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild className={isCollapsed ? 'mx-auto' : undefined}>
-                            <Link href="/dashboard" prefetch className="flex h-full w-full items-center justify-center">
-                                {isCollapsed ? (
-                                    <img src={LogoIcon} alt="Logo" className="h-8 w-8" />
-                                ) : (
-                                    <img src={LogoHorizontal} alt="Logo" className="h-8 w-auto" />
-                                )}
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
+                <div className="flex items-center justify-center rounded-lg bg-secondary p-2">
+                    <Link href="/dashboard" className="flex items-center justify-center">
+                        {isCollapsed ? (
+                            // Show book icon when collapsed
+                            <BookOpen className="h-6 w-6 text-secondary-foreground" />
+                        ) : (
+                            // Show full logo when expanded
+                            <AppLogo />
+                        )}
+                    </Link>
+                </div>
             </SidebarHeader>
 
             <SidebarContent>

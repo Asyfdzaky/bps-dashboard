@@ -76,7 +76,7 @@ export default function DashboardPenulis({
             cell: ({ row }) => {
                 const status = row.getValue('status') as ManuscriptStatus;
                 return (
-                    <div className="flex items-center">
+                    <div className="flex justify-center text-center">
                         <Badge variant="outline" className={statusBadgeClass(status)}>
                             {status.charAt(0).toUpperCase() + status.slice(1)}
                         </Badge>
@@ -90,7 +90,7 @@ export default function DashboardPenulis({
             cell: ({ row }) => {
                 const updatedAt = row.getValue('updatedAt') as string;
                 return (
-                    <div className="flex items-center">
+                    <div className="flex justify-center text-center">
                         {updatedAt ? (
                             <div className="text-sm text-muted-foreground">{updatedAt}</div>
                         ) : (

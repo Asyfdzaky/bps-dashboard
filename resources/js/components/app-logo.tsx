@@ -3,11 +3,8 @@ import AppLogoIcon from './app-logo-icon';
 export default function AppLogo() {
     return (
         <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md">
-                <AppLogoIcon className="size-6 dark:text-black" />
-            </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 leading-tight font-semibold">Book Management System</span>
+            <div className="flex items-center justify-center">
+                <AppLogoIcon className="h-10 w-auto" />
             </div>
         </>
     );
