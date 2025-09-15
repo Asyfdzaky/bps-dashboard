@@ -50,8 +50,9 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /home/saldomas/reneturos.saldomaster.com
+            cd /home/saldomas/reneturos.saldomaster.com/
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
