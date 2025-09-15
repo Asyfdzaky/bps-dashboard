@@ -8,55 +8,55 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-        extensions: pgsql, pdo_pgsql
-        tools: composer
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pgsql, pdo_pgsql
+          tools: composer
 
-    - name: Install Composer dependencies
-      run: composer install --no-dev --optimize-autoloader
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader
 
-    - name: Setup Node
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-    - name: Build frontend assets
-      run: |
-        npm ci
-        npm run build
+      - name: Build frontend assets
+        run: |
+          npm ci
+          npm run build
 
-    - name: Deploy to cPanel via rsync
-      uses: burnett01/rsync-deployments@v5
-      with:
-        switches: -avz --delete
-        path: ./
-        remote_path: /home/saldomas/reneturos.saldomaster.com/
-        remote_host: ${{ secrets.SSH_HOST }}
-        remote_user: ${{ secrets.SSH_USER }}
-        remote_key:  ${{ secrets.SSH_PRIVATE_KEY }}
-        exclude: |
-          **/.git*
-          **/.github*
-          node_modules/**
-          tests/**
-          .env*
-          storage/logs/**
+      # 🔹 Deploy code to cPanel with rsync
+      - name: Deploy via SSH (rsync)
+        uses: easingthemes/ssh-deploy@v4
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USER }}
+          TARGET: /home/saldomas/reneturos.saldomaster.com/
+          EXCLUDE: |
+            **/.git*
+            **/.github*
+            node_modules/**
+            tests/**
+            .env*
+            storage/logs/**
 
-    - name: Run artisan commands on server
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          cd /home/saldomas/reneturos.saldomaster.com
-          php artisan migrate --force
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
+      # 🔹 Run artisan commands on the server
+      - name: Run artisan commands
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/saldomas/reneturos.saldomaster.com
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
