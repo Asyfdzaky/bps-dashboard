@@ -2,18 +2,15 @@ name: Deploy Laravel + Inertia (React) to cPanel via SSH
 
 on:
   push:
-    branches: [ main ]   # jalankan otomatis setiap push ke branch main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-    # 1️⃣ Ambil kode dari repo
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2️⃣ Install PHP & Composer
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
@@ -24,16 +21,16 @@ jobs:
     - name: Install Composer dependencies
       run: composer install --no-dev --optimize-autoloader
 
-    # 3️⃣ Build asset React (Inertia / Vite)
-    - name: Setup Node and build assets
+    - name: Setup Node
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+
+    - name: Build frontend assets
       run: |
         npm ci
         npm run build
 
-    # 4️⃣ Deploy kode ke cPanel menggunakan rsync lewat SSH
     - name: Deploy to cPanel via rsync
       uses: burnett01/rsync-deployments@v6
       with:
@@ -51,7 +48,6 @@ jobs:
           .env*
           storage/logs/**
 
-    # 5️⃣ Jalankan artisan commands langsung di server
     - name: Run artisan commands on server
       uses: appleboy/ssh-action@v0.1.10
       with:
