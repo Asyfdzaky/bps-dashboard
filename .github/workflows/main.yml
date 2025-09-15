@@ -38,14 +38,10 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_USER: ${{ secrets.SSH_USER }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT }}
           TARGET: /home/saldomas/reneturos.saldomaster.com/
-          EXCLUDE: |
-            **/.git*
-            **/.github*
-            node_modules/**
-            tests/**
-            .env*
-            storage/logs/**
+          EXCLUDE: "**/.git* **/.github* node_modules/** tests/** .env* storage/logs/**"
+
 
       # 🔹 Run artisan commands on the server
       - name: Run artisan commands
