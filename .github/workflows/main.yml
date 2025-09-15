@@ -39,7 +39,7 @@ jobs:
           REMOTE_HOST: ${{ secrets.SSH_HOST }}
           REMOTE_USER: ${{ secrets.SSH_USER }}
           REMOTE_PORT: ${{ secrets.SSH_PORT }}
-          TARGET: /home/saldomas/reneturos.saldomaster.com/
+          TARGET: reneturos.saldomaster.com/
           EXCLUDE: "**/.git* **/.github* node_modules/** tests/** .env* storage/logs/**"
 
 
@@ -52,7 +52,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd /home/saldomas/reneturos.saldomaster.com/
+            cd reneturos.saldomaster.com/
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
