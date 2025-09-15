@@ -129,25 +129,25 @@ export default function Profile({ mustVerifyEmail, status, user }: ProfileProps)
         });
     };
 
-    // Profile info items with icons
+    // Profile info items with theme-consistent colors
     const profileItems = [
-        { icon: <User className="h-4 w-4 text-blue-600" />, label: 'Nama', value: data.nama_lengkap },
-        { icon: <Mail className="h-4 w-4 text-green-600" />, label: 'Email', value: data.email },
-        { icon: <Phone className="h-4 w-4 text-purple-600" />, label: 'No. HP', value: data.nomor_hp },
-        { icon: <MapPin className="h-4 w-4 text-red-600" />, label: 'Alamat', value: data.alamat },
-        { icon: <GraduationCap className="h-4 w-4 text-indigo-600" />, label: 'Pendidikan', value: data.pendidikan },
+        { icon: <User className="h-4 w-4 text-primary" />, label: 'Nama', value: data.nama_lengkap },
+        { icon: <Mail className="h-4 w-4 text-chart-1" />, label: 'Email', value: data.email },
+        { icon: <Phone className="h-4 w-4 text-chart-2" />, label: 'No. HP', value: data.nomor_hp },
+        { icon: <MapPin className="h-4 w-4 text-destructive" />, label: 'Alamat', value: data.alamat },
+        { icon: <GraduationCap className="h-4 w-4 text-chart-3" />, label: 'Pendidikan', value: data.pendidikan },
     ];
 
     // Same content component
     const profileContent = (
         <div className="max-w-6xl space-y-6">
             {/* Horizontal Profile Card */}
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden border shadow-sm">
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-2xl font-bold text-gray-900">Profile Saya</CardTitle>
+                        <CardTitle className="text-2xl font-bold text-foreground">Profile Saya</CardTitle>
                         <div className="flex items-center gap-2">
-                            <Button onClick={() => setShowEditDialog(true)} className="gap-2">
+                            <Button onClick={() => setShowEditDialog(true)} className="gap-2 bg-primary hover:bg-primary/90">
                                 <Edit className="h-4 w-4" />
                                 Edit Profile
                             </Button>
@@ -160,21 +160,13 @@ export default function Profile({ mustVerifyEmail, status, user }: ProfileProps)
                     <div className="flex flex-col gap-6 lg:flex-row">
                         {/* Avatar Section */}
                         <div className="flex flex-col items-center space-y-4 lg:w-1/4 lg:items-start">
-                            <div className="relative rounded-3xl border">
+                            <div className="relative rounded-3xl border-border">
                                 <Avatar className="h-32 w-32">
                                     <AvatarImage src={getAvatarUrl() || undefined} />
-                                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-2xl font-bold text-white">
+                                    <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-2xl font-bold text-primary-foreground">
                                         {getInitials(data.nama_lengkap || 'User')}
                                     </AvatarFallback>
                                 </Avatar>
-                                <Button
-                                    size="icon"
-                                    className="absolute -right-2 -bottom-2 h-8 w-8 rounded-full shadow-lg"
-                                    onClick={handleAvatarClick}
-                                    type="button"
-                                >
-                                    <Camera className="h-4 w-4" />
-                                </Button>
                             </div>
 
                             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
@@ -191,12 +183,12 @@ export default function Profile({ mustVerifyEmail, status, user }: ProfileProps)
                         <div className="flex-1 lg:w-3/4">
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                                 {profileItems.map((item, index) => (
-                                    <div key={index} className="rounded-lg bg-gray-50 p-4 transition-colors hover:bg-gray-100">
+                                    <div key={index} className="rounded-lg border border-border bg-muted/50 p-4 transition-colors hover:bg-muted/80">
                                         <div className="flex items-start gap-3">
                                             <div className="mt-1">{item.icon}</div>
                                             <div className="min-w-0 flex-1">
-                                                <p className="text-xs font-medium tracking-wide text-gray-500 uppercase">{item.label}</p>
-                                                <p className="mt-1 text-sm font-medium break-words text-gray-900">{item.value || 'Belum diisi'}</p>
+                                                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{item.label}</p>
+                                                <p className="mt-1 text-sm font-medium break-words text-foreground">{item.value || 'Belum diisi'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -207,12 +199,12 @@ export default function Profile({ mustVerifyEmail, status, user }: ProfileProps)
 
                     {/* Email Verification Notice */}
                     {mustVerifyEmail && auth.user.email_verified_at === null && (
-                        <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4">
+                        <div className="mt-6 rounded-lg border border-secondary/30 bg-secondary/10 p-4">
                             <div className="flex items-center gap-3">
-                                <Mail className="h-5 w-5 text-amber-600" />
+                                <Mail className="h-5 w-5 text-secondary-foreground" />
                                 <div>
-                                    <p className="text-sm font-medium text-amber-800">Email belum diverifikasi</p>
-                                    <p className="text-xs text-amber-700">
+                                    <p className="text-sm font-medium text-secondary-foreground">Email belum diverifikasi</p>
+                                    <p className="text-xs text-secondary-foreground/80">
                                         <Link
                                             href={route('verification.send')}
                                             method="post"
@@ -223,7 +215,7 @@ export default function Profile({ mustVerifyEmail, status, user }: ProfileProps)
                                         </Link>
                                     </p>
                                     {status === 'verification-link-sent' && (
-                                        <p className="mt-1 text-xs font-medium text-green-600">Link verifikasi telah dikirim.</p>
+                                        <p className="mt-1 text-xs font-medium text-chart-1">Link verifikasi telah dikirim.</p>
                                     )}
                                 </div>
                             </div>
@@ -240,8 +232,8 @@ export default function Profile({ mustVerifyEmail, status, user }: ProfileProps)
                         leaveFrom="opacity-100"
                         leaveTo="opacity-0"
                     >
-                        <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-3">
-                            <p className="text-sm font-medium text-green-800">Profile berhasil diperbarui!</p>
+                        <div className="mt-4 rounded-lg border border-chart-1/30 bg-chart-1/10 p-3">
+                            <p className="text-sm font-medium text-chart-1">Profile berhasil diperbarui!</p>
                         </div>
                     </Transition>
                 </CardContent>
@@ -257,10 +249,10 @@ export default function Profile({ mustVerifyEmail, status, user }: ProfileProps)
 
                     <form onSubmit={handleUpdateProfile} className="space-y-6">
                         {/* Photo Section */}
-                        <div className="flex items-center gap-6 rounded-lg bg-gray-50 p-4">
+                        <div className="flex items-center gap-6 rounded-lg bg-muted/50 p-4">
                             <Avatar className="h-20 w-20">
                                 <AvatarImage src={getAvatarUrl() || undefined} />
-                                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-lg font-bold text-white">
+                                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-lg font-bold text-primary-foreground">
                                     {getInitials(data.nama_lengkap || 'User')}
                                 </AvatarFallback>
                             </Avatar>
@@ -356,7 +348,7 @@ export default function Profile({ mustVerifyEmail, status, user }: ProfileProps)
                             <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
                                 Batal
                             </Button>
-                            <Button type="submit" disabled={processing}>
+                            <Button type="submit" disabled={processing} className="bg-primary hover:bg-primary/90">
                                 {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
                             </Button>
                         </DialogFooter>

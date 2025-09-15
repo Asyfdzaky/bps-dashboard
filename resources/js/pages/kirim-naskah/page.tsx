@@ -381,9 +381,9 @@ export default function KirimNaskahPage() {
                     </AlertDialogContent>
                 </AlertDialog>
 
-                <div className="mb-4 rounded-lg bg-primary p-6 text-white">
+                <div className="mn-4 rounded-lg bg-primary p-6 text-white">
                     <h1 className="mb-2 text-2xl font-bold">Selamat datang, {auth.user.nama_lengkap}! 👋</h1>
-                    <p className="text-blue-100">Kirim naskah anda</p>
+                    <p className="text-blue-100">Kirim naskah </p>
                 </div>
 
                 <Card className="rounded-2xl">

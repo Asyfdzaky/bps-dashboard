@@ -7,6 +7,7 @@ type SummaryItem = {
     label: string;
     value: number;
     icon: React.ElementType;
+    colorClass: string;
 };
 
 function formatNumber(n: number) {
@@ -26,36 +27,60 @@ export function SummaryStats({
     delta?: Partial<Record<'total' | 'draft' | 'progres' | 'publish', number>>;
 }) {
     const items: SummaryItem[] = [
-        { key: 'total', label: 'Total Naskah', value: total, icon: BookOpen },
-        { key: 'draft', label: 'Draft', value: draft, icon: FileEdit },
-        { key: 'progres', label: 'Dalam Proses', value: progres, icon: Loader2 },
-        { key: 'publish', label: 'Sudah Dipublikasi', value: publish, icon: BadgeCheck },
+        {
+            key: 'total',
+            label: 'Total Naskah',
+            value: total,
+            icon: BookOpen,
+            colorClass: 'text-primary bg-primary/10 border-primary/20', // Using primary color (Space Cadet)
+        },
+        {
+            key: 'draft',
+            label: 'Draft',
+            value: draft,
+            icon: FileEdit,
+            colorClass: 'text-muted-foreground bg-muted border-muted-foreground/20', // Using muted colors
+        },
+        {
+            key: 'progres',
+            label: 'Dalam Proses',
+            value: progres,
+            icon: Loader2,
+            colorClass: 'text-secondary bg-secondary/10 border-secondary/30 dark:text-secondary dark:bg-secondary/20', // Using secondary color (Golden Yellow)
+        },
+        {
+            key: 'publish',
+            label: 'Sudah Dipublikasi',
+            value: publish,
+            icon: BadgeCheck,
+            colorClass: 'text-chart-1 bg-chart-1/10 border-chart-1/20', // Using chart-1 color for success/completion
+        },
     ];
 
     return (
-        <Card className="rounded-2xl">
-            <CardContent className="px-2">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                    {items.map((it) => {
+        <Card className="bg-secondary">
+            <CardContent className="p-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {items.map((item, index) => {
                         return (
                             <div
-                                key={it.key}
+                                key={item.key}
                                 className={cn(
-                                    'relative flex items-center justify-between rounded-xl bg-card px-4',
-                                    // pemisah vertikal di layout > sm (seperti screenshot)
-                                    'lg:[&:not(:last-child)]:after:absolute lg:[&:not(:last-child)]:after:top-4 lg:[&:not(:last-child)]:after:right-0 lg:[&:not(:last-child)]:after:h-[calc(100%-2rem)] lg:[&:not(:last-child)]:after:w-px lg:[&:not(:last-child)]:after:bg-border',
+                                    'relative flex items-center gap-4 rounded-lg border bg-card p-4',
+                                    // Add subtle divider for larger screens using border color
+                                    index < items.length - 1 &&
+                                        'lg:after:absolute lg:after:top-1/2 lg:after:-right-3 lg:after:h-8 lg:after:w-px lg:after:-translate-y-1/2 lg:after:bg-border',
                                 )}
                             >
-                                {/* left block */}
-                                <div>
-                                    <div className="text-sm text-muted-foreground">{it.label}</div>
-                                    <div className="mt-1 text-2xl font-semibold tracking-tight">{formatNumber(it.value)}</div>
-                                    <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground"></div>
+                                {/* Icon container */}
+                                <div className={cn('flex h-12 w-12 items-center justify-center rounded-lg border', item.colorClass)}>
+                                    <item.icon className="h-6 w-6" />
                                 </div>
 
-                                {/* right icon */}
-                                <div className="ml-4 shrink-0 rounded-xl border bg-secondary p-2">
-                                    <it.icon className="h-5 w-5 text-primary" />
+                                {/* Content */}
+                                <div className="min-w-0 flex-1">
+                                    <p className="mb-1 text-sm font-medium text-muted-foreground">{item.label}</p>
+                                    <p className="text-2xl leading-tight font-bold text-foreground">{formatNumber(item.value)}</p>
                                 </div>
                             </div>
                         );

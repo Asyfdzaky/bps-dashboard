@@ -145,12 +145,6 @@ class KirimNaskahController extends Controller
                 'pendidikan' => $validated['pendidikan'],
             ]
         );
-
-        // Update user basic info
-        \App\Models\User::where('user_id', $userId)->update([
-            'nama_lengkap' => $validated['nama_penulis_1'],
-            'email' => $validated['email'],
-        ]);
     }
 
     /**

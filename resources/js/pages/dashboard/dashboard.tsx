@@ -24,12 +24,11 @@ type PenulisProps = {
         stats: {
             total: number;
             draft: number;
-            progres: number; // <- selaras dengan controller
+            progres: number;
             publish: number;
             delta?: Partial<Record<'total' | 'draft' | 'progres' | 'publish', number>>;
         };
         activities: Array<{
-            // <- selaras dengan controller
             id: string | number;
             title: string;
             status: ManuscriptStatus;
@@ -59,28 +58,28 @@ export default function Dashboard() {
     // KPI data for the grid dengan warna sesuai theme
     const kpiItems = [
         {
-            title: "Target Cetak",
+            title: 'Target Cetak',
             value: TargetTahunan,
             icon: <Trophy className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: "chart-3" as const, // Golden yellow untuk target
+            color: 'chart-3' as const,
         },
         {
-            title: "Buku Published",
+            title: 'Buku Published',
             value: Published,
             icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: "primary" as const, // Space Cadet blue untuk published
+            color: 'primary' as const,
         },
         {
-            title: "Sedang Dikerjakan",
+            title: 'Sedang Dikerjakan',
             value: SedangDikerjakan,
             icon: <FileText className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: "chart-2" as const, // Teal untuk progress
+            color: 'chart-2' as const,
         },
         {
-            title: "Mendekati Deadline",
+            title: 'Mendekati Deadline',
             value: MendekatiDeadline,
             icon: <Clock className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: "destructive" as const, // Red untuk urgent
+            color: 'destructive' as const,
         },
     ];
 
@@ -90,59 +89,60 @@ export default function Dashboard() {
                 <DashboardPenulis
                     total={penulis.stats.total}
                     draft={penulis.stats.draft}
-                    progres={penulis.stats.progres} // <- sebelumnya .review
+                    progres={penulis.stats.progres}
                     publish={penulis.stats.publish}
                     delta={penulis.stats.delta}
-                    activities={penulis.activities} // <- sebelumnya tidak diteruskan
+                    activities={penulis.activities}
                 />
             ) : (
                 <>
                     <Head title="Dashboard Manajemen Penerbitan Buku" />
-                    
-                    {/* Main Container with better spacing */}
+
+                    {/* Main Container with optimized spacing */}
                     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-                        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-                            {/* Header Section */}
-                            <div className="mb-8 lg:mb-12">
+                        <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                            {/* Header Section - Reduced margin */}
+                            <div className="mb-6 lg:mb-8">
                                 <div className="flex flex-col gap-2">
-                                    <h1 className="text-3xl lg:text-4xl font-bold text-primary tracking-tight">
+                                    <h1 className="text-3xl font-bold tracking-tight text-primary lg:text-4xl">
                                         Dashboard Manajemen Penerbitan Buku
                                     </h1>
-                                    <p className="text-muted-foreground text-sm lg:text-base">
+                                    <p className="text-sm text-muted-foreground lg:text-base">
                                         Pantau progress penerbitan dan kelola naskah dengan mudah
                                     </p>
                                 </div>
                             </div>
 
-                            {/* KPI Section - Always full width */}
-                            <div className="mb-8 lg:mb-12">
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold text-foreground mb-2">Statistik Utama</h2>
-                                    <div className="h-1 w-20 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
-                                </div>
-                                <KPIGrid items={kpiItems} className="grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6" />
-                            </div>
+                            {/* Main Layout Grid */}
+                            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+                                {/* Left Column - KPI + Naskah Terkini */}
+                                <div className="lg:col-span-8">
+                                    {/* KPI Section - Reduced margins */}
+                                    <div className="mb-6">
+                                        <div className="mb-4">
+                                            <h2 className="mb-2 text-xl font-semibold text-foreground">Statistik Utama</h2>
+                                            <div className="h-1 w-16 rounded-full bg-gradient-to-r from-primary to-secondary"></div>
+                                        </div>
+                                        <KPIGrid items={kpiItems} className="grid-cols-2 gap-4 lg:grid-cols-2 lg:gap-4" />
+                                    </div>
 
-                            {/* Content Grid - Responsive Layout */}
-                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-                                {/* Main Content Area */}
-                                <div className="lg:col-span-8 space-y-6 lg:space-y-8">
+                                    {/* Naskah Terkini Section - Moved up with reduced spacing */}
                                     <div>
                                         <div className="mb-4">
-                                            <h2 className="text-xl font-semibold text-foreground mb-2">Naskah Terkini</h2>
-                                            <div className="h-1 w-16 bg-gradient-to-r from-chart-2 to-chart-3 rounded-full"></div>
+                                            <h2 className="mb-2 text-xl font-semibold text-foreground">Naskah Terkini</h2>
+                                            <div className="h-1 w-16 rounded-full bg-gradient-to-r from-chart-2 to-chart-3"></div>
                                         </div>
                                         <ListNaskahTerkini books={books} title="" />
                                     </div>
                                 </div>
 
-                                {/* Sidebar Content */}
-                                <div className="lg:col-span-4 space-y-6 lg:space-y-8">
+                                {/* Right Column - Deadline + Chart */}
+                                <div className="lg:col-span-4">
                                     {/* Deadline Section */}
-                                    <div>
+                                    <div className="mb-6">
                                         <div className="mb-4">
-                                            <h2 className="text-xl font-semibold text-foreground mb-2">Deadline Terdekat</h2>
-                                            <div className="h-1 w-16 bg-gradient-to-r from-destructive to-orange-500 rounded-full"></div>
+                                            <h3 className="text-lg font-medium text-foreground">Deadline Terdekat</h3>
+                                            <div className="h-0.5 w-12 rounded-full bg-gradient-to-r from-destructive to-orange-500"></div>
                                         </div>
                                         <ListNaskahDeadline books={books} title="" />
                                     </div>
@@ -150,10 +150,10 @@ export default function Dashboard() {
                                     {/* Chart Section */}
                                     <div>
                                         <div className="mb-4">
-                                            <h2 className="text-xl font-semibold text-foreground mb-2">Status Buku</h2>
-                                            <div className="h-1 w-16 bg-gradient-to-r from-chart-1 to-chart-4 rounded-full"></div>
+                                            <h3 className="text-lg font-medium text-foreground">Status Buku</h3>
+                                            <div className="h-0.5 w-12 rounded-full bg-gradient-to-r from-chart-1 to-chart-4"></div>
                                         </div>
-                                        <Card className="border-0 shadow-lg bg-gradient-to-br from-card to-card/80 backdrop-blur-sm">
+                                        <Card className="border">
                                             <CardContent className="p-6">
                                                 <StatusBukuChart data={ChartData} />
                                             </CardContent>
