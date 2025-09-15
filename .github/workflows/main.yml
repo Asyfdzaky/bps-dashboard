@@ -1,59 +1,48 @@
-name: Deploy Laravel + Inertia (React) to cPanel via SSH
+name: Publish Laravel App to cPanel
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - Development-Main
 
 jobs:
   deploy:
+    name: Deploy via FTP
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # Checkout source code
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: pgsql, pdo_pgsql
-          tools: composer
-
-      - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Build frontend assets
+      # Build frontend assets
+      - name: Install & build frontend assets
         run: |
-          npm ci
+          npm install
           npm run build
 
-      # 🔹 Deploy code to cPanel with rsync
-      - name: Deploy via SSH (rsync)
-        uses: easingthemes/ssh-deploy@v4
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: saldomaster.com
-          REMOTE_USER: saldomas
-          REMOTE_PORT: ${{ secrets.SSH_PORT }}
-          TARGET:  saldomas/reneturos.saldomaster.com/
-          EXCLUDE: "**/.git* **/.github* node_modules/** tests/** .env* storage/logs/**"
-
-
-      # 🔹 Run artisan commands on the server
-      - name: Run artisan commands
-        uses: appleboy/ssh-action@v0.1.10
+      # Setup PHP and Composer
+      - name: Setup PHP and Composer
+        uses: shivammathur/setup-php@v2
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            cd reneturos.saldomaster.com/
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+          php-version: '8.3'
+          tools: composer
+
+      # Install PHP dependencies for production
+      - name: Install Composer dependencies (production)
+        run: composer install --no-dev --optimize-autoloader
+
+      # Deploy via FTP (only important files)
+      - name: Upload to cPanel via FTP
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ secrets.SERVER }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          exclude: |
+             .git*
+              node_modules/**
+              vendor/**
+              storage/**
+              tests/**
+              .env
