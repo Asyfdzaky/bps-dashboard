@@ -1,13 +1,13 @@
 import { ApprovalDataTable } from '@/components/approval-data-table';
-import { KPIGrid } from '@/components/ui/progress-summary';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { KPIGrid } from '@/components/ui/progress-summary';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { CheckCircle, Eye, FileText, XCircle, Clock } from 'lucide-react';
+import { CheckCircle, Clock, Eye, FileText, XCircle } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
 interface Manuscript {
@@ -51,7 +51,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Approval Naskah',
         href: '/approval-naskah',
-        href: '/approval',
     },
 ];
 
@@ -219,28 +218,28 @@ export default function ApprovalNaskah({ manuscripts, stats }: Props) {
                 <KPIGrid
                     items={[
                         {
-                            title: "Draft",
+                            title: 'Draft',
                             value: stats.draft,
                             icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: "chart-2",
+                            color: 'chart-2',
                         },
                         {
-                            title: "Sedang Review",
+                            title: 'Sedang Review',
                             value: stats.pending,
                             icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: "chart-3",
+                            color: 'chart-3',
                         },
                         {
-                            title: "Ditolak",
+                            title: 'Ditolak',
                             value: stats.rejected,
                             icon: <XCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: "destructive",
+                            color: 'destructive',
                         },
                         {
-                            title: "Total Aktif",
+                            title: 'Total Aktif',
                             value: stats.total,
                             icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: "primary",
+                            color: 'primary',
                         },
                     ]}
                 />
@@ -251,10 +250,10 @@ export default function ApprovalNaskah({ manuscripts, stats }: Props) {
                         <CardTitle>Daftar Naskah untuk Approval</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ApprovalDataTable 
-                            columns={columns} 
-                            data={filteredManuscripts} 
-                            searchableColumn="judul_naskah" 
+                        <ApprovalDataTable
+                            columns={columns}
+                            data={filteredManuscripts}
+                            searchableColumn="judul_naskah"
                             onSearch={handleSearch}
                             statusFilter={statusFilter}
                             onStatusFilterChange={setStatusFilter}
