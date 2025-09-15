@@ -1,0 +1,66 @@
+name: Deploy Laravel + Inertia (React) to cPanel via SSH
+
+on:
+  push:
+    branches: [ main ]   # jalankan otomatis setiap push ke branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Ambil kode dari repo
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # 2️⃣ Install PHP & Composer
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: pgsql, pdo_pgsql
+        tools: composer
+
+    - name: Install Composer dependencies
+      run: composer install --no-dev --optimize-autoloader
+
+    # 3️⃣ Build asset React (Inertia / Vite)
+    - name: Setup Node and build assets
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+      run: |
+        npm ci
+        npm run build
+
+    # 4️⃣ Deploy kode ke cPanel menggunakan rsync lewat SSH
+    - name: Deploy to cPanel via rsync
+      uses: burnett01/rsync-deployments@v6
+      with:
+        switches: -avz --delete
+        path: ./
+        remote_path: /home/saldomas/reneturos.saldomaster.com/
+        remote_host: ${{ secrets.SSH_HOST }}
+        remote_user: ${{ secrets.SSH_USER }}
+        remote_key:  ${{ secrets.SSH_PRIVATE_KEY }}
+        exclude: |
+          **/.git*
+          **/.github*
+          node_modules/**
+          tests/**
+          .env*
+          storage/logs/**
+
+    # 5️⃣ Jalankan artisan commands langsung di server
+    - name: Run artisan commands on server
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /home/saldomas/reneturos.saldomaster.com
+          php artisan migrate --force
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
