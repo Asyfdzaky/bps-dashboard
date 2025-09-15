@@ -100,7 +100,6 @@ export default function KirimNaskahShow({ manuscript }: Props) {
     const [showPdfPreview, setShowPdfPreview] = useState(false);
     const pdfUrl = `/storage/${manuscript.file_naskah_url}`;
 
-    // Safe access to info_tambahan with fallback
     const info = manuscript.info_tambahan || {};
 
     // Get primary and co-authors
