@@ -69,11 +69,11 @@ export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
-                <div className="flex items-center justify-center rounded-lg bg-secondary p-2">
+                <div className="flex items-center justify-center">
                     <Link href="/dashboard" className="flex items-center justify-center">
                         {isCollapsed ? (
                             // Show book icon when collapsed
-                            <BookOpen className="h-6 w-6 text-secondary-foreground" />
+                            <BookOpen className="h-6 w-6 text-primary" />
                         ) : (
                             // Show full logo when expanded
                             <AppLogo />

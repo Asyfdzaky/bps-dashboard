@@ -102,7 +102,7 @@ export function NavMain({
                                 <div className="flex items-center gap-2">
                                     {icon && <span>{icon}</span>} {/* TAMBAHKAN text-gray-600 */}
                                     {/* Use the same text styling as SidebarGroupLabel */}
-                                    <span className="text-sm font-medium">{title}</span>
+                                    <span className="">{title}</span>
                                 </div>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -112,9 +112,7 @@ export function NavMain({
                 <>
                     {/* Expanded state: pakai label clickable + chevron */}
                     <SidebarGroupLabel
-                        className={`${shouldBeCollapsible ? 'cursor-pointer rounded-md transition-colors hover:bg-sidebar-accent' : ''} ${
-                            isGroupActive ? 'text-white' : ''
-                        }`}
+                        className={`${shouldBeCollapsible ? 'cursor-pointer transition-colors hover:text-primary' : ''} ${isGroupActive ? 'text-sm font-medium' : ''}`}
                         onClick={toggleGroup}
                     >
                         <div className="flex w-full items-center justify-between">
@@ -139,7 +137,7 @@ export function NavMain({
                         <div className="max-h-screen overflow-hidden opacity-100 transition-all duration-200 ease-in-out">
                             <div className="relative ml-3 pl-3">
                                 {/* Vertical line */}
-                                <div className="absolute top-0 bottom-0 left-0 w-px bg-gray-300" />
+                                <div className="absolute top-0 bottom-0 left-0 w-px bg-secondary/50" />
                                 <SidebarMenu>
                                     {items.map((item) => (
                                         <SidebarMenuItem key={item.title}>
@@ -147,7 +145,6 @@ export function NavMain({
                                                 <Link href={item.href} prefetch>
                                                     <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2">
                                                         <span>{item.title}</span>
-                                                        {/* badge dsb di sini */}
                                                     </div>
                                                 </Link>
                                             </SidebarMenuButton>
