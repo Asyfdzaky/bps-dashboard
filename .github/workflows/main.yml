@@ -3,7 +3,7 @@ name: Publish Laravel App to cPanel
 on:
   push:
     branches:
-      - Development-Main
+      - main
 
 jobs:
   deploy:
