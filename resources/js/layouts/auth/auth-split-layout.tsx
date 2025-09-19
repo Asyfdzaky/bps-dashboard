@@ -1,6 +1,7 @@
 import AppLogoIcon from '@/components/app-logo-icon';
 import { type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { type PropsWithChildren } from 'react';
 
 interface AuthLayoutProps {
@@ -39,9 +40,9 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
 
             {/* Right Side - Marketing Content */}
             <div className="relative m-3 hidden overflow-hidden rounded-2xl lg:block">
-                <div className="absolute inset-0 rounded-2xl bg-primary">
+                <div className="absolute inset-0 rounded-2xl bg-secondary">
                     {/* Background Pattern using primary color variations */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/80"></div>
+                    <div className="absolute inset-0 rounded-2xl"></div>
                     <div
                         className="absolute inset-0 rounded-2xl"
                         style={{
@@ -58,46 +59,14 @@ export default function AuthSplitLayout({ children, title, description }: PropsW
                             Access your dashboard to manage manuscripts, track progress, and collaborate with your team efficiently.
                         </p>
 
-                        {/* Dashboard Preview */}
-                        <div className="rounded-xl border border-primary-foreground/20 bg-primary-foreground/10 p-6 backdrop-blur-sm">
-                            <div className="space-y-4">
-                                {/* Mock Dashboard Elements */}
-                                <div className="flex items-center justify-between">
-                                    <div className="text-sm text-primary-foreground/70">Total Manuscripts</div>
-                                    <div className="text-2xl font-bold text-primary-foreground">1,247</div>
-                                </div>
-
-                                <div className="h-2 overflow-hidden rounded-full bg-primary-foreground/20">
-                                    <div className="h-full w-3/4 rounded-full bg-secondary"></div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4 pt-4">
-                                    <div className="text-center">
-                                        <div className="text-lg font-semibold text-primary-foreground">6,248</div>
-                                        <div className="text-xs text-primary-foreground/70">Published Books</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-lg font-semibold text-primary-foreground">156</div>
-                                        <div className="text-xs text-primary-foreground/70">Active Authors</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Features List */}
-                        <div className="mt-8 space-y-3">
-                            <div className="flex items-center">
-                                <div className="mr-3 h-2 w-2 rounded-full bg-secondary"></div>
-                                <span className="text-primary-foreground/80">Manuscript Management</span>
-                            </div>
-                            <div className="flex items-center">
-                                <div className="mr-3 h-2 w-2 rounded-full bg-accent"></div>
-                                <span className="text-primary-foreground/80">Publishing Workflow</span>
-                            </div>
-                            <div className="flex items-center">
-                                <div className="mr-3 h-2 w-2 rounded-full bg-secondary/80"></div>
-                                <span className="text-primary-foreground/80">Team Collaboration</span>
-                            </div>
+                        {/* Lottie Animation replaces the mock dashboard */}
+                        <div className="flex items-center justify-center">
+                            <DotLottieReact
+                                src="https://lottie.host/f5dd1e15-a0f0-4086-903c-1aee37da7cdd/qF1JKfb5DY.lottie"
+                                loop
+                                autoplay
+                                style={{ width: 620, height: 320 }}
+                            />
                         </div>
                     </div>
                 </div>

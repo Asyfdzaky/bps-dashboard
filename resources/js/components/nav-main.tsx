@@ -131,8 +131,6 @@ export function NavMain({
                             )}
                         </div>
                     </SidebarGroupLabel>
-
-                    {/* Konten group: JANGAN render saat collapsed */}
                     {(!shouldBeCollapsible || isOpen) && (
                         <div className="max-h-screen overflow-hidden opacity-100 transition-all duration-200 ease-in-out">
                             <div className="relative ml-3 pl-3">
