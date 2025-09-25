@@ -5,7 +5,6 @@ import { UserMenuContent } from '@/components/user-menu-content';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { type SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
-import { ChevronsUpDown } from 'lucide-react';
 
 export function NavUser() {
     const { auth } = usePage<SharedData>().props;
@@ -19,13 +18,12 @@ export function NavUser() {
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton size="lg" className="group text-black data-[state=open]:bg-gray-100">
                             <UserInfo user={auth.user} />
-                            <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         className="bg0se w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
                         align="end"
-                        side={isMobile ? 'bottom' : state === 'collapsed' ? 'left' : 'bottom'}
+                        side={isMobile ? 'bottom' : state === 'collapsed' ? "bottom" : 'bottom'}
                     >
                         <UserMenuContent user={auth.user} />
                     </DropdownMenuContent>
