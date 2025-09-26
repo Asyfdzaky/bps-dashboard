@@ -247,7 +247,7 @@ export default function Calendar({ events, users = [] }: { events: CalendarEvent
                     </Button>
                 </div>
 
-                <div className="rounded-lg border bg-card shadow-sm">
+                <div className="rounded-lg border bg-card p-8">
                     <FullCalendar
                         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                         initialView="dayGridMonth"

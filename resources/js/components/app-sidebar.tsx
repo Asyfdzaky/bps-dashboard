@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import { type NavItem } from '@/types';
 import { hasRole } from '@/types/access';
 import { Link, usePage } from '@inertiajs/react';
-import { BarChart, BookOpen, Calendar, FileText, LayoutGrid, Users } from 'lucide-react';
+import { BarChart, BookOpen, Calendar, FileText, LayoutGrid, ListCollapse, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -56,6 +56,12 @@ const KalenderNavItems: NavItem[] = [
     {
         title: 'Kalender',
         href: '/calender',
+    },
+];
+const ManajemenTaskNavItems: NavItem[] = [
+    {
+        title: 'Manajemen Task',
+        href: '/manajemen-task',
     },
 ];
 
@@ -117,6 +123,14 @@ export function AppSidebar() {
                     </SidebarGroup>
                 )}
 
+                {/* Manajemen Pengguna (manajer saja) */}
+                {hasRole(user, 'manajer') && (
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <NavMain items={ManajemenTaskNavItems} title="Manajemen Task" collapsible icon={<ListCollapse className="h-4 w-4" />} />
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
                 {/* Manajemen Pengguna (manajer saja) */}
                 {hasRole(user, 'manajer') && (
                     <SidebarGroup>

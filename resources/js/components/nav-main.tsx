@@ -26,25 +26,23 @@ export function NavMain({
     collapsible?: boolean;
 }) {
     const page = usePage();
-    const { state } = useSidebar(); // { open, collapsed }
+    const { state } = useSidebar();
     const isCollapsed = state === 'collapsed';
 
     const [isOpen, setIsOpen] = useState(defaultOpen);
     const [hasBeenManuallyClosed, setHasBeenManuallyClosed] = useState(false);
 
     const isGroupActive = useMemo(() => items.some((item) => page.url.startsWith(item.href)), [items, page.url]);
-
     const shouldBeCollapsible = collapsible && items.length > 1;
 
-    // Tutup paksa saat sidebar collapsed
+    // Close when sidebar is collapsed
     useEffect(() => {
         if (isCollapsed) {
             setIsOpen(false);
-            // jangan tandai "manually closed" — ini state UI karena collapsed
         }
     }, [isCollapsed]);
 
-    // Auto-open kalau ada item aktif (kecuali saat collapsed)
+    // Auto-open when group has active item (except when collapsed)
     useEffect(() => {
         if (!isCollapsed && isGroupActive && !isOpen && !hasBeenManuallyClosed) {
             setIsOpen(true);
@@ -59,7 +57,7 @@ export function NavMain({
         }
     };
 
-    // === Single item: biarkan seperti sebelumnya (sudah bagus & tooltip jalan saat collapsed)
+    // Single item navigation
     if (items.length === 1) {
         const item = items[0];
         return (
@@ -70,12 +68,19 @@ export function NavMain({
                             <SidebarMenuButton
                                 asChild
                                 isActive={page.url.startsWith(item.href)}
-                                tooltip={{ children: item.title }} // tooltip muncul saat collapsed
+                                tooltip={isCollapsed ? { children: title } : undefined}
+                                className="h-9 px-3 text-sm font-medium"
                             >
                                 <Link href={item.href} prefetch>
-                                    <div className="flex items-center gap-2">
-                                        {icon && <span>{icon}</span>}
-                                        <span>{item.title}</span>
+                                    <div className="flex w-full items-center gap-3">
+                                        {icon && (
+                                            <span
+                                                className={`flex-shrink-0 transition-colors duration-200 ${page.url.startsWith(item.href) ? 'text-sidebar-foreground' : 'text-sidebar-foreground/60'} `}
+                                            >
+                                                {icon}
+                                            </span>
+                                        )}
+                                        <span className="truncate">{title}</span>
                                     </div>
                                 </Link>
                             </SidebarMenuButton>
@@ -86,72 +91,86 @@ export function NavMain({
         );
     }
 
-    // === Multiple items
+    // Multiple items navigation
     return (
-        <SidebarGroup className="px-2 py-0">
-            {/* Saat COLLAPSED: render header sebagai SidebarMenuButton agar tooltip & icon-only bekerja */}
+        <SidebarGroup>
             {isCollapsed ? (
+                // Collapsed state: show as single menu button with tooltip
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton
-                                asChild
                                 tooltip={{ children: title }}
-                                className="h-auto p-2" // Match the padding/height of SidebarGroupLabel
+                                isActive={isGroupActive}
+                                className="h-9 justify-center px-3 data-[state=collapsed]:justify-center"
                             >
-                                <div className="flex items-center gap-2">
-                                    {icon && <span>{icon}</span>} {/* TAMBAHKAN text-gray-600 */}
-                                    {/* Use the same text styling as SidebarGroupLabel */}
-                                    <span className="">{title}</span>
+                                <div className="flex items-center justify-center">
+                                    {icon && <span className="flex-shrink-0 text-sidebar-foreground">{icon}</span>}
+                                    <span className="sr-only">{title}</span>
                                 </div>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarGroupContent>
             ) : (
+                // Expanded state: show group label and sub-items
                 <>
-                    {/* Expanded state: pakai label clickable + chevron */}
                     <SidebarGroupLabel
-                        className={`${shouldBeCollapsible ? 'cursor-pointer transition-colors hover:text-primary' : ''} ${isGroupActive ? 'text-sm font-medium' : ''}`}
+                        className={`mx-0 flex h-9 items-center rounded-md px-3 transition-all duration-200 ${
+                            shouldBeCollapsible ? 'cursor-pointer hover:bg-primary/60 hover:text-black' : 'cursor-default'
+                        } ${isGroupActive ? 'text-sm' : 'text-sm font-medium'} `}
                         onClick={toggleGroup}
                     >
                         <div className="flex w-full items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                {icon && <span>{icon}</span>} {/* Sudah ada text-gray-600 */}
-                                <h3 className="text-sm font-medium">{title}</h3>
+                            <div className="flex items-center gap-3">
+                                {icon && (
+                                    <span
+                                        className={`flex-shrink-0 transition-colors duration-200 ${isGroupActive ? 'text-foreground/70' : 'text-foreground/70'} `}
+                                    >
+                                        {icon}
+                                    </span>
+                                )}
+                                <span className="truncate text-black">{title}</span>
                             </div>
                             {shouldBeCollapsible && (
-                                <span className="ml-auto">
+                                <span className="ml-2 flex-shrink-0 opacity-60 transition-opacity hover:opacity-100">
                                     {isOpen ? (
-                                        <ChevronDown className="h-3 w-3 transition-transform" />
+                                        <ChevronDown className="h-4 w-4 transition-transform duration-200" />
                                     ) : (
-                                        <ChevronRight className="h-3 w-3 transition-transform" />
+                                        <ChevronRight className="h-4 w-4 transition-transform duration-200" />
                                     )}
                                 </span>
                             )}
                         </div>
                     </SidebarGroupLabel>
-                    {(!shouldBeCollapsible || isOpen) && (
-                        <div className="max-h-screen overflow-hidden opacity-100 transition-all duration-200 ease-in-out">
-                            <div className="relative ml-3 pl-3">
-                                {/* Vertical line */}
-                                <div className="absolute top-0 bottom-0 left-0 w-px bg-secondary/50" />
-                                <SidebarMenu>
-                                    {items.map((item) => (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton asChild isActive={page.url.startsWith(item.href)} tooltip={{ children: item.title }}>
-                                                <Link href={item.href} prefetch>
-                                                    <div className="grid w-full grid-cols-[1fr_auto] items-center gap-2">
-                                                        <span>{item.title}</span>
-                                                    </div>
-                                                </Link>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    ))}
-                                </SidebarMenu>
-                            </div>
+
+                    {/* Sub-items container with better animation */}
+                    <SidebarGroupContent
+                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            !shouldBeCollapsible || isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                        } `}
+                    >
+                        <div className="mt-1 ml-6 border-l border-sidebar-border/50 pl-3">
+                            <SidebarMenu className="gap-1">
+                                {items.map((item) => (
+                                    <SidebarMenuItem key={item.href}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={page.url.startsWith(item.href)}
+                                            tooltip={isCollapsed ? { children: item.title } : undefined}
+                                            className="h-8 px-3 text-sm font-medium"
+                                        >
+                                            <Link href={item.href} prefetch>
+                                                <div className="flex w-full items-center">
+                                                    <span className="truncate">{item.title}</span>
+                                                </div>
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
+                            </SidebarMenu>
                         </div>
-                    )}
+                    </SidebarGroupContent>
                 </>
             )}
         </SidebarGroup>
