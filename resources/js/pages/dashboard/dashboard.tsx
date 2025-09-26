@@ -100,7 +100,7 @@ export default function Dashboard() {
 
                     {/* Main Container with optimized spacing */}
                     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-                        <div className="container mx-auto px-4 py-6 sm:px-6 lg:px-8">
+                        <div className="container mx-auto px-3 py-1.5">
                             {/* Header Section - Reduced margin */}
                             <div className="mb-6 lg:mb-8">
                                 <div className="flex flex-col gap-2">
@@ -121,7 +121,6 @@ export default function Dashboard() {
                                     <div className="mb-6">
                                         <div className="mb-4">
                                             <h2 className="mb-2 text-xl font-semibold text-foreground">Statistik Utama</h2>
-                                            <div className="h-1 w-16 rounded-full bg-gradient-to-r from-primary to-secondary"></div>
                                         </div>
                                         <KPIGrid items={kpiItems} className="grid-cols-2 gap-4 lg:grid-cols-2 lg:gap-4" />
                                     </div>
@@ -130,7 +129,6 @@ export default function Dashboard() {
                                     <div>
                                         <div className="mb-4">
                                             <h2 className="mb-2 text-xl font-semibold text-foreground">Naskah Terkini</h2>
-                                            <div className="h-1 w-16 rounded-full bg-gradient-to-r from-chart-2 to-chart-3"></div>
                                         </div>
                                         <ListNaskahTerkini books={books} title="" />
                                     </div>
@@ -142,7 +140,6 @@ export default function Dashboard() {
                                     <div className="mb-6">
                                         <div className="mb-4">
                                             <h3 className="text-lg font-medium text-foreground">Deadline Terdekat</h3>
-                                            <div className="h-0.5 w-12 rounded-full bg-gradient-to-r from-destructive to-orange-500"></div>
                                         </div>
                                         <ListNaskahDeadline books={books} title="" />
                                     </div>
@@ -151,7 +148,6 @@ export default function Dashboard() {
                                     <div>
                                         <div className="mb-4">
                                             <h3 className="text-lg font-medium text-foreground">Status Buku</h3>
-                                            <div className="h-0.5 w-12 rounded-full bg-gradient-to-r from-chart-1 to-chart-4"></div>
                                         </div>
                                         <Card className="border">
                                             <CardContent className="p-6">

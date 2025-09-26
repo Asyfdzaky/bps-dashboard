@@ -39,7 +39,7 @@ export default function DashboardPenulisPage() {
         <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard Penulis" />
 
-            <div className="w-full px-4 py-4">
+            <div className="w-full px-3 py-1.6">
                 {/* Welcome Header */}
                 <div className="rounded-lg bg-primary p-6 text-white">
                     <h1 className="mb-2 text-2xl font-bold">Selamat datang, {user.nama_lengkap}! 👋</h1>

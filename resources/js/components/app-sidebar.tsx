@@ -1,7 +1,5 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, useSidebar } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, useSidebar } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { hasRole } from '@/types/access';
 import { Link, usePage } from '@inertiajs/react';
@@ -65,7 +63,6 @@ const ManajemenTaskNavItems: NavItem[] = [
     },
 ];
 
-const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
     const { auth } = usePage<{ auth: { user?: { roles?: string[] } } }>().props;
@@ -140,11 +137,6 @@ export function AppSidebar() {
                     </SidebarGroup>
                 )}
             </SidebarContent>
-
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
-                <NavUser />
-            </SidebarFooter>
         </Sidebar>
     );
 }
