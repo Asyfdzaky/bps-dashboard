@@ -289,9 +289,9 @@ export default function KirimNaskahPage() {
                                         className={[
                                             'flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-all',
                                             isDone
-                                                ? 'border-green-600 bg-green-600 text-white'
+                                                ? 'border-primary bg-primary text-primary-foreground' // Selesai: Menggunakan Primary
                                                 : isActive
-                                                  ? 'border-blue-600 bg-blue-600 text-white'
+                                                  ? 'border-secondary bg-secondary text-secondary-foreground' // Aktif: Menggunakan Secondary
                                                   : isAccessible
                                                     ? 'border-border bg-background text-muted-foreground hover:border-muted-foreground/70'
                                                     : 'border-muted bg-muted text-muted-foreground/50',
@@ -303,7 +303,7 @@ export default function KirimNaskahPage() {
                                         className={[
                                             'mt-1 text-xs transition-all',
                                             isActive
-                                                ? 'font-medium text-foreground'
+                                                ? 'font-medium text-secondary' // Teks Aktif: Menggunakan Secondary
                                                 : isAccessible
                                                   ? 'text-muted-foreground hover:text-foreground'
                                                   : 'text-muted-foreground/50',
@@ -314,9 +314,10 @@ export default function KirimNaskahPage() {
                                 </button>
                                 {idx < items.length - 1 && (
                                     <div
-                                        className={['mx-2 h-[2px] flex-1 rounded transition-all', step > it.id ? 'bg-green-600' : 'bg-border'].join(
-                                            ' ',
-                                        )}
+                                        className={[
+                                            'mx-2 h-[2px] flex-1 rounded transition-all',
+                                            step > it.id ? 'bg-primary' : 'bg-border', // Garis Progres: Menggunakan Primary
+                                        ].join(' ')}
                                     />
                                 )}
                             </div>
@@ -380,11 +381,6 @@ export default function KirimNaskahPage() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
-
-                <div className="mn-4 rounded-lg bg-primary p-6 text-white">
-                    <h1 className="mb-2 text-2xl font-bold">Selamat datang, {auth.user.nama_lengkap}! 👋</h1>
-                    <p className="text-blue-100">Kirim naskah </p>
-                </div>
 
                 <Card className="rounded-2xl">
                     <CardContent className="p-4 sm:p-6">
