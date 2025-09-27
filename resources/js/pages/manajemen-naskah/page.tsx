@@ -1,13 +1,13 @@
 import ListNaskah from '@/components/list-naskah';
-import { KPIGrid } from '@/components/ui/progress-summary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { KPIGrid } from '@/components/ui/progress-summary';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { type Book } from '@/types/books';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Plus, Book as BookIcon, FileText, CheckCircle, Clock } from 'lucide-react';
+import { Book as BookIcon, CheckCircle, Clock, FileText, Plus } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -55,7 +55,7 @@ export default function ManajemenNaskah() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manajemen Naskah" />
-            <div className="mx-auto w-full max-w-7xl px-4 py-6">
+            <div className="w-full p-8">
                 {/* Header */}
                 <div className="mb-6 flex items-center justify-between">
                     <div>
@@ -75,28 +75,28 @@ export default function ManajemenNaskah() {
                     <KPIGrid
                         items={[
                             {
-                                title: "Total Naskah",
+                                title: 'Total Naskah',
                                 value: totalBooks,
                                 icon: <BookIcon className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: "primary",
+                                color: 'primary',
                             },
                             {
-                                title: "Draft",
+                                title: 'Draft',
                                 value: draftBooks,
                                 icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: "chart-2",
+                                color: 'chart-2',
                             },
                             {
-                                title: "Sedang Diproses",
+                                title: 'Sedang Diproses',
                                 value: inProgressBooks,
                                 icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: "chart-3",
+                                color: 'chart-3',
                             },
                             {
-                                title: "Terbit",
+                                title: 'Terbit',
                                 value: publishedBooks,
                                 icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: "destructive",
+                                color: 'destructive',
                             },
                         ]}
                     />

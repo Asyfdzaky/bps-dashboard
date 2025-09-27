@@ -61,7 +61,7 @@ export default function Dashboard() {
             title: 'Target Cetak',
             value: TargetTahunan,
             icon: <Trophy className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: 'chart-3' as const,
+            color: 'secondary' as const,
         },
         {
             title: 'Buku Published',
@@ -73,7 +73,7 @@ export default function Dashboard() {
             title: 'Sedang Dikerjakan',
             value: SedangDikerjakan,
             icon: <FileText className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: 'chart-2' as const,
+            color: 'secondary' as const,
         },
         {
             title: 'Mendekati Deadline',
@@ -100,13 +100,11 @@ export default function Dashboard() {
 
                     {/* Main Container with optimized spacing */}
                     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-                        <div className="container mx-auto px-3 py-1.5">
+                        <div className="container mx-auto p-8">
                             {/* Header Section - Reduced margin */}
                             <div className="mb-6 lg:mb-8">
                                 <div className="flex flex-col gap-2">
-                                    <h1 className="text-3xl font-bold tracking-tight text-primary lg:text-4xl">
-                                        Dashboard Manajemen Penerbitan Buku
-                                    </h1>
+                                    <h1 className="text-3xl font-bold tracking-tight lg:text-4xl">Dashboard Manajemen Penerbitan Buku</h1>
                                     <p className="text-sm text-muted-foreground lg:text-base">
                                         Pantau progress penerbitan dan kelola naskah dengan mudah
                                     </p>
@@ -138,10 +136,13 @@ export default function Dashboard() {
                                 <div className="lg:col-span-4">
                                     {/* Deadline Section */}
                                     <div className="mb-6">
-                                        <div className="mb-4">
-                                            <h3 className="text-lg font-medium text-foreground">Deadline Terdekat</h3>
+                                        <div className="flex items-center gap-3 py-0.5">
+                                            <Clock className="h-6 w-6 text-destructive" />
+                                            <span className="e text-lg font-semibold">Naskah Mendekati Deadline</span>
                                         </div>
-                                        <ListNaskahDeadline books={books} title="" />
+                                        <div className="mt-3">
+                                            <ListNaskahDeadline books={books} />
+                                        </div>
                                     </div>
 
                                     {/* Chart Section */}

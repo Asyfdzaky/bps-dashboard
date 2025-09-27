@@ -109,7 +109,7 @@ interface KPICardProps {
     title: string;
     value: number;
     icon: React.ReactNode;
-    color?: "primary" | "chart-2" | "chart-3" | "destructive";
+    color?: "primary" | "secondary" | "accent" | "destructive";
     className?: string;
 }
 
@@ -122,8 +122,8 @@ export function KPICard({
 }: KPICardProps) {
     const colorClasses = {
         primary: "text-primary bg-primary/10",
-        "chart-2": "text-chart-2 bg-chart-2/10",
-        "chart-3": "text-chart-3 bg-chart-3/10",
+        secondary: "text-secondary bg-secondary/10",
+        accent: "text-accent bg-accent/10",
         destructive: "text-destructive bg-destructive/10",
     };
 
@@ -135,8 +135,8 @@ export function KPICard({
                         <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</p>
                         <h3 className={cn("text-xl sm:text-2xl lg:text-3xl font-bold", {
                             "text-primary": color === "primary",
-                            "text-chart-2": color === "chart-2", 
-                            "text-chart-3": color === "chart-3",
+                            "text-secondary": color === "secondary", 
+                            "text-accent": color === "accent",
                             "text-destructive": color === "destructive",
                         })}>
                             {value}
@@ -157,7 +157,7 @@ interface KPIGridProps {
         title: string;
         value: number;
         icon: React.ReactNode;
-        color?: "primary" | "chart-2" | "chart-3" | "destructive";
+        color?: "primary" | "secondary" | "accent" | "destructive";
     }>;
     className?: string;
 }

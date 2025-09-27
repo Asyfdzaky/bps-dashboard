@@ -144,7 +144,7 @@ export default function DashboardPenulis({
     ];
 
     return (
-        <div className="w-full space-y-8 px-4 py-6">
+        <div className="mt-2.5 w-full space-y-8">
             <SummaryStats total={total} draft={draft} progres={progres} publish={publish} delta={delta} />
 
             <Card>
@@ -165,7 +165,7 @@ export default function DashboardPenulis({
                             </p>
                         </div>
                     ) : (
-                        <div className="overflow-hidden rounded-lg border border-gray-100 bg-gray-50/50">
+                        <div className="overflow-hidden rounded-lg border border-gray-100 bg-gray-50/50 p-2">
                             <DataTable columns={columns} data={filteredActivities} searchableColumn="judul naskah" onSearch={handleSearch} />
                         </div>
                     )}

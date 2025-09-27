@@ -13,6 +13,7 @@ use App\Http\Controllers\rolePermission\TeamController;
 use App\Http\Controllers\naskah\ProgresNaskahController;
 use App\Http\Controllers\dashboard\DashboardUserController;
 use App\Http\Controllers\rolePermission\PenggunaController;
+use App\Http\Controllers\taskController;
 use App\Http\Controllers\naskah\KirimNaskahController;
 
 use App\Http\Controllers\TargetController;
@@ -91,6 +92,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('manajemen-pengguna/{id}', [PenggunaController::class, 'destroy'])->name('manajemen-pengguna.destroy')->middleware('role:manajer');
 
     Route::get('progres-naskah', [ProgresNaskahController::class, 'index'])->name('progres-naskah');
+
+
+    Route::get('/manajemen-task', [taskController::class, 'index'])->name('manajemen-task');
+    Route::post('/manajemen-task', [taskController::class, 'store'])->name('manajemen-task.store');
+    Route::put('/manajemen-task/{id}', [taskController::class, 'update'])->name('manajemen-task.update');
+    Route::delete('/manajemen-task/{id}', [taskController::class, 'destroy'])->name('manajemen-task.destroy');
+    Route::post('/manajemen-task/reorder', [taskController::class, 'reorder'])->name('manajemen-task.reorder');
 });
 
 
