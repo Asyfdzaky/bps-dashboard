@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useEffect } from "react";
 
 interface ProgressSummaryItem {
     name: string;
@@ -39,21 +40,32 @@ export function ProgressSummary({
     const remainingCount = items.length - maxItems;
 
     // Komponen untuk menampilkan progress item
+    // Lebar label kiri (nama) disamakan untuk semua item agar garis progress selalu sejajar
+    // Tambahkan animasi entry: progress bar akan ngefill dari 0 ke persentase saat komponen mount
     const ProgressItem = ({ item, index }: { item: ProgressSummaryItem; index: number }) => {
+        const [fill, setFill] = React.useState(0);
         const percentage = showPercentage && calculatedTotal > 0 
             ? (item.count / calculatedTotal) * 100 
             : item.percentage ?? 0;
-            
+
+        useEffect(() => {
+            // Timeout agar animasi smooth saat entry
+            const timeout = setTimeout(() => {
+                setFill(percentage);
+            }, 100 + index * 60); // sedikit delay antar item biar lebih smooth
+            return () => clearTimeout(timeout);
+        }, [percentage, index]);
+
         return (
-            <div key={index} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium break-words">{item.name}</p>
+            <div key={index} className="flex items-center gap-3">
+                <div className="w-[140px] min-w-[100px] max-w-[180px]">
+                    <p className="text-sm font-medium break-words truncate">{item.name}</p>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="flex-1 sm:w-24 bg-muted rounded-full h-2">
+                <div className="flex-1 flex items-center gap-2">
+                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                         <div 
-                            className="bg-primary h-2 rounded-full transition-all duration-300" 
-                            style={{ width: `${percentage}%` }}
+                            className="bg-primary h-2 rounded-full transition-all duration-700"
+                            style={{ width: `${fill}%` }}
                         />
                     </div>
                     <Badge variant="outline" className="text-xs flex-shrink-0">

@@ -10,8 +10,8 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, Link } from '@inertiajs/react';
 import { BookCopy, TrendingUp, Calendar, Award, BarChart3, Plus, Eye, Edit, Trash2, Search} from 'lucide-react';
-import ApexCharts from 'apexcharts';
-import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Analisis Target Penerbitan', href: '/target' }];
 
@@ -78,31 +78,15 @@ type PageProps = {
     };
 };
 
-// Custom colors berdasarkan app.css CSS variables
-const chartColors = {
-    primary: 'hsl(224, 62%, 25%)', // oklch(28.9% 0.064 268.04) converted to HSL
-    secondary: 'hsl(48, 96%, 65%)', // oklch(85% 0.15 85) converted to HSL
-    chart1: 'hsl(14, 82%, 58%)', // oklch(0.646 0.222 41.116) 
-    chart2: 'hsl(196, 59%, 50%)', // oklch(0.6 0.118 184.704)
-    chart3: 'hsl(225, 30%, 39%)', // oklch(0.398 0.07 227.392)
-    chart4: 'hsl(42, 75%, 66%)', // oklch(0.828 0.189 84.429)
-    chart5: 'hsl(33, 80%, 62%)', // oklch(0.769 0.188 70.08)
-    destructive: 'hsl(10, 73%, 57%)', // oklch(0.577 0.245 27.325)
-    success: 'hsl(142, 71%, 45%)',
-    warning: 'hsl(38, 92%, 50%)',
-    muted: 'hsl(0, 0%, 56%)', // oklch(0.556 0 0)
-};
 
 export default function TargetPage({ 
     metrics, 
     acquisitionData, 
     monthlyProgressData,
     yearlyTargetData,
-    filters
+    filters,
+    userPublisher
 }: PageProps) {
-    const acquisitionChartRef = useRef<HTMLDivElement>(null);
-    const progressChartRef = useRef<HTMLDivElement>(null);
-    
     const [selectedMonth, setSelectedMonth] = useState(filters.selectedMonth.toString());
     const [selectedYear, setSelectedYear] = useState(filters.selectedYear.toString());
     const [selectedKategori, setSelectedKategori] = useState(filters.selectedKategori);
@@ -112,8 +96,6 @@ export default function TargetPage({
     const [yearFilter, setYearFilter] = useState('all');
     const [currentPage, setCurrentPage] = useState(1);
     const [deleteTarget, setDeleteTarget] = useState<{tahun: number, penerbit_id: number, nama_penerbit: string} | null>(null);
-    const acquisitionChartInstance = useRef<ApexCharts | null>(null);
-    const progressChartInstance = useRef<ApexCharts | null>(null);
 
     const handleFilterChange = useCallback((type: 'month' | 'year' | 'kategori', value: string) => {
         if (type === 'kategori') {
@@ -282,311 +264,16 @@ export default function TargetPage({
         }
     };
 
-    useEffect(() => {
-        // Destroy existing charts first
-        if (acquisitionChartInstance.current) {
-            acquisitionChartInstance.current.destroy();
-            acquisitionChartInstance.current = null;
-        }
-        if (progressChartInstance.current) {
-            progressChartInstance.current.destroy();
-            progressChartInstance.current = null;
-        }
-
-
-        // Chart Target Akuisisi
-        if (acquisitionChartRef.current && filteredAcquisitionData.length > 0) {
-            
-            // Filter series yang memiliki data (bukan semua 0)
-            const allSeries = [
-                {
-                    name: 'Target Akuisisi',
-                    data: filteredAcquisitionData.map(item => item.target_akuisisi),
-                    color: chartColors.chart2
-                },
-                {
-                    name: 'Realisasi Terbit',
-                    data: filteredAcquisitionData.map(item => item.realisasi_terbit),
-                    color: chartColors.chart5
-                },
-                {
-                    name: 'Naskah Masuk',
-                    data: filteredAcquisitionData.map(item => item.naskah_masuk),
-                    color: chartColors.muted
-                },
-                {
-                    name: 'Naskah Ditolak',
-                    data: filteredAcquisitionData.map(item => item.naskah_ditolak),
-                    color: '#000000'
-                }
-            ];
-            
-            // Hanya ambil series yang memiliki data (total > 0)
-            const activeSeries = allSeries.filter(series => 
-                series.data.some(value => value > 0)
-            );
-            
-            // Hitung column width berdasarkan jumlah series aktif
-            let columnWidth;
-            switch(activeSeries.length) {
-                case 1: columnWidth = '60%'; break;
-                case 2: columnWidth = '70%'; break;
-                case 3: columnWidth = '75%'; break;
-                default: columnWidth = '80%'; break;
-            }
-            
-            const acquisitionOptions = {
-                series: activeSeries,
-                chart: {
-                    type: 'bar' as const,
-                    height: 400,
-                    fontFamily: 'Instrument Sans, ui-sans-serif',
-                    toolbar: {
-                        show: false
-                    },
-                    background: 'transparent'
-                },
-                colors: activeSeries.map(series => series.color),
-                xaxis: {
-                    categories: filteredAcquisitionData.map(item => item.month),
-                    labels: {
-                        style: {
-                            fontSize: '13px',
-                            colors: chartColors.muted,
-                            fontWeight: 500
-                        }
-                    },
-                    axisBorder: {
-                        show: false
-                    },
-                    axisTicks: {
-                        show: false
-                    }
-                },
-                yaxis: {
-                    labels: {
-                        style: {
-                            fontSize: '12px',
-                            colors: chartColors.muted
-                        },
-                        formatter: function(val: number) {
-                            return Math.round(val).toString();
-                        }
-                    },
-                    title: {
-                        text: 'Jumlah',
-                        style: {
-                            fontSize: '12px',
-                            color: chartColors.muted
-                        }
-                    }
-                },
-                legend: {
-                    position: 'bottom' as const,
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    labels: {
-                        colors: chartColors.muted
-                    },
-                    markers: {
-                        width: 8,
-                        height: 8,
-                        radius: 4
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                plotOptions: {
-                    bar: {
-                        borderRadius: 6,
-                        columnWidth: columnWidth,
-                        dataLabels: {
-                            position: 'top'
-                        }
-                    }
-                },
-                grid: {
-                    borderColor: chartColors.muted + '20',
-                    strokeDashArray: 3,
-                    xaxis: {
-                        lines: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        lines: {
-                            show: true
-                        }
-                    }
-                },
-                tooltip: {
-                    style: {
-                        fontSize: '12px'
-                    },
-                    y: {
-                        formatter: function(val: number) {
-                            return val + ' buku';
-                        }
-                    }
-                }
-            };
-            
-            acquisitionChartInstance.current = new ApexCharts(acquisitionChartRef.current, acquisitionOptions);
-            acquisitionChartInstance.current.render();
-        }
-
-        // Chart Progress vs Target Bulanan
-        if (progressChartRef.current && filteredMonthlyProgressData.length > 0) {
-            
-            // Filter series yang memiliki data (bukan semua 0)
-            const allProgressSeries = [
-                {
-                    name: 'Selesai',
-                    data: filteredMonthlyProgressData.map(item => item.selesai),
-                    color: chartColors.chart2
-                },
-                {
-                    name: 'Target',
-                    data: filteredMonthlyProgressData.map(item => item.target),
-                    color: chartColors.chart5
-                }
-            ];
-            
-            // Hanya ambil series yang memiliki data (total > 0)
-            const activeProgressSeries = allProgressSeries.filter(series => 
-                series.data.some(value => value > 0)
-            );
-            
-            // Hitung column width berdasarkan jumlah series aktif
-            let progressColumnWidth;
-            switch(activeProgressSeries.length) {
-                case 1: progressColumnWidth = '60%'; break;
-                default: progressColumnWidth = '70%'; break;
-            }
-            
-            const progressOptions = {
-                series: activeProgressSeries,
-                chart: {
-                    type: 'bar' as const,
-                    height: 400,
-                    fontFamily: 'Instrument Sans, ui-sans-serif',
-                    toolbar: {
-                        show: false
-                    },
-                    background: 'transparent'
-                },
-                colors: activeProgressSeries.map(series => series.color),
-                xaxis: {
-                    categories: filteredMonthlyProgressData.map(item => item.month),
-                    labels: {
-                        style: {
-                            fontSize: '13px',
-                            colors: chartColors.muted,
-                            fontWeight: 500
-                        }
-                    },
-                    axisBorder: {
-                        show: false
-                    },
-                    axisTicks: {
-                        show: false
-                    }
-                },
-                yaxis: {
-                    labels: {
-                        style: {
-                            fontSize: '12px',
-                            colors: chartColors.muted
-                        },
-                        formatter: function(val: number) {
-                            return Math.round(val).toString();
-                        }
-                    },
-                    title: {
-                        text: 'Jumlah Buku',
-                        style: {
-                            fontSize: '12px',
-                            color: chartColors.muted
-                        }
-                    }
-                },
-                legend: {
-                    position: 'bottom' as const,
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    labels: {
-                        colors: chartColors.muted
-                    },
-                    markers: {
-                        width: 8,
-                        height: 8,
-                        radius: 4
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                plotOptions: {
-                    bar: {
-                        borderRadius: 6,
-                        columnWidth: progressColumnWidth,
-                        dataLabels: {
-                            position: 'top'
-                        }
-                    }
-                },
-                grid: {
-                    borderColor: chartColors.muted + '20',
-                    strokeDashArray: 3,
-                    xaxis: {
-                        lines: {
-                            show: false
-                        }
-                    },
-                    yaxis: {
-                        lines: {
-                            show: true
-                        }
-                    }
-                },
-                tooltip: {
-                    style: {
-                        fontSize: '12px'
-                    },
-                    y: {
-                        formatter: function(val: number) {
-                            return val + ' buku';
-                        }
-                    }
-                }
-            };
-            
-            progressChartInstance.current = new ApexCharts(progressChartRef.current, progressOptions);
-            progressChartInstance.current.render();
-        }
-
-        // Cleanup function
-        return () => {
-            if (acquisitionChartInstance.current) {
-                acquisitionChartInstance.current.destroy();
-                acquisitionChartInstance.current = null;
-            }
-            if (progressChartInstance.current) {
-                progressChartInstance.current.destroy();
-                progressChartInstance.current = null;
-            }
-        };
-    }, [filteredAcquisitionData, filteredMonthlyProgressData]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Analisis Target Penerbitan" />
-            <div className="mx-auto w-full max-w-7xl px-4 py-6">
+            <div className="p-4 sm:p-6 lg:p-8">
                 {/* Header */}
-                <div className="mb-6 flex justify-between items-start">
-                    <div>
-                        <h1 className="text-2xl font-bold text-foreground">
+                <div className="mb-6">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
+                        <div className="flex-1">
+                            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
                             Analisis {selectedKategori === 'target_terbit' ? 'Target Terbit' : 'Target Akuisisi'}
                         </h1>
                         <p className="mt-1 text-sm text-muted-foreground">
@@ -595,11 +282,11 @@ export default function TargetPage({
                     </div>
                     
                     {/* Global Filter and Add Button */}
-                    <div className="flex gap-4 items-center">
+                        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
                         <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-muted-foreground">Kategori:</span>
+                                <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Kategori:</span>
                             <Select value={selectedKategori} onValueChange={(value) => handleFilterChange('kategori', value)}>
-                                <SelectTrigger className="w-40 bg-background border-input">
+                                    <SelectTrigger className="w-full sm:w-40 bg-background border-input">
                                     <SelectValue placeholder="Kategori" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -610,23 +297,25 @@ export default function TargetPage({
                         </div>
 
                         {isLoading ? (
-                            <Button disabled className="bg-primary/50 text-primary-foreground cursor-not-allowed">
+                                <Button disabled className="w-full sm:w-auto bg-primary/50 text-primary-foreground cursor-not-allowed">
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-2"></div>
                                 Loading...
                             </Button>
                         ) : (
-                            <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                                <Button asChild className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground">
                                 <Link href="/target/create">
                                     <Plus className="mr-2 h-4 w-4" />
-                                    Add Target
+                                        <span className="hidden sm:inline">Add Target</span>
+                                        <span className="sm:hidden">Tambah</span>
                                 </Link>
                             </Button>
                         )}
+                        </div>
                     </div>
                 </div>
 
 
-                <div className="space-y-8">
+                <div className="space-y-6 lg:space-y-8">
                     {/* Metrik Utama menggunakan KPIGrid */}
                     <KPIGrid 
                         items={[
@@ -658,42 +347,49 @@ export default function TargetPage({
                     {/* Target Tahunan Table */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="flex items-center gap-2">
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                <div className="flex-1">
+                                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
                                         <BookCopy className="h-5 w-5 text-primary" />
+                                        <span className="hidden sm:inline">
                                         {selectedKategori === 'target_terbit' ? 'Target Terbit Tahunan' : 'Target Akuisisi Tahunan'}
+                                        </span>
+                                        <span className="sm:hidden">
+                                            Target {selectedKategori === 'target_terbit' ? 'Terbit' : 'Akuisisi'}
+                                        </span>
                                     </CardTitle>
-                                    <CardDescription>
+                                    <CardDescription className="mt-1">
                                         Ringkasan {selectedKategori === 'target_terbit' ? 'target terbit' : 'target akuisisi'} dan realisasi per tahun
                                     </CardDescription>
                                 </div>
                                 
                                 {/* Table Filter Controls */}
-                                <div className="flex items-center gap-4">
-                                    {/* Search */}
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
+                                    {/* Search - Hide for publisher role */}
+                                    {(!userPublisher) && (
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">Cari:</span>
+                                            <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Cari:</span>
                                         <Input
                                             placeholder="Nama penerbit..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                                            className="w-48"
+                                                className="w-full sm:w-48"
                                         />
-                                        <Button onClick={handleSearch} size="sm" variant="outline">
+                                            <Button onClick={handleSearch} size="sm" variant="outline" className="flex-shrink-0">
                                             <Search className="h-4 w-4" />
                                         </Button>
                                     </div>
+                                    )}
                                     
                                     {/* Year Filter */}
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">Tahun:</span>
+                                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Tahun:</span>
                                         <Select value={yearFilter} onValueChange={(value) => {
                                             setYearFilter(value);
                                             setCurrentPage(1); // Reset to first page when filtering
                                         }}>
-                                            <SelectTrigger className="w-32">
+                                            <SelectTrigger className="w-full sm:w-32">
                                                 <SelectValue placeholder="Semua Tahun" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -712,6 +408,101 @@ export default function TargetPage({
                         <CardContent>
                             {paginatedData && paginatedData.length > 0 ? (
                                 <div className="space-y-4">
+                                    {/* Mobile Card View */}
+                                    <div className="block lg:hidden space-y-3">
+                                        {paginatedData.map((target) => (
+                                            <div key={`${target.tahun}-${target.penerbit_id}`} className="border rounded-lg p-4 bg-card">
+                                                <div className="flex justify-between items-start mb-3">
+                                                    <div>
+                                                        <h4 className="font-semibold text-foreground">{target.nama_penerbit}</h4>
+                                                        <p className="text-sm text-muted-foreground">Tahun {target.tahun}</p>
+                                                    </div>
+                                                    <div className="flex gap-1">
+                                                        <Button size="sm" variant="outline" className="h-8 w-8 p-0" asChild>
+                                                            <Link href={`/target/${target.tahun}/${target.penerbit_id}/${target.kategori}/detail`}>
+                                                                <Eye className="h-4 w-4" />
+                                                            </Link>
+                                                        </Button>
+                                                        <Button size="sm" variant="outline" className="h-8 w-8 p-0" asChild>
+                                                            <Link href={`/target/${target.tahun}/${target.penerbit_id}/${target.kategori}/edit`}>
+                                                                <Edit className="h-4 w-4" />
+                                                            </Link>
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+                                                            onClick={() => setDeleteTarget({
+                                                                tahun: target.tahun,
+                                                                penerbit_id: target.penerbit_id,
+                                                                nama_penerbit: target.nama_penerbit
+                                                            })}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                                    <div>
+                                                        <p className="text-muted-foreground">Target Tahunan</p>
+                                                        <p className="font-medium text-primary">
+                                                            {target.target_tahunan > 0 ? target.target_tahunan.toLocaleString() : '-'} buku
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-muted-foreground">Target Bulanan</p>
+                                                        <p className="font-medium" style={{ color: 'hsl(var(--chart-2))' }}>
+                                                            {target.total_target_bulanan > 0 ? target.total_target_bulanan.toLocaleString() : '-'} buku
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-muted-foreground">Terpenuhi</p>
+                                                        <p className="font-medium" style={{ color: 'hsl(var(--chart-5))' }}>
+                                                            {target.total_realisasi.toLocaleString()} buku
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-muted-foreground">Bulan Aktif</p>
+                                                        <Badge variant="outline" className="text-xs">
+                                                            {Math.min(target.jumlah_bulan_ada_target, 12)}/12 bulan
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-3 pt-3 border-t">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`font-medium text-sm ${
+                                                            target.persentase_tercapai >= 100
+                                                                ? 'text-green-600'
+                                                                : target.persentase_tercapai >= 75
+                                                                    ? 'text-yellow-600'
+                                                                    : 'text-red-600'
+                                                        }`}>
+                                                            {target.persentase_tercapai.toFixed(1)}%
+                                                        </span>
+                                                        <div className="flex-1 bg-muted rounded-full h-2">
+                                                            <div
+                                                                className={`h-2 rounded-full transition-all duration-300 ${
+                                                                    target.persentase_tercapai >= 100
+                                                                        ? 'bg-green-500'
+                                                                        : target.persentase_tercapai >= 75
+                                                                            ? 'bg-yellow-500'
+                                                                            : 'bg-red-500'
+                                                                }`}
+                                                                style={{
+                                                                    width: `${Math.min(target.persentase_tercapai, 100)}%`
+                                                                }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Desktop Table View */}
+                                    <div className="hidden lg:block overflow-x-auto">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
@@ -823,21 +614,24 @@ export default function TargetPage({
                                             ))}
                                         </TableBody>
                                     </Table>
+                                    </div>
                                     
                                     {/* Pagination */}
                                     {totalPages > 1 && (
-                                        <div className="flex items-center justify-between">
-                                            <div className="text-sm text-muted-foreground">
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                            <div className="text-sm text-muted-foreground text-center sm:text-left">
                                                 Menampilkan {startIndex + 1} - {Math.min(endIndex, filteredData.length)} dari {filteredData.length} data
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center justify-center gap-1 sm:gap-2">
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
                                                     onClick={() => handlePageChange(currentPage - 1)}
                                                     disabled={currentPage === 1}
+                                                    className="px-3"
                                                 >
-                                                    Previous
+                                                    <span className="hidden sm:inline">Previous</span>
+                                                    <span className="sm:hidden">‹</span>
                                                 </Button>
                                                 
                                                 {/* Page Numbers */}
@@ -859,10 +653,10 @@ export default function TargetPage({
                                                                 key={pageNum}
                                                                 variant={pageNum === currentPage ? "default" : "outline"}
                                                                 size="sm"
-                                                                className="w-8 h-8 p-0"
+                                                                className="w-8 h-8 p-0 sm:w-10 sm:h-10"
                                                                 onClick={() => handlePageChange(pageNum)}
                                                             >
-                                                                {pageNum}
+                                                                <span className="text-xs sm:text-sm">{pageNum}</span>
                                                             </Button>
                                                         );
                                                     })}
@@ -873,8 +667,10 @@ export default function TargetPage({
                                                     size="sm"
                                                     onClick={() => handlePageChange(currentPage + 1)}
                                                     disabled={currentPage === totalPages}
+                                                    className="px-3"
                                                 >
-                                                    Next
+                                                    <span className="hidden sm:inline">Next</span>
+                                                    <span className="sm:hidden">›</span>
                                                 </Button>
                                             </div>
                                         </div>
@@ -901,21 +697,24 @@ export default function TargetPage({
                     {/* Chart Target Akuisisi */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <BarChart3 className="h-5 w-5" />
-                                        Target Akuisisi
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                <div className="flex-1">
+                                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                                        <BarChart3 className="h-5 w-5 text-primary" />
+                                        <span className="hidden sm:inline">Target Akuisisi</span>
+                                        <span className="sm:hidden">Target</span>
                                     </CardTitle>
-                                    <CardDescription>Perbandingan target dengan realisasi per bulan</CardDescription>
+                                    <CardDescription className="mt-1">
+                                        Perbandingan target dengan realisasi per bulan
+                                    </CardDescription>
                                 </div>
                                 
                                 {/* Chart Filter */}
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">Bulan:</span>
+                                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Bulan:</span>
                                         <Select value={selectedMonth} onValueChange={(value) => handleFilterChange('month', value)} disabled={isChartLoading}>
-                                            <SelectTrigger className={`w-32 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
+                                            <SelectTrigger className={`w-full sm:w-32 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
                                                 <SelectValue placeholder="Pilih Bulan" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -929,9 +728,9 @@ export default function TargetPage({
                                     </div>
                                     
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">Tahun:</span>
+                                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Tahun:</span>
                                         <Select value={selectedYear} onValueChange={(value) => handleFilterChange('year', value)} disabled={isChartLoading}>
-                                            <SelectTrigger className={`w-24 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
+                                            <SelectTrigger className={`w-full sm:w-24 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
                                                 <SelectValue placeholder="Tahun" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -948,7 +747,66 @@ export default function TargetPage({
                         </CardHeader>
                         <CardContent>
                             <div className="relative">
-                                <div ref={acquisitionChartRef}></div>
+                                {filteredAcquisitionData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={400}>
+                                        <BarChart data={filteredAcquisitionData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="var(--muted-foreground)" opacity={0.3} />
+                                            <XAxis
+                                                dataKey="month"
+                                                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                                            />
+                                            <YAxis
+                                                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                                                label={{ value: 'Jumlah', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: 'var(--muted-foreground)' } }}
+                                            />
+                                            <Tooltip
+                                                formatter={(value, name) => [
+                                                    `${value} buku`,
+                                                    name
+                                                ]}
+                                                labelStyle={{ color: 'var(--foreground)' }}
+                                                contentStyle={{
+                                                    backgroundColor: 'var(--card)',
+                                                    border: '1px solid var(--border)',
+                                                    borderRadius: '8px'
+                                                }}
+                                            />
+                                            <Legend />
+                                            <Bar
+                                                dataKey="target_akuisisi"
+                                                fill="var(--chart-2)"
+                                                name="Target Akuisisi"
+                                                radius={[4, 4, 0, 0]}
+                                            />
+                                            <Bar
+                                                dataKey="realisasi_terbit"
+                                                fill="var(--chart-5)"
+                                                name="Realisasi Terbit"
+                                                radius={[4, 4, 0, 0]}
+                                            />
+                                            <Bar
+                                                dataKey="naskah_masuk"
+                                                fill="var(--muted-foreground)"
+                                                name="Naskah Masuk"
+                                                radius={[4, 4, 0, 0]}
+                                            />
+                                            <Bar
+                                                dataKey="naskah_ditolak"
+                                                fill="var(--destructive)"
+                                                name="Naskah Ditolak"
+                                                radius={[4, 4, 0, 0]}
+                                            />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground" />
+                                        <h3 className="mt-4 text-lg font-medium text-muted-foreground">Belum ada data akuisisi</h3>
+                                        <p className="mt-2 text-sm text-muted-foreground">
+                                            Data akan muncul setelah ada target dan realisasi
+                                        </p>
+                                    </div>
+                                )}
                                 {isChartLoading && (
                                     <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
                                         <div className="flex items-center gap-3">
@@ -964,21 +822,24 @@ export default function TargetPage({
                     {/* Chart Progress vs Target Bulanan */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Award className="h-5 w-5" />
-                                        Progress vs Target Bulanan
+                            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                <div className="flex-1">
+                                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                                        <Award className="h-5 w-5 text-primary" />
+                                        <span className="hidden sm:inline">Progress vs Target Bulanan</span>
+                                        <span className="sm:hidden">Progress vs Target</span>
                                     </CardTitle>
-                                    <CardDescription>Perbandingan pencapaian dengan target bulanan</CardDescription>
+                                    <CardDescription className="mt-1">
+                                        Perbandingan pencapaian dengan target bulanan
+                                    </CardDescription>
                                 </div>
                                 
                                 {/* Chart Filter */}
-                                <div className="flex items-center gap-3">
+                                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">Bulan:</span>
+                                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Bulan:</span>
                                         <Select value={selectedMonth} onValueChange={(value) => handleFilterChange('month', value)} disabled={isChartLoading}>
-                                            <SelectTrigger className={`w-32 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
+                                            <SelectTrigger className={`w-full sm:w-32 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
                                                 <SelectValue placeholder="Pilih Bulan" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -992,9 +853,9 @@ export default function TargetPage({
                                     </div>
                                     
                                     <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">Tahun:</span>
+                                        <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Tahun:</span>
                                         <Select value={selectedYear} onValueChange={(value) => handleFilterChange('year', value)} disabled={isChartLoading}>
-                                            <SelectTrigger className={`w-24 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
+                                            <SelectTrigger className={`w-full sm:w-24 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
                                                 <SelectValue placeholder="Tahun" />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -1011,7 +872,54 @@ export default function TargetPage({
                         </CardHeader>
                         <CardContent>
                             <div className="relative">
-                                <div ref={progressChartRef}></div>
+                                {filteredMonthlyProgressData.length > 0 ? (
+                                    <ResponsiveContainer width="100%" height={400}>
+                                        <BarChart data={filteredMonthlyProgressData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="var(--muted-foreground)" opacity={0.3} />
+                                            <XAxis
+                                                dataKey="month"
+                                                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                                            />
+                                            <YAxis
+                                                tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                                                label={{ value: 'Jumlah Buku', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle', fill: 'var(--muted-foreground)' } }}
+                                            />
+                                            <Tooltip
+                                                formatter={(value, name) => [
+                                                    `${value} buku`,
+                                                    name
+                                                ]}
+                                                labelStyle={{ color: 'var(--foreground)' }}
+                                                contentStyle={{
+                                                    backgroundColor: 'var(--card)',
+                                                    border: '1px solid var(--border)',
+                                                    borderRadius: '8px'
+                                                }}
+                                            />
+                                            <Legend />
+                                            <Bar
+                                                dataKey="selesai"
+                                                fill="var(--chart-2)"
+                                                name="Selesai"
+                                                radius={[4, 4, 0, 0]}
+                                            />
+                                            <Bar
+                                                dataKey="target"
+                                                fill="var(--chart-5)"
+                                                name="Target"
+                                                radius={[4, 4, 0, 0]}
+                                            />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                ) : (
+                                <div className="text-center py-12">
+                                        <Award className="mx-auto h-12 w-12 text-muted-foreground" />
+                                        <h3 className="mt-4 text-lg font-medium text-muted-foreground">Belum ada data progress</h3>
+                                    <p className="mt-2 text-sm text-muted-foreground">
+                                            Data akan muncul setelah ada target dan realisasi
+                                    </p>
+                                </div>
+                                )}
                                 {isChartLoading && (
                                     <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
                                         <div className="flex items-center gap-3">
@@ -1024,92 +932,24 @@ export default function TargetPage({
                         </CardContent>
                     </Card>
 
-                    {/* Chart Status Naskah */}
-                    <Card>
-                        <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <BookCopy className="h-5 w-5" />
-                                        Status Naskah
-                                    </CardTitle>
-                                    <CardDescription>Status naskah yang masuk per bulan</CardDescription>
-                                </div>
-                                
-                                {/* Chart Filter */}
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">Bulan:</span>
-                                        <Select value={selectedMonth} onValueChange={(value) => handleFilterChange('month', value)} disabled={isChartLoading}>
-                                            <SelectTrigger className={`w-32 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
-                                                <SelectValue placeholder="Pilih Bulan" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {filters.months.map((month) => (
-                                                    <SelectItem key={month.value} value={month.value.toString()}>
-                                                        {month.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm font-medium text-muted-foreground">Tahun:</span>
-                                        <Select value={selectedYear} onValueChange={(value) => handleFilterChange('year', value)} disabled={isChartLoading}>
-                                            <SelectTrigger className={`w-24 bg-background border-input ${isChartLoading ? 'opacity-50' : ''}`}>
-                                                <SelectValue placeholder="Tahun" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {filters.years.map((year) => (
-                                                    <SelectItem key={year.value} value={year.value.toString()}>
-                                                        {year.label}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="relative">
-                                <div className="text-center py-12">
-                                    <BookCopy className="mx-auto h-12 w-12 text-muted-foreground" />
-                                    <h3 className="mt-4 text-lg font-medium text-muted-foreground">Chart Status Naskah</h3>
-                                    <p className="mt-2 text-sm text-muted-foreground">
-                                        Chart ini akan menampilkan status naskah (diterima/ditolak) per bulan
-                                    </p>
-                                </div>
-                                {isChartLoading && (
-                                    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center rounded-lg">
-                                        <div className="flex items-center gap-3">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                                            <span className="text-sm font-medium text-foreground">Memuat chart...</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
                 </div>
                 
                 {/* Delete Confirmation Dialog */}
                 <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-                    <DialogContent>
+                    <DialogContent className="w-[95vw] max-w-md">
                         <DialogHeader>
-                            <DialogTitle>Konfirmasi Hapus Target</DialogTitle>
-                            <DialogDescription>
+                            <DialogTitle className="text-lg">Konfirmasi Hapus Target</DialogTitle>
+                            <DialogDescription className="text-sm">
                                 Apakah Anda yakin ingin menghapus semua target untuk tahun {deleteTarget?.tahun} - {deleteTarget?.nama_penerbit}?
                                 <br />
                                 <span className="text-red-600 font-medium">Tindakan ini tidak dapat dibatalkan.</span>
                             </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
+                        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                            <Button variant="outline" onClick={() => setDeleteTarget(null)} className="w-full sm:w-auto">
                                 Batal
                             </Button>
-                            <Button variant="destructive" onClick={handleDeleteConfirm}>
+                            <Button variant="destructive" onClick={handleDeleteConfirm} className="w-full sm:w-auto">
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Hapus Target
                             </Button>

@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { KPIGrid, KPICard } from '@/components/ui/progress-summary';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm} from '@inertiajs/react';
@@ -121,79 +122,98 @@ export default function TargetDetailPage({ tahun, penerbit_id, kategori, nama_pe
                 </div>
 
                 {/* Summary Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">
-                                Target {kategori === 'target_terbit' ? 'Terbit' : 'Akuisisi'} Tahunan
-                            </CardTitle>
-                            <BookCopy className="h-5 w-5 text-primary" />
-                        </CardHeader>
-                        <CardContent>
-                            {editMode ? (
-                                <div className="space-y-2">
-                                    <Input
-                                        type="number"
-                                        min="0"
-                                        value={data.target_tahunan === 0 ? '' : data.target_tahunan}
-                                        onChange={(e) => {
-                                            const value = e.target.value;
-                                            const numericValue = value === '' ? 0 : parseInt(value) || 0;
-                                            setData('target_tahunan', numericValue);
-                                        }}
-                                        className="text-lg font-bold"
-                                        placeholder="Masukkan target tahunan"
-                                    />
-                                    <p className="text-xs text-muted-foreground">target utama</p>
-                                    {errors.target_tahunan && <p className="text-xs text-destructive">{errors.target_tahunan}</p>}
+                {!editMode ? (
+                    <KPIGrid 
+                        items={[
+                            {
+                                title: `Target ${kategori === 'target_terbit' ? 'Terbit' : 'Akuisisi'} Tahunan`,
+                                value: targetTahunan || 0,
+                                icon: <BookCopy className="h-5 w-5" />,
+                                color: "primary",
+                                description: "target utama"
+                            },
+                            {
+                                title: "Target Bulanan",
+                                value: totalTarget,
+                                icon: <Calendar className="h-5 w-5" />,
+                                color: "primary",
+                                description: "total per bulan"
+                            },
+                            {
+                                title: "Total Realisasi",
+                                value: totalRealisasi,
+                                icon: <TrendingUp className="h-5 w-5" />,
+                                color: "primary",
+                                description: "buku terealisasi"
+                            },
+                            {
+                                title: "Persentase Tercapai",
+                                value: parseFloat(overallPercentage.toFixed(1)),
+                                icon: <Calendar className="h-5 w-5" />,
+                                color: "primary",
+                                description: "dari target bulanan"
+                            }
+                        ]}
+                        className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                    />
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Target Tahunan - Custom Card dengan design KPI Grid yang persis */}
+                        <Card className="relative overflow-hidden">
+                            <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
+                                            Target {kategori === 'target_terbit' ? 'Terbit' : 'Akuisisi'} Tahunan
+                                        </p>
+                                        <div className="space-y-2">
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                value={data.target_tahunan === 0 ? '' : data.target_tahunan}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    const numericValue = value === '' ? 0 : parseInt(value) || 0;
+                                                    setData('target_tahunan', numericValue);
+                                                }}
+                                                className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground border border-input  focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                                                placeholder="0"
+                                            />
+                                            <p className="text-xs text-muted-foreground mt-1">target utama</p>
+                                            {errors.target_tahunan && <p className="text-xs text-destructive mt-1">{errors.target_tahunan}</p>}
+                                        </div>
+                                    </div>
+                                    <div className="flex h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 items-center justify-center rounded-full flex-shrink-0 text-primary bg-primary/10">
+                                        <BookCopy className="h-5 w-5" />
+                                    </div>
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="text-2xl font-bold text-primary">{targetTahunan?.toLocaleString() || 0}</div>
-                                    <p className="text-xs text-muted-foreground">target utama</p>
-                                </>
-                            )}
-                        </CardContent>
-                    </Card>
+                            </CardContent>
+                        </Card>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Target Bulanan</CardTitle>
-                            <Calendar className="h-5 w-5" style={{ color: 'hsl(var(--chart-2))' }} />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold" style={{ color: 'hsl(var(--chart-2))' }}>{totalTarget.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">total per bulan</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Realisasi</CardTitle>
-                            <TrendingUp className="h-5 w-5" style={{ color: 'hsl(var(--chart-5))' }} />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold" style={{ color: 'hsl(var(--chart-5))' }}>{totalRealisasi.toLocaleString()}</div>
-                            <p className="text-xs text-muted-foreground">buku terealisasi</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Persentase Tercapai</CardTitle>
-                            <Calendar className="h-5 w-5 text-green-600" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className={`text-2xl font-bold ${
-                                overallPercentage >= 100 ? 'text-green-600' : 
-                                overallPercentage >= 75 ? 'text-yellow-600' : 'text-red-600'
-                            }`}>
-                                {overallPercentage.toFixed(1)}%
-                            </div>
-                            <p className="text-xs text-muted-foreground">dari target bulanan</p>
-                        </CardContent>
-                    </Card>
-                </div>
+                        {/* KPI Cards lainnya */}
+                        <KPICard
+                            title="Target Bulanan"
+                            value={totalTarget}
+                            icon={<Calendar className="h-5 w-5" />}
+                            color="primary"
+                            description="total per bulan"
+                        />
+                        <KPICard
+                            title="Total Realisasi"
+                            value={totalRealisasi}
+                            icon={<TrendingUp className="h-5 w-5" />}
+                            color="primary"
+                            description="buku terealisasi"
+                        />
+                        <KPICard
+                            title="Persentase Tercapai"
+                            value={parseFloat(overallPercentage.toFixed(1))}
+                            icon={<Calendar className="h-5 w-5" />}
+                            color="primary"
+                            description="dari target bulanan"
+                        />
+                    </div>
+                )}
 
                 {/* Monthly Targets */}
                 <Card>

@@ -85,7 +85,7 @@ export default function ProgressPage() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Progres Naskah" />
-            <div className="flex h-full flex-1 flex-col gap-4 sm:gap-6 p-4 sm:p-6 max-w-full overflow-hidden">
+            <div className="flex h-full flex-1 flex-col gap-4 sm:gap-6 p-4 sm:p-8 max-w-full overflow-hidden">
                 {/* KPI Cards */}
                 <KPIGrid
                     items={[

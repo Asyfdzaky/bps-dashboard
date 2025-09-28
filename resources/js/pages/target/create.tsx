@@ -89,12 +89,6 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
         }
     }, [data.penerbit_id]);
 
-    const updateMonthlyTarget = (index: number, value: number) => {
-        const newMonthlyTargets = [...data.monthly_targets];
-        newMonthlyTargets[index] = { ...newMonthlyTargets[index], jumlah_target: value };
-        setData('monthly_targets', newMonthlyTargets);
-    };
-
     const handleYearlyTargetChange = (value: string) => {
         // Remove leading zeros and handle empty string
         const cleanValue = value.replace(/^0+/, '') || '0';

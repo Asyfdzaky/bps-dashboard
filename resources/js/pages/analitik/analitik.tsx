@@ -1,12 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { KPIGrid } from '@/components/ui/progress-summary';
+import { KPIGrid, ProgressSummary } from '@/components/ui/progress-summary';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { TrendingUp, Clock, Users, CheckCircle, AlertTriangle, BookOpen, Target, Award, Activity } from 'lucide-react';
-import ApexCharts from 'apexcharts';
-import { useEffect, useRef } from 'react';
+import { PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Analitik Kinerja Tim', href: '/analitik' }];
 
@@ -34,16 +32,6 @@ type MonthlyProductivity = {
     books: number;
 };
 
-type StagePerformance = {
-    nama_tugas: string;
-    urutan: number;
-    total_tasks: number;
-    completed_tasks: number;
-    overdue_tasks: number;
-    completion_rate: number;
-    overdue_rate: number;
-    avg_completion_days: number;
-};
 
 type TopPerformer = {
     user_id: string;
@@ -75,365 +63,26 @@ type PageProps = {
     metrics: Metrics;
     bookStatusDistribution: BookStatusDistribution[];
     monthlyProductivity: MonthlyProductivity[];
-    stagePerformance: StagePerformance[];
     topPerformers: TopPerformer[];
     workloadDistribution: WorkloadDistribution[];
     deadlinePerformance: DeadlinePerformance;
 };
 
-// Custom colors berdasarkan app.css CSS variables
-const chartColors = {
-    primary: 'hsl(224, 62%, 25%)', // oklch(28.9% 0.064 268.04) converted to HSL
-    secondary: 'hsl(48, 96%, 65%)', // oklch(85% 0.15 85) converted to HSL
-    chart1: 'hsl(14, 82%, 58%)', // oklch(0.646 0.222 41.116) 
-    chart2: 'hsl(196, 59%, 50%)', // oklch(0.6 0.118 184.704)
-    chart3: 'hsl(225, 30%, 39%)', // oklch(0.398 0.07 227.392)
-    chart4: 'hsl(42, 75%, 66%)', // oklch(0.828 0.189 84.429)
-    chart5: 'hsl(33, 80%, 62%)', // oklch(0.769 0.188 70.08)
-    destructive: 'hsl(10, 73%, 57%)', // oklch(0.577 0.245 27.325)
-    success: 'hsl(142, 71%, 45%)',
-    warning: 'hsl(38, 92%, 50%)',
-    muted: 'hsl(0, 0%, 56%)', // oklch(0.556 0 0)
-};
 
 export default function Analitik({ 
     metrics, 
     bookStatusDistribution, 
     monthlyProductivity, 
-    stagePerformance, 
     topPerformers, 
     workloadDistribution, 
     deadlinePerformance 
 }: PageProps) {
-    const pieChartRef = useRef<HTMLDivElement>(null);
-    const areaChartRef = useRef<HTMLDivElement>(null);
-    const barChartRef = useRef<HTMLDivElement>(null);
-    const workloadChartRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        // Pie Chart untuk Distribusi Status Buku
-        if (pieChartRef.current) {
-            pieChartRef.current.innerHTML = '';
-            
-            const pieOptions = {
-                series: bookStatusDistribution.map(item => item.value),
-                chart: {
-                    type: 'pie' as const,
-                    height: 350,
-                    fontFamily: 'Instrument Sans, ui-sans-serif',
-                    toolbar: {
-                        show: false
-                    }
-                },
-                labels: bookStatusDistribution.map(item => item.name),
-                colors: [chartColors.chart1, chartColors.chart4, chartColors.chart3],
-                legend: {
-                    position: 'bottom' as const,
-                    fontSize: '14px',
-                    labels: {
-                        colors: chartColors.muted
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    formatter: function(val: number) {
-                        return Math.round(val) + '%';
-                    },
-                    style: {
-                        fontSize: '14px',
-                        fontWeight: 'bold',
-                        colors: ['#fff']
-                    }
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val: number) {
-                            return val + ' buku';
-                        }
-                    }
-                }
-            };
-            
-            const pieChart = new ApexCharts(pieChartRef.current, pieOptions);
-            pieChart.render();
-        }
-
-        // Area Chart untuk Produktivitas Bulanan
-        if (areaChartRef.current && monthlyProductivity.length > 0) {
-            // Clear any existing chart first
-            areaChartRef.current.innerHTML = '';
-            
-            const areaOptions = {
-                series: [
-                    {
-                        name: 'Tugas Selesai',
-                        data: monthlyProductivity.map(item => item.tasks),
-                        color: chartColors.chart2
-                    },
-                    {
-                        name: 'Buku Selesai',
-                        data: monthlyProductivity.map(item => item.books),
-                        color: chartColors.chart3
-                    }
-                ],
-                chart: {
-                    type: 'area' as const,
-                    height: 350,
-                    fontFamily: 'Instrument Sans, ui-sans-serif',
-                    stacked: true,
-                    toolbar: {
-                        show: false
-                    },
-                    zoom: {
-                        enabled: false
-                    }
-                },
-                colors: [chartColors.chart2, chartColors.chart3],
-                xaxis: {
-                    categories: monthlyProductivity.map(item => item.month),
-                    labels: {
-                        style: {
-                            fontSize: '12px',
-                            colors: chartColors.muted
-                        }
-                    }
-                },
-                yaxis: {
-                    labels: {
-                        style: {
-                            fontSize: '12px',
-                            colors: chartColors.muted
-                        }
-                    }
-                },
-                fill: {
-                    type: 'gradient',
-                    gradient: {
-                        shadeIntensity: 1,
-                        opacityFrom: 0.7,
-                        opacityTo: 0.3,
-                        stops: [0, 90, 100]
-                    }
-                },
-                legend: {
-                    position: 'top' as const,
-                    fontSize: '14px',
-                    labels: {
-                        colors: chartColors.muted
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                },
-                stroke: {
-                    curve: 'smooth',
-                    width: 2
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val: number) {
-                            return val.toString();
-                        }
-                    }
-                }
-            };
-            
-            const areaChart = new ApexCharts(areaChartRef.current, areaOptions);
-            areaChart.render();
-        }
-
-        // Bar Chart untuk Kinerja per Tahap
-        if (barChartRef.current) {
-            barChartRef.current.innerHTML = '';
-            
-            const barOptions = {
-                series: [
-                    {
-                        name: 'Tingkat Selesai (%)',
-                        data: stagePerformance.map(item => item.completion_rate),
-                        color: chartColors.chart2
-                    },
-                    {
-                        name: 'Rata-rata Hari',
-                        data: stagePerformance.map(item => item.avg_completion_days),
-                        color: chartColors.chart4
-                    }
-                ],
-                chart: {
-                    type: 'bar' as const,
-                    height: 400,
-                    fontFamily: 'Instrument Sans, ui-sans-serif',
-                    toolbar: {
-                        show: false
-                    }
-                },
-                colors: [chartColors.chart2, chartColors.chart4],
-                xaxis: {
-                    categories: stagePerformance.map(item => item.nama_tugas),
-                    labels: {
-                        style: {
-                            fontSize: '11px',
-                            colors: chartColors.muted
-                        },
-                        rotate: -45,
-                        maxHeight: 120
-                    }
-                },
-                yaxis: [
-                    {
-                        title: {
-                            text: 'Tingkat Selesai (%)',
-                            style: {
-                                fontSize: '12px',
-                                color: chartColors.muted
-                            }
-                        },
-                        labels: {
-                            style: {
-                                fontSize: '12px',
-                                colors: chartColors.muted
-                            }
-                        }
-                    },
-                    {
-                        opposite: true,
-                        title: {
-                            text: 'Rata-rata Hari',
-                            style: {
-                                fontSize: '12px',
-                                color: chartColors.muted
-                            }
-                        },
-                        labels: {
-                            style: {
-                                fontSize: '12px',
-                                colors: chartColors.muted
-                            }
-                        }
-                    }
-                ],
-                legend: {
-                    position: 'top' as const,
-                    fontSize: '14px',
-                    labels: {
-                        colors: chartColors.muted
-                    }
-                },
-                dataLabels: {
-                    enabled: false
-                }
-            };
-            
-            const barChart = new ApexCharts(barChartRef.current, barOptions);
-            barChart.render();
-        }
-
-        // Horizontal Bar Chart untuk Beban Kerja
-        if (workloadChartRef.current && workloadDistribution.length > 0) {
-            workloadChartRef.current.innerHTML = '';
-            
-            const workloadData = workloadDistribution.slice(0, 6); // Limit to 6 for better readability
-            const workloadOptions = {
-                series: [
-                    {
-                        name: 'Tugas Aktif',
-                        data: workloadData.map(item => ({
-                            x: item.nama_lengkap,
-                            y: item.active_tasks
-                        }))
-                    },
-                    {
-                        name: 'Terlambat',
-                        data: workloadData.map(item => ({
-                            x: item.nama_lengkap,
-                            y: item.overdue_tasks
-                        }))
-                    }
-                ],
-                chart: {
-                    type: 'bar' as const,
-                    height: 350,
-                    fontFamily: 'Instrument Sans, ui-sans-serif',
-                    toolbar: {
-                        show: false
-                    }
-                },
-                colors: [chartColors.chart1, chartColors.destructive],
-                plotOptions: {
-                    bar: {
-                        horizontal: true,
-                        barHeight: '65%',
-                        dataLabels: {
-                            position: 'top'
-                        }
-                    }
-                },
-                xaxis: {
-                    type: 'numeric',
-                    labels: {
-                        style: {
-                            fontSize: '12px',
-                            colors: chartColors.muted
-                        }
-                    },
-                    title: {
-                        text: 'Jumlah Tugas',
-                        style: {
-                            fontSize: '12px',
-                            color: chartColors.muted
-                        }
-                    }
-                },
-                yaxis: {
-                    labels: {
-                        style: {
-                            fontSize: '11px',
-                            colors: chartColors.muted
-                        }
-                    }
-                },
-                legend: {
-                    position: 'top' as const,
-                    fontSize: '14px',
-                    labels: {
-                        colors: chartColors.muted
-                    }
-                },
-                dataLabels: {
-                    enabled: false,
-                },
-                tooltip: {
-                    y: {
-                        formatter: function(val: number) {
-                            return val + ' tugas';
-                        }
-                    }
-                },
-                grid: {
-                    borderColor: chartColors.muted + '30'
-                }
-            };
-            
-            const workloadChart = new ApexCharts(workloadChartRef.current, workloadOptions);
-            workloadChart.render();
-        }
-
-        // Cleanup function
-        return () => {
-            const charts = document.querySelectorAll('.apexcharts-canvas');
-            charts.forEach(chart => {
-                const parent = chart.parentElement;
-                if (parent) {
-                    parent.innerHTML = '';
-                }
-            });
-        };
-    }, [bookStatusDistribution, monthlyProductivity, stagePerformance, workloadDistribution]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Analitik Kinerja Tim" />
-            <div className="mx-auto w-full max-w-7xl px-4 py-6">
+            <div className="p-8">
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-900">Analitik Kinerja Tim</h1>
@@ -479,60 +128,119 @@ export default function Analitik({
                     {/* Charts Row 1 */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Status Distribusi Buku */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Target className="h-5 w-5" />
-                                Distribusi Status Buku
-                            </CardTitle>
-                            <CardDescription>Persentase status buku dalam sistem</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div ref={pieChartRef}></div>
-                        </CardContent>
-                    </Card>
+                    <div className="bg-card border rounded-lg p-4">
+                        <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <Target className="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold">Distribusi Status Buku</h3>
+                                    <p className="text-sm text-muted-foreground">Persentase status buku dalam sistem</p>
+                                </div>
+                            </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={350}>
+                            <PieChart>
+                                <Pie
+                                    data={bookStatusDistribution}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={60}
+                                    outerRadius={120}
+                                    dataKey="value"
+                                    label={({ percentage }) => `${percentage}%`}
+                                    labelLine={false}
+                                >
+                                    {bookStatusDistribution.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={`var(--chart-${index + 1})`}
+                                        />
+                                    ))}
+                                </Pie>
+                                <Tooltip formatter={(value) => [`${value} buku`, '']} />
+                                <Legend
+                                    verticalAlign="bottom"
+                                    height={36}
+                                    formatter={(value) => value}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
 
                     {/* Produktivitas Bulanan */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <TrendingUp className="h-5 w-5" />
-                                Produktivitas 6 Bulan Terakhir
-                            </CardTitle>
-                            <CardDescription>Tugas dan buku yang diselesaikan per bulan</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div ref={areaChartRef}></div>
-                        </CardContent>
-                    </Card>
+                    <div className="bg-card border rounded-lg p-4">
+                        <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <TrendingUp className="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold">Produktivitas 6 Bulan Terakhir</h3>
+                                    <p className="text-sm text-muted-foreground">Tugas dan buku yang diselesaikan per bulan</p>
+                                </div>
+                            </div>
+                        </div>
+                        <ResponsiveContainer width="100%" height={350}>
+                            <AreaChart data={monthlyProductivity}>
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--muted-foreground)" opacity={0.3} />
+                                <XAxis
+                                    dataKey="month"
+                                    tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }}
+                                />
+                                <YAxis tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                                <Tooltip
+                                    formatter={(value, name) => [
+                                        `${value} ${name === 'tasks' ? 'tugas' : 'buku'}`,
+                                        name === 'tasks' ? 'Tugas Selesai' : 'Buku Selesai'
+                                    ]}
+                                    labelStyle={{ color: 'var(--foreground)' }}
+                                    contentStyle={{
+                                        backgroundColor: 'var(--card)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '8px'
+                                    }}
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="tasks"
+                                    stackId="1"
+                                    stroke="var(--chart-3)"
+                                    fill="var(--chart-3)"
+                                    fillOpacity={0.6}
+                                    name="tasks"
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="books"
+                                    stackId="1"
+                                    stroke="var(--chart-1)"
+                                    fill="var(--chart-1)"
+                                    fillOpacity={0.6}
+                                    name="books"
+                                />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
 
-                {/* Kinerja per Tahap */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Clock className="h-5 w-5" />
-                            Kinerja per Tahap Produksi
-                        </CardTitle>
-                        <CardDescription>Analisis tingkat penyelesaian dan waktu per tahap</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div ref={barChartRef}></div>
-                    </CardContent>
-                </Card>
 
                 {/* Charts Row 2 */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Top Performers */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Award className="h-5 w-5" />
-                                Top Performers
-                            </CardTitle>
-                            <CardDescription>Anggota tim dengan kinerja terbaik</CardDescription>
-                        </CardHeader>
-                        <CardContent>
+                    <div className="bg-card border rounded-lg p-4">
+                        <div className="mb-4">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <Award className="h-4 w-4" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-semibold">Top Performers</h3>
+                                    <p className="text-sm text-muted-foreground">Anggota tim dengan kinerja terbaik</p>
+                                </div>
+                            </div>
+                        </div>
                             <div className="space-y-4">
                                 {topPerformers.slice(0, 5).map((performer, index) => (
                                     <div key={performer.user_id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
@@ -558,58 +266,77 @@ export default function Analitik({
                                     </div>
                                 ))}
                             </div>
-                        </CardContent>
-                    </Card>
+                    </div>
 
                     {/* Distribusi Beban Kerja */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Activity className="h-5 w-5" />
-                                Distribusi Beban Kerja Aktif
-                            </CardTitle>
-                            <CardDescription>Tugas aktif per anggota tim</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div ref={workloadChartRef}></div>
-                        </CardContent>
-                    </Card>
+                    <div className="bg-card border rounded-lg">
+                        <div className="p-4 pb-0">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">
+                                    <Activity className="h-4 w-4" />
                 </div>
-
-                {/* Deadline Performance Summary */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Clock className="h-5 w-5" />
-                            Ringkasan Kinerja Deadline
-                        </CardTitle>
-                        <CardDescription>Distribusi kinerja berdasarkan tenggat waktu</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="text-center p-4 rounded-lg border">
-                                <CheckCircle className="h-8 w-8 mx-auto mb-2" style={{ color: chartColors.success }} />
-                                <div className="text-2xl font-bold" style={{ color: chartColors.success }}>{deadlinePerformance.on_time}</div>
-                                <p className="text-sm text-muted-foreground">Tepat Waktu</p>
+                                <div>
+                                    <h3 className="text-lg font-semibold">Distribusi Beban Kerja Aktif</h3>
+                                    <p className="text-sm text-muted-foreground">Tugas aktif per anggota tim</p>
                             </div>
-                            <div className="text-center p-4 rounded-lg border">
-                                <Clock className="h-8 w-8 mx-auto mb-2" style={{ color: chartColors.warning }} />
-                                <div className="text-2xl font-bold" style={{ color: chartColors.warning }}>{deadlinePerformance.upcoming}</div>
-                                <p className="text-sm text-muted-foreground">Mendekati Deadline</p>
-                            </div>
-                            <div className="text-center p-4 rounded-lg border">
-                                <AlertTriangle className="h-8 w-8 mx-auto mb-2" style={{ color: chartColors.chart4 }} />
-                                <div className="text-2xl font-bold" style={{ color: chartColors.chart4 }}>{deadlinePerformance.late}</div>
-                                <p className="text-sm text-muted-foreground">Terlambat</p>
-                            </div>
-                            <div className="text-center p-4 rounded-lg border">
-                                <AlertTriangle className="h-8 w-8 mx-auto mb-2" style={{ color: chartColors.destructive }} />
-                                <div className="text-2xl font-bold" style={{ color: chartColors.destructive }}>{deadlinePerformance.overdue}</div>
-                                <p className="text-sm text-muted-foreground">Lewat Deadline</p>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="px-4 pb-4">
+                            <ProgressSummary
+                                items={workloadDistribution.slice(0, 8).map((member) => {
+                                    const totalTasks = member.active_tasks + member.completed_tasks;
+                                    const completionRate = totalTasks > 0 ? Math.round((member.completed_tasks / totalTasks) * 100) : 0;
+
+                                    return {
+                                        name: member.nama_lengkap,
+                                        count: member.active_tasks,
+                                        percentage: completionRate,
+                                        description: `${member.completed_tasks} selesai${member.overdue_tasks > 0 ? ` • ${member.overdue_tasks} terlambat` : ''}`
+                                    };
+                                })}
+                                total={workloadDistribution.reduce((sum, member) => sum + member.active_tasks, 0)}
+                                maxItems={8}
+                                showPercentage={true}
+                                className="border-0 shadow-none bg-transparent"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Deadline Performance Summary - KPIGrid */}
+                <KPIGrid
+                    items={[
+                        {
+                            title: "Tepat Waktu",
+                            value: deadlinePerformance.on_time,
+                            icon: <CheckCircle className="h-5 w-5" />,
+                            color: "accent",
+                            description: "Tugas selesai sesuai deadline"
+                        },
+                        {
+                            title: "Mendekati Deadline",
+                            value: deadlinePerformance.upcoming,
+                            icon: <Clock className="h-5 w-5" />,
+                            color: "accent",
+                            description: "Tugas dengan deadline dalam 7 hari"
+                        },
+                        {
+                            title: "Terlambat",
+                            value: deadlinePerformance.late,
+                            icon: <AlertTriangle className="h-5 w-5" />,
+                            color: "accent",
+                            description: "Tugas selesai melewati deadline"
+                        },
+                        {
+                            title: "Lewat Deadline",
+                            value: deadlinePerformance.overdue,
+                            icon: <AlertTriangle className="h-5 w-5" />,
+                            color: "accent",
+                            description: "Tugas yang sudah melewati deadline"
+                        }
+                    ]}
+                    className="grid-cols-2 md:grid-cols-4"
+                />
                 </div>
             </div>
         </AppLayout>

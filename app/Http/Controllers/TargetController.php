@@ -211,8 +211,11 @@ class TargetController extends Controller
         }
         
         // 5. Get all yearly targets data (no pagination, search, or filter - all client-side)
-        $yearlyTargetsQuery = $targetQuery->clone()
+        $yearlyTargetsQuery = DB::table('target')
             ->join('publishers', 'target.penerbit_id', '=', 'publishers.penerbit_id')
+            ->when($user && $user->hasPublisherRole() && $user->penerbit_id, function ($query) use ($user) {
+                return $query->where('target.penerbit_id', $user->penerbit_id);
+            })
             ->where('target.kategori', $kategori)
             ->select([
                 'target.tahun',
@@ -230,10 +233,9 @@ class TargetController extends Controller
             ->get();
 
         // Transform all data
-        $yearlyTargetsData = $yearlyTargetsQuery->map(function ($yearlyTarget) use ($booksQuery) {
-            // Calculate total realization for the year
-            $totalRealisasi = $booksQuery->clone()
-                ->where('penerbit_id', $yearlyTarget->penerbit_id)
+        $yearlyTargetsData = $yearlyTargetsQuery->map(function ($yearlyTarget) {
+            // Calculate total realization for the year - use direct Book query with filtering
+            $totalRealisasi = Book::where('penerbit_id', $yearlyTarget->penerbit_id)
                 ->where('status_keseluruhan', 'published')
                 ->whereYear('tanggal_realisasi_naik_cetak', $yearlyTarget->tahun)
                 ->count();
@@ -461,15 +463,20 @@ class TargetController extends Controller
     public function show(Request $request, $id)
     {
         $user = $request->user();
-        
+
         $targetQuery = Target::with('publisher');
-        
+
         // Apply publisher filtering if user has publisher role
         if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
             $targetQuery = $targetQuery->where('penerbit_id', $user->penerbit_id);
         }
-        
+
         $target = $targetQuery->findOrFail($id);
+
+        // Additional authorization check for publisher role
+        if ($user && $user->hasPublisherRole() && $target->penerbit_id !== $user->penerbit_id) {
+            abort(403, 'Anda tidak memiliki akses untuk melihat target penerbit ini.');
+        }
         
         // Calculate detailed realization
         $booksQuery = Book::where('penerbit_id', $target->penerbit_id)
@@ -525,15 +532,20 @@ class TargetController extends Controller
     public function edit(Request $request, $id)
     {
         $user = $request->user();
-        
+
         $targetQuery = Target::with('publisher');
-        
+
         // Apply publisher filtering if user has publisher role
         if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
             $targetQuery = $targetQuery->where('penerbit_id', $user->penerbit_id);
         }
-        
+
         $target = $targetQuery->findOrFail($id);
+
+        // Additional authorization check for publisher role
+        if ($user && $user->hasPublisherRole() && $target->penerbit_id !== $user->penerbit_id) {
+            abort(403, 'Anda tidak memiliki akses untuk mengedit target penerbit ini.');
+        }
         
         // Get publishers data
         $publishersQuery = Publisher::query();
@@ -627,12 +639,10 @@ class TargetController extends Controller
     public function showYearlyDetail(Request $request, $year, $publisherId, $kategori = 'target_terbit')
     {
         $user = $request->user();
-        
-        // Apply publisher filtering if user has publisher role
-        if ($user && $user->hasPublisherRole() && $user->penerbit_id) {
-            if ((int)$publisherId !== $user->penerbit_id) {
-                abort(403, 'Anda tidak memiliki akses untuk melihat target penerbit ini.');
-            }
+
+        // Authorization check for publisher role
+        if ($user && $user->hasPublisherRole() && (int)$publisherId !== $user->penerbit_id) {
+            abort(403, 'Anda tidak memiliki akses untuk melihat target penerbit ini.');
         }
         
         // Get publisher info
