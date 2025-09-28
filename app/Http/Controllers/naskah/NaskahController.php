@@ -10,38 +10,52 @@ use App\Models\Publisher;
 use App\Models\User;
 use App\Models\MasterTask;
 use Illuminate\Support\Facades\DB;
+
 class NaskahController extends Controller
 {
     public function index(Request $request)
     {
-        
-        $books = Book::with([
-            'manuscript.author', 
-            'pic', 
-            'publisher',
-            'taskProgress.masterTask',
-            'taskProgress.pic'
-        ])->get();
-        
+        $user = $request->user();
+
+        // Jika user adalah penerbit, filter naskah berdasarkan penerbit_id miliknya
+        if ($user && $user->hasRole('penerbit')) {
+            $books = Book::with([
+                'manuscript.author',
+                'pic',
+                'publisher',
+                'taskProgress.masterTask',
+                'taskProgress.pic'
+            ])->where('penerbit_id', $user->penerbit_id)->get();
+        } else {
+            // Jika bukan penerbit, tampilkan semua naskah
+            $books = Book::with([
+                'manuscript.author',
+                'pic',
+                'publisher',
+                'taskProgress.masterTask',
+                'taskProgress.pic'
+            ])->get();
+        }
+
         // Get data needed for edit dialog
         $users = User::select('user_id', 'nama_lengkap', 'email')->get();
         $publishers = Publisher::select('penerbit_id', 'nama_penerbit')->get();
         $masterTasks = MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
 
-            // Perbaiki query statistik berdasarkan data yang ada
+        // Perbaiki query statistik berdasarkan data yang ada
         $TargetTahunan = Book::whereYear('tanggal_target_naik_cetak', now()->year)->count();
         $SedangDikerjakan = Book::whereIn('status_keseluruhan', ['editing', 'review'])->count();
         $MendekatiDeadline = Book::where('tanggal_target_naik_cetak', '<', now()->addDays(7))->count();
         $Published = Book::where('status_keseluruhan', 'published')->count();
-        
+
         $ChartData = [
             'Belum Mulai' => Book::where('status_keseluruhan', 'draft')->count(),
             'Dalam Proses' => Book::whereIn('status_keseluruhan', ['editing', 'review'])->count(),
             'Selesai' => Book::where('status_keseluruhan', 'published')->count(),
         ];
-       
 
-        
+
+
         return Inertia::render('manajemen-naskah/page', [
             'books' => $books,
             'users' => $users,
@@ -54,17 +68,17 @@ class NaskahController extends Controller
             'ChartData' => $ChartData,
         ]);
     }
-    
+
     public function show(Request $request, $id)
     {
         $book = Book::with([
-            'manuscript.author', 
-            'pic', 
+            'manuscript.author',
+            'pic',
             'publisher',
             'taskProgress.masterTask',
             'taskProgress.pic'
         ])->findOrFail($id);
-        
+
         // Hitung progress percentage untuk setiap task berdasarkan status
         if ($book->taskProgress) {
             foreach ($book->taskProgress as $task) {
@@ -87,7 +101,7 @@ class NaskahController extends Controller
                 }
             }
         }
-        
+
         // Tentukan referer dan breadcrumb berdasarkan parameter atau referer header
         $referer = $request->get('from', '');
         if (!$referer && $request->header('referer')) {
@@ -100,7 +114,7 @@ class NaskahController extends Controller
                 $referer = 'naskah';
             }
         }
-        
+
         return Inertia::render('manajemen-naskah/show', [
             'book' => $book,
             'referer' => $referer ?: 'naskah' // default ke naskah jika tidak ada referer
@@ -112,14 +126,14 @@ class NaskahController extends Controller
         $users = User::select('user_id', 'nama_lengkap', 'email')->get();
         $publishers = Publisher::select('penerbit_id', 'nama_penerbit')->get();
         $masterTasks = MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
-        
+
         return Inertia::render('manajemen-naskah/create', [
             'users' => $users,
             'publishers' => $publishers,
             'masterTasks' => $masterTasks
         ]);
     }
-    
+
     public function store(Request $request)
     {
         // Validate request
@@ -174,28 +188,27 @@ class NaskahController extends Controller
             DB::commit();
 
             return redirect()->route('manajemen-naskah')->with('success', 'Naskah berhasil dibuat!');
-
         } catch (\Exception $e) {
             DB::rollback();
             return back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
-    
+
     public function edit($id)
     {
         $book = Book::with([
-            'manuscript.author', 
-            'pic', 
+            'manuscript.author',
+            'pic',
             'publisher',
             'taskProgress.masterTask',
             'taskProgress.pic'
         ])->findOrFail($id);
-        
+
         // Get data needed for edit page
         $users = \App\Models\User::select('user_id', 'nama_lengkap', 'email')->get();
         $publishers = \App\Models\Publisher::select('penerbit_id', 'nama_penerbit')->get();
         $masterTasks = \App\Models\MasterTask::select('tugas_id', 'nama_tugas', 'urutan')->orderBy('urutan')->get();
-        
+
         return Inertia::render('manajemen-naskah/edit', [
             'book' => $book,
             'users' => $users,
@@ -203,11 +216,11 @@ class NaskahController extends Controller
             'masterTasks' => $masterTasks
         ]);
     }
-    
-    public function update(Request $request, $id)   
+
+    public function update(Request $request, $id)
     {
         $book = Book::findOrFail($id);
-        
+
         // Update book information
         $book->update([
             'judul_buku' => $request->input('judul_buku'),
@@ -217,7 +230,7 @@ class NaskahController extends Controller
             'tanggal_target_naik_cetak' => $request->input('tanggal_target_naik_cetak'),
             'tanggal_realisasi_naik_cetak' => $request->input('tanggal_realisasi_naik_cetak'),
         ]);
-        
+
         // Update task progress if provided
         if ($request->has('task_progress')) {
             foreach ($request->input('task_progress') as $taskData) {
@@ -225,36 +238,36 @@ class NaskahController extends Controller
                     // Update existing task
                     $taskProgress = \App\Models\TaskProgress::find($taskData['progres_id']);
                     if ($taskProgress) {
-                                                 $taskProgress->update([
-                             'pic_tugas_user_id' => ($taskData['pic_tugas_user_id'] && $taskData['pic_tugas_user_id'] !== 'none') ? $taskData['pic_tugas_user_id'] : null,
-                             'deadline' => $taskData['deadline'] ?: null,
-                             'status' => $taskData['status'],
+                        $taskProgress->update([
+                            'pic_tugas_user_id' => ($taskData['pic_tugas_user_id'] && $taskData['pic_tugas_user_id'] !== 'none') ? $taskData['pic_tugas_user_id'] : null,
+                            'deadline' => $taskData['deadline'] ?: null,
+                            'status' => $taskData['status'],
 
-                             'tanggal_mulai' => $taskData['tanggal_mulai'] ?: null,
-                             'tanggal_selesai' => $taskData['tanggal_selesai'] ?: null,
-                             'catatan' => $taskData['catatan'] ?: null,
-                         ]);
+                            'tanggal_mulai' => $taskData['tanggal_mulai'] ?: null,
+                            'tanggal_selesai' => $taskData['tanggal_selesai'] ?: null,
+                            'catatan' => $taskData['catatan'] ?: null,
+                        ]);
                     }
                 } else {
                     // Create new task
-                                         \App\Models\TaskProgress::create([
-                         'progres_id' => \Illuminate\Support\Str::uuid(),
-                         'buku_id' => $book->buku_id,
-                         'tugas_id' => $taskData['tugas_id'],
-                         'pic_tugas_user_id' => ($taskData['pic_tugas_user_id'] && $taskData['pic_tugas_user_id'] !== 'none') ? $taskData['pic_tugas_user_id'] : null,
-                         'deadline' => $taskData['deadline'] ?: null,
-                         'status' => $taskData['status'],
-                         'tanggal_mulai' => $taskData['tanggal_mulai'] ?: null,
-                         'tanggal_selesai' => $taskData['tanggal_selesai'] ?: null,
-                         'catatan' => $taskData['catatan'] ?: null,
-                     ]);
+                    \App\Models\TaskProgress::create([
+                        'progres_id' => \Illuminate\Support\Str::uuid(),
+                        'buku_id' => $book->buku_id,
+                        'tugas_id' => $taskData['tugas_id'],
+                        'pic_tugas_user_id' => ($taskData['pic_tugas_user_id'] && $taskData['pic_tugas_user_id'] !== 'none') ? $taskData['pic_tugas_user_id'] : null,
+                        'deadline' => $taskData['deadline'] ?: null,
+                        'status' => $taskData['status'],
+                        'tanggal_mulai' => $taskData['tanggal_mulai'] ?: null,
+                        'tanggal_selesai' => $taskData['tanggal_selesai'] ?: null,
+                        'catatan' => $taskData['catatan'] ?: null,
+                    ]);
                 }
             }
         }
-        
+
         return redirect()->route('manajemen-naskah');
     }
-    
+
     public function destroy($id)
     {
         $book = Book::findOrFail($id);

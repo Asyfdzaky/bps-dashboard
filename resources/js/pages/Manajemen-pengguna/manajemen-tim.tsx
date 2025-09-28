@@ -12,7 +12,7 @@ import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import type { Role, TeamIndexPageProps, UserRow } from '@/types/team';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
-import { ArrowUpDown, Edit, Plus, Trash2, Users } from 'lucide-react';
+import { Edit, Plus, Settings, Trash2, UserCheck, Users } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -117,33 +117,15 @@ export default function ManajemenTim() {
     const columns = [
         {
             accessorKey: 'nama_lengkap',
-            header: () => (
-                <Button
-                    variant="ghost"
-                    onClick={() => {
-                        const next = filters?.sort === 'nama_lengkap' && filters?.dir === 'asc' ? 'desc' : 'asc';
-                        router.get(route('manajemen-tim'), { ...filters, sort: 'nama_lengkap', dir: next }, { preserveState: true, replace: true });
-                    }}
-                >
-                    Nama Lengkap <ArrowUpDown className="ml-1 h-4 w-4" />
-                </Button>
-            ),
+            header: 'Nama Lengkap',
             cell: ({ row }: { row: { original: UserRow } }) => <div className="font-medium">{row.original.nama_lengkap}</div>,
+            enableSorting: false,
         },
         {
             accessorKey: 'email',
-            header: () => (
-                <Button
-                    variant="ghost"
-                    onClick={() => {
-                        const next = filters?.sort === 'email' && filters?.dir === 'asc' ? 'desc' : 'asc';
-                        router.get(route('manajemen-tim'), { ...filters, sort: 'email', dir: next }, { preserveState: true, replace: true });
-                    }}
-                >
-                    Email <ArrowUpDown className="ml-1 h-4 w-4" />
-                </Button>
-            ),
-            cell: ({ row }: { row: { original: UserRow } }) => <div className="text-sm text-muted-foreground">{row.original.email}</div>,
+            header: 'Email',
+            cell: ({ row }: { row: { original: UserRow } }) => <div className="text-muted-foreground">{row.original.email}</div>,
+            enableSorting: false,
         },
         {
             accessorKey: 'roles',
@@ -151,34 +133,42 @@ export default function ManajemenTim() {
             cell: ({ row }: { row: { original: UserRow } }) => (
                 <div className="flex flex-wrap gap-1">
                     {row.original.roles.map((role: Role) => (
-                        <Badge key={role.id} variant="secondary">
+                        <Badge key={role.id} variant="outline" className="items-center text-xs">
                             {role.name}
                         </Badge>
                     ))}
                 </div>
             ),
+            enableSorting: false,
         },
         {
             accessorKey: 'publisher',
             header: 'Penerbit',
             cell: ({ row }: { row: { original: UserRow } }) => (
-                <div className="text-sm text-muted-foreground">{row.original.publisher ? row.original.publisher.nama_penerbit : '-'}</div>
+                <div className="text-muted-foreground">{row.original.publisher ? row.original.publisher.nama_penerbit : '-'}</div>
             ),
+            enableSorting: false,
         },
         {
             accessorKey: 'created_at',
             header: 'Tanggal Dibuat',
             cell: ({ row }: { row: { original: UserRow } }) => (
-                <div className="text-sm text-muted-foreground">{new Date(row.original.created_at).toLocaleDateString('id-ID')}</div>
+                <div className="text-muted-foreground">{new Date(row.original.created_at).toLocaleDateString('id-ID')}</div>
             ),
+            enableSorting: false,
         },
         {
             id: 'actions',
             header: 'Aksi',
             cell: ({ row }: { row: { original: UserRow } }) => (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-end gap-2">
                     {can?.edit && (
-                        <Button variant="ghost" size="icon" onClick={() => startEdit(row.original)} title="Edit User">
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-primary hover:bg-primary/10 h-8 w-8"
+                            onClick={() => startEdit(row.original)}
+                        >
                             <Edit className="h-4 w-4" />
                         </Button>
                     )}
@@ -186,29 +176,29 @@ export default function ManajemenTim() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-destructive"
+                            className="text-destructive hover:bg-destructive/10 h-8 w-8"
                             onClick={() => onDelete(row.original.user_id)}
-                            title="Hapus User"
                         >
                             <Trash2 className="h-4 w-4" />
                         </Button>
                     )}
                 </div>
             ),
+            enableSorting: false,
         },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manajemen Tim" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold">Manajemen Tim</h1>
+                        <h1 className="text-foreground text-2xl font-bold">Manajemen Tim</h1>
                         <p className="text-muted-foreground">Kelola anggota tim, tambah user baru, dan assign role untuk mereka</p>
                     </div>
                     {can?.create && (
-                        <Button onClick={handleCreateClick}>
+                        <Button onClick={handleCreateClick} className="bg-primary hover:bg-primary/90">
                             <Plus className="mr-2 h-4 w-4" />
                             Tambah User
                         </Button>
@@ -220,33 +210,39 @@ export default function ManajemenTim() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                                <Users className="text-primary h-4 w-4" />
+                            </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{users.total}</div>
+                            <div className="text-primary text-2xl font-bold">{users.total}</div>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Users with Roles</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <div className="bg-secondary/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                                <UserCheck className="text-secondary h-4 w-4" />
+                            </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{users.data.filter((user) => user.roles.length > 0).length}</div>
+                            <div className="text-secondary text-2xl font-bold">{users.data.filter((user) => user.roles.length > 0).length}</div>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">Total Roles</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <div className="bg-accent/10 flex h-8 w-8 items-center justify-center rounded-lg">
+                                <Settings className="text-accent h-4 w-4" />
+                            </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{roles.length}</div>
+                            <div className="text-accent text-2xl font-bold">{roles.length}</div>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Create/Edit User Form */}
+                {/* Create User Form */}
                 <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
                     <DialogContent className="max-w-2xl">
                         <DialogHeader>
@@ -261,10 +257,10 @@ export default function ManajemenTim() {
                                         id="nama_lengkap"
                                         value={data.nama_lengkap}
                                         onChange={(e) => setData('nama_lengkap', e.target.value)}
-                                        className={errors.nama_lengkap ? 'border-red-500' : ''}
+                                        className={errors.nama_lengkap ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.nama_lengkap && <p className="text-sm text-red-500">{errors.nama_lengkap}</p>}
+                                    {errors.nama_lengkap && <p className="text-destructive text-sm">{errors.nama_lengkap}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
@@ -273,10 +269,10 @@ export default function ManajemenTim() {
                                         type="email"
                                         value={data.email}
                                         onChange={(e) => setData('email', e.target.value)}
-                                        className={errors.email ? 'border-red-500' : ''}
+                                        className={errors.email ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                                    {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
                                 </div>
                             </div>
 
@@ -288,10 +284,10 @@ export default function ManajemenTim() {
                                         type="password"
                                         value={data.password}
                                         onChange={(e) => setData('password', e.target.value)}
-                                        className={errors.password ? 'border-red-500' : ''}
+                                        className={errors.password ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                                    {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password_confirmation">Konfirmasi Password</Label>
@@ -300,10 +296,10 @@ export default function ManajemenTim() {
                                         type="password"
                                         value={data.password_confirmation}
                                         onChange={(e) => setData('password_confirmation', e.target.value)}
-                                        className={errors.password_confirmation ? 'border-red-500' : ''}
+                                        className={errors.password_confirmation ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.password_confirmation && <p className="text-sm text-red-500">{errors.password_confirmation}</p>}
+                                    {errors.password_confirmation && <p className="text-destructive text-sm">{errors.password_confirmation}</p>}
                                 </div>
                             </div>
 
@@ -327,7 +323,7 @@ export default function ManajemenTim() {
                                 {/* Display selected roles */}
                                 {data.roles.length > 0 && (
                                     <div className="space-y-2">
-                                        <Label className="text-sm text-muted-foreground">Role yang dipilih:</Label>
+                                        <Label className="text-muted-foreground text-sm">Role yang dipilih:</Label>
                                         <div className="flex flex-wrap gap-2">
                                             {data.roles.map((roleId) => {
                                                 const role = roles.find((r) => r.id === roleId);
@@ -335,7 +331,7 @@ export default function ManajemenTim() {
                                                     <Badge key={role.id} variant="default" className="flex items-center gap-1">
                                                         {role.name}
                                                         <X
-                                                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                                            className="hover:text-destructive h-3 w-3 cursor-pointer"
                                                             onClick={() => handleRoleRemove(role.id)}
                                                         />
                                                     </Badge>
@@ -344,11 +340,10 @@ export default function ManajemenTim() {
                                         </div>
                                     </div>
                                 )}
-
-                                {errors.roles && <p className="text-sm text-red-500">{errors.roles}</p>}
+                                {errors.roles && <p className="text-destructive text-sm">{errors.roles}</p>}
                             </div>
 
-                            {/* Publisher Selection (hanya muncul jika role 'penerbit' dipilih) */}
+                            {/* Publisher Selection */}
                             {data.roles.some((roleId) => roles.find((role) => role.id === roleId)?.name === 'penerbit') && (
                                 <div className="space-y-2">
                                     <Label htmlFor="penerbit_id">Pilih Penerbit</Label>
@@ -367,7 +362,7 @@ export default function ManajemenTim() {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.penerbit_id && <p className="text-sm text-red-500">{errors.penerbit_id}</p>}
+                                    {errors.penerbit_id && <p className="text-destructive text-sm">{errors.penerbit_id}</p>}
                                 </div>
                             )}
 
@@ -375,7 +370,7 @@ export default function ManajemenTim() {
                                 <Button type="button" variant="outline" onClick={handleCloseCreateDialog}>
                                     Batal
                                 </Button>
-                                <Button type="submit" disabled={processing}>
+                                <Button type="submit" disabled={processing} className="bg-primary hover:bg-primary/90">
                                     {processing ? 'Menyimpan...' : 'Tambah User'}
                                 </Button>
                             </DialogFooter>
@@ -398,10 +393,10 @@ export default function ManajemenTim() {
                                         id="edit-nama_lengkap"
                                         value={data.nama_lengkap}
                                         onChange={(e) => setData('nama_lengkap', e.target.value)}
-                                        className={errors.nama_lengkap ? 'border-red-500' : ''}
+                                        className={errors.nama_lengkap ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.nama_lengkap && <p className="text-sm text-red-500">{errors.nama_lengkap}</p>}
+                                    {errors.nama_lengkap && <p className="text-destructive text-sm">{errors.nama_lengkap}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="edit-email">Email</Label>
@@ -410,10 +405,10 @@ export default function ManajemenTim() {
                                         type="email"
                                         value={data.email}
                                         onChange={(e) => setData('email', e.target.value)}
-                                        className={errors.email ? 'border-red-500' : ''}
+                                        className={errors.email ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                                    {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
                                 </div>
                             </div>
 
@@ -437,7 +432,7 @@ export default function ManajemenTim() {
                                 {/* Display selected roles */}
                                 {data.roles.length > 0 && (
                                     <div className="space-y-2">
-                                        <Label className="text-sm text-muted-foreground">Role yang dipilih:</Label>
+                                        <Label className="text-muted-foreground text-sm">Role yang dipilih:</Label>
                                         <div className="flex flex-wrap gap-2">
                                             {data.roles.map((roleId) => {
                                                 const role = roles.find((r) => r.id === roleId);
@@ -445,7 +440,7 @@ export default function ManajemenTim() {
                                                     <Badge key={role.id} variant="default" className="flex items-center gap-1">
                                                         {role.name}
                                                         <X
-                                                            className="h-3 w-3 cursor-pointer hover:text-destructive"
+                                                            className="hover:text-destructive h-3 w-3 cursor-pointer"
                                                             onClick={() => handleRoleRemove(role.id)}
                                                         />
                                                     </Badge>
@@ -454,11 +449,10 @@ export default function ManajemenTim() {
                                         </div>
                                     </div>
                                 )}
-
-                                {errors.roles && <p className="text-sm text-red-500">{errors.roles}</p>}
+                                {errors.roles && <p className="text-destructive text-sm">{errors.roles}</p>}
                             </div>
 
-                            {/* Publisher Selection (hanya muncul jika role 'penerbit' dipilih) */}
+                            {/* Publisher Selection */}
                             {data.roles.some((roleId) => roles.find((role) => role.id === roleId)?.name === 'penerbit') && (
                                 <div className="space-y-2">
                                     <Label htmlFor="edit-penerbit_id">Pilih Penerbit</Label>
@@ -477,7 +471,7 @@ export default function ManajemenTim() {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.penerbit_id && <p className="text-sm text-red-500">{errors.penerbit_id}</p>}
+                                    {errors.penerbit_id && <p className="text-destructive text-sm">{errors.penerbit_id}</p>}
                                 </div>
                             )}
 
@@ -485,7 +479,7 @@ export default function ManajemenTim() {
                                 <Button type="button" variant="outline" onClick={handleCloseEditDialog}>
                                     Batal
                                 </Button>
-                                <Button type="submit" disabled={processing}>
+                                <Button type="submit" disabled={processing} className="bg-primary hover:bg-primary/90">
                                     {processing ? 'Menyimpan...' : 'Update User'}
                                 </Button>
                             </DialogFooter>

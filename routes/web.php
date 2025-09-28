@@ -1,22 +1,24 @@
 <?php
 
 use Inertia\Inertia;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\taskController;
+use App\Http\Controllers\TargetController;
+use App\Http\Controllers\PenerbitController;
 use App\Http\Controllers\naskah\NaskahController;
-use App\Http\Controllers\naskah\ApprovalNaskahController;
 use App\Http\Controllers\Analitik\AnalitikController;
 use App\Http\Controllers\calender\CalenderController;
+use App\Http\Controllers\naskah\KirimNaskahController;
 use App\Http\Controllers\dashboard\DashboardController;
 use App\Http\Controllers\rolePermission\RoleController;
 use App\Http\Controllers\rolePermission\TeamController;
 use App\Http\Controllers\naskah\ProgresNaskahController;
+use App\Http\Controllers\naskah\ApprovalNaskahController;
+
 use App\Http\Controllers\dashboard\DashboardUserController;
 use App\Http\Controllers\rolePermission\PenggunaController;
-use App\Http\Controllers\taskController;
-use App\Http\Controllers\naskah\KirimNaskahController;
-
-use App\Http\Controllers\TargetController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -99,6 +101,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/manajemen-task/{id}', [taskController::class, 'update'])->name('manajemen-task.update');
     Route::delete('/manajemen-task/{id}', [taskController::class, 'destroy'])->name('manajemen-task.destroy');
     Route::post('/manajemen-task/reorder', [taskController::class, 'reorder'])->name('manajemen-task.reorder');
+
+    Route::get('/penerbit', [PenerbitController::class, 'index'])->name('penerbit.index');
+    Route::get('/penerbit/create', [PenerbitController::class, 'create'])->name('penerbit.create');
+    Route::post('/penerbit', [PenerbitController::class, 'store'])->name('penerbit.store');
+    Route::get('/penerbit/{id}/edit', [PenerbitController::class, 'edit'])->name('penerbit.edit');
+    Route::put('/penerbit/{id}', [PenerbitController::class, 'update'])->name('penerbit.update');
+    Route::delete('/penerbit/{id}', [PenerbitController::class, 'destroy'])->name('penerbit.destroy');
 });
 
 

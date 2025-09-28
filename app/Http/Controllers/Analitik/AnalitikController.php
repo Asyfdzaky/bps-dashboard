@@ -24,21 +24,21 @@ class AnalitikController extends Controller
         $completedBooks = Book::where('status_keseluruhan', 'published')->count();
         $inProgressBooks = Book::whereIn('status_keseluruhan', ['editing', 'review'])->count();
         $draftBooks = Book::where('status_keseluruhan', 'draft')->count();
-        
+
         // Total tasks dan completion rate
         $totalTasks = TaskProgress::count();
         $completedTasks = TaskProgress::where('status', 'completed')->count();
         $completionRate = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 1) : 0;
-        
+
         // Overdue tasks
         $overdueTasks = TaskProgress::whereNotNull('deadline')
             ->where('deadline', '<', now())
             ->where('status', '!=', 'completed')
             ->count();
         $overdueRate = $totalTasks > 0 ? round(($overdueTasks / $totalTasks) * 100, 1) : 0;
-        
+
         // Active team members
-        $activeMembers = User::whereHas('taskProgressAsPic', function($query) {
+        $activeMembers = User::whereHas('taskProgressAsPic', function ($query) {
             $query->where('status', '!=', 'completed');
         })->count();
 
@@ -56,17 +56,17 @@ class AnalitikController extends Controller
             $monthName = $month->format('M Y');
             $startOfMonth = $month->copy()->startOfMonth()->toDateString();
             $endOfMonth = $month->copy()->endOfMonth()->toDateString();
-            
+
             $completedInMonth = TaskProgress::where('status', 'completed')
                 ->whereNotNull('tanggal_selesai')
                 ->whereBetween('tanggal_selesai', [$startOfMonth, $endOfMonth])
                 ->count();
-                
+
             $booksCompletedInMonth = Book::where('status_keseluruhan', 'published')
                 ->whereNotNull('tanggal_realisasi_naik_cetak')
                 ->whereBetween('tanggal_realisasi_naik_cetak', [$startOfMonth, $endOfMonth])
                 ->count();
-            
+
             $monthlyProductivity[] = [
                 'month' => $monthName,
                 'tasks' => $completedInMonth,
@@ -88,25 +88,25 @@ class AnalitikController extends Controller
             ->groupBy('master_tasks.tugas_id', 'master_tasks.nama_tugas', 'master_tasks.urutan')
             ->orderBy('master_tasks.urutan')
             ->get()
-            ->map(function($item) {
+            ->map(function ($item) {
                 $item->completion_rate = $item->total_tasks > 0 ? round(($item->completed_tasks / $item->total_tasks) * 100, 1) : 0;
                 $item->overdue_rate = $item->total_tasks > 0 ? round(($item->overdue_tasks / $item->total_tasks) * 100, 1) : 0;
-                
+
                 // Hitung rata-rata hari secara terpisah untuk menghindari masalah PostgreSQL
                 try {
                     $taskProgressForStage = TaskProgress::where('tugas_id', $item->tugas_id)
                         ->whereNotNull('tanggal_selesai')
                         ->whereNotNull('tanggal_mulai')
                         ->get();
-                    
+
                     $avgDays = 0;
                     if ($taskProgressForStage->count() > 0) {
-                        $totalDays = $taskProgressForStage->sum(function($task) {
+                        $totalDays = $taskProgressForStage->sum(function ($task) {
                             return Carbon::parse($task->tanggal_selesai)->diffInDays(Carbon::parse($task->tanggal_mulai));
                         });
                         $avgDays = $totalDays / $taskProgressForStage->count();
                     }
-                    
+
                     $item->avg_completion_days = round($avgDays, 1);
                 } catch (\Exception $e) {
                     $item->avg_completion_days = 0;
@@ -128,24 +128,24 @@ class AnalitikController extends Controller
             ->groupBy('users.user_id', 'users.nama_lengkap')
             ->havingRaw('COUNT(*) >= 3') // Minimal 3 task untuk dianggap
             ->get()
-            ->map(function($item) {
+            ->map(function ($item) {
                 $item->completion_rate = $item->total_tasks > 0 ? round(($item->completed_tasks / $item->total_tasks) * 100, 1) : 0;
-                
+
                 // Hitung rata-rata hari secara terpisah
                 try {
                     $userTasks = TaskProgress::where('pic_tugas_user_id', $item->user_id)
                         ->whereNotNull('tanggal_selesai')
                         ->whereNotNull('tanggal_mulai')
                         ->get();
-                    
+
                     $avgDays = 0;
                     if ($userTasks->count() > 0) {
-                        $totalDays = $userTasks->sum(function($task) {
+                        $totalDays = $userTasks->sum(function ($task) {
                             return Carbon::parse($task->tanggal_selesai)->diffInDays(Carbon::parse($task->tanggal_mulai));
                         });
                         $avgDays = $totalDays / $userTasks->count();
                     }
-                    
+
                     $item->avg_completion_days = round($avgDays, 1);
                 } catch (\Exception $e) {
                     $item->avg_completion_days = 0;
@@ -190,6 +190,25 @@ class AnalitikController extends Controller
             'overdue' => $overdueTasks
         ];
 
+        // 8. Target Penerbitan Buku
+        $publishingTargets = DB::table('target')
+            ->join('publishers', 'target.penerbit_id', '=', 'publishers.penerbit_id')
+            ->select(
+                'target.tahun',
+                'target.penerbit_id',
+                'target.kategori',
+                'publishers.nama_penerbit',
+                DB::raw("MAX(CASE WHEN target.tipe_target = 'tahunan' THEN target.jumlah_target ELSE 0 END) as target_tahunan"),
+                DB::raw("SUM(CASE WHEN target.tipe_target = 'bulanan' THEN target.jumlah_target ELSE 0 END) as total_target_bulanan"),
+                DB::raw("COUNT(CASE WHEN target.tipe_target = 'bulanan' THEN target.target_id END) as jumlah_bulan_ada_target")
+            )
+            ->where('target.penerbit_id', 1)
+            ->where('target.kategori', 'target_terbit')
+            ->groupBy('target.tahun', 'target.penerbit_id', 'target.kategori', 'publishers.nama_penerbit')
+            ->orderBy('target.tahun', 'desc')
+            ->orderBy('publishers.nama_penerbit', 'asc')
+            ->get();
+
         return Inertia::render('analitik/analitik', [
             'metrics' => [
                 'totalBooks' => $totalBooks,
@@ -208,6 +227,7 @@ class AnalitikController extends Controller
             'topPerformers' => $topPerformers->values(),
             'workloadDistribution' => $workloadDistribution,
             'deadlinePerformance' => $deadlinePerformance,
+            'publishingTargets' => $publishingTargets,
         ]);
     }
 

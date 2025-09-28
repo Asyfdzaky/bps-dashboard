@@ -6,7 +6,6 @@ import { Link } from '@inertiajs/react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
 import { DataTable } from './table-data';
-import { Checkbox } from './ui/checkbox';
 
 interface ListBukuProps {
     books: Book[];
@@ -62,22 +61,6 @@ export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
     };
     const columns: ColumnDef<Book>[] = [
         {
-            id: 'select',
-            header: ({ table }) => (
-                <Checkbox
-                    checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Select all"
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
-
-        {
             accessorKey: 'judul_buku',
             header: 'Judul Buku',
             cell: ({ row }) => {
@@ -118,7 +101,7 @@ export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
             header: 'Status',
             cell: ({ row }) => {
                 return (
-                    <div className="flex justify-center">
+                    <div className="">
                         <Badge className={getStatusColor(row.original.status_keseluruhan)}>{getStatusText(row.original.status_keseluruhan)}</Badge>
                     </div>
                 );
