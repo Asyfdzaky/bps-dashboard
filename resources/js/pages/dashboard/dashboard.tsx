@@ -61,7 +61,7 @@ export default function Dashboard() {
             title: 'Target Cetak',
             value: TargetTahunan,
             icon: <Trophy className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: 'secondary' as const,
+            color: 'primary' as const,
         },
         {
             title: 'Buku Published',
@@ -73,13 +73,13 @@ export default function Dashboard() {
             title: 'Sedang Dikerjakan',
             value: SedangDikerjakan,
             icon: <FileText className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: 'secondary' as const,
+            color: 'primary' as const,
         },
         {
             title: 'Mendekati Deadline',
             value: MendekatiDeadline,
             icon: <Clock className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: 'destructive' as const,
+            color: 'primary' as const,
         },
     ];
 
@@ -128,7 +128,7 @@ export default function Dashboard() {
                                         <div className="mb-4">
                                             <h2 className="mb-2 text-xl font-semibold text-foreground">Naskah Terkini</h2>
                                         </div>
-                                        <ListNaskahTerkini books={books} title="" />
+                                        <ListNaskahTerkini books={books}/>
                                     </div>
                                 </div>
 

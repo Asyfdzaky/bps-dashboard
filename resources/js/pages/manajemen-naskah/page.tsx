@@ -84,19 +84,19 @@ export default function ManajemenNaskah() {
                                 title: 'Draft',
                                 value: draftBooks,
                                 icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'chart-2',
+                                color: 'primary',
                             },
                             {
                                 title: 'Sedang Diproses',
                                 value: inProgressBooks,
                                 icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'chart-3',
+                                color: 'primary',
                             },
                             {
                                 title: 'Terbit',
                                 value: publishedBooks,
                                 icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'destructive',
+                                color: 'primary',
                             },
                         ]}
                     />

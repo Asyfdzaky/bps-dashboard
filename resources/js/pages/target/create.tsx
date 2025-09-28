@@ -57,6 +57,10 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
     });
 
     const [availableYearsForPublisher, setAvailableYearsForPublisher] = useState<number[]>([]);
+    const [yearlyTargetDisplay, setYearlyTargetDisplay] = useState<string>('0');
+    const [monthlyTargetsDisplay, setMonthlyTargetsDisplay] = useState<string[]>(
+        new Array(12).fill('0')
+    );
 
     // Fetch available years when publisher changes
     useEffect(() => {
@@ -88,6 +92,25 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
     const updateMonthlyTarget = (index: number, value: number) => {
         const newMonthlyTargets = [...data.monthly_targets];
         newMonthlyTargets[index] = { ...newMonthlyTargets[index], jumlah_target: value };
+        setData('monthly_targets', newMonthlyTargets);
+    };
+
+    const handleYearlyTargetChange = (value: string) => {
+        // Remove leading zeros and handle empty string
+        const cleanValue = value.replace(/^0+/, '') || '0';
+        setYearlyTargetDisplay(cleanValue);
+        setData('jumlah_target_tahunan', parseInt(cleanValue) || 0);
+    };
+
+    const handleMonthlyTargetChange = (index: number, value: string) => {
+        // Remove leading zeros and handle empty string
+        const cleanValue = value.replace(/^0+/, '') || '0';
+        const newDisplayValues = [...monthlyTargetsDisplay];
+        newDisplayValues[index] = cleanValue;
+        setMonthlyTargetsDisplay(newDisplayValues);
+        
+        const newMonthlyTargets = [...data.monthly_targets];
+        newMonthlyTargets[index] = { ...newMonthlyTargets[index], jumlah_target: parseInt(cleanValue) || 0 };
         setData('monthly_targets', newMonthlyTargets);
     };
 
@@ -192,10 +215,11 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
                                     <Label htmlFor="jumlah_target_tahunan">Target Tahunan *</Label>
                                     <Input
                                         id="jumlah_target_tahunan"
-                                        type="number"
-                                        min="0"
-                                        value={data.jumlah_target_tahunan}
-                                        onChange={(e) => setData('jumlah_target_tahunan', parseInt(e.target.value) || 0)}
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={yearlyTargetDisplay}
+                                        onChange={(e) => handleYearlyTargetChange(e.target.value)}
                                         placeholder="Masukkan jumlah target tahunan"
                                     />
                                     {errors.jumlah_target_tahunan && <p className="text-sm text-red-500 mt-1">{errors.jumlah_target_tahunan}</p>}
@@ -238,10 +262,11 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
                                                     </Label>
                                                     <Input
                                                         id={`monthly_target_${monthTarget.bulan}`}
-                                                        type="number"
-                                                        min="0"
-                                                        value={monthTarget.jumlah_target}
-                                                        onChange={(e) => updateMonthlyTarget(index, parseInt(e.target.value) || 0)}
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        value={monthlyTargetsDisplay[index]}
+                                                        onChange={(e) => handleMonthlyTargetChange(index, e.target.value)}
                                                         className="h-10 bg-background border-input focus:border-ring focus:ring-ring/20"
                                                         placeholder="0"
                                                     />
@@ -275,10 +300,11 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
                                                     </Label>
                                                     <Input
                                                         id={`monthly_target_${monthTarget.bulan}`}
-                                                        type="number"
-                                                        min="0"
-                                                        value={monthTarget.jumlah_target}
-                                                        onChange={(e) => updateMonthlyTarget(index + 3, parseInt(e.target.value) || 0)}
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        value={monthlyTargetsDisplay[index + 3]}
+                                                        onChange={(e) => handleMonthlyTargetChange(index + 3, e.target.value)}
                                                         className="h-10 bg-background border-input focus:border-ring focus:ring-ring/20"
                                                         placeholder="0"
                                                     />
@@ -312,10 +338,11 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
                                                     </Label>
                                                     <Input
                                                         id={`monthly_target_${monthTarget.bulan}`}
-                                                        type="number"
-                                                        min="0"
-                                                        value={monthTarget.jumlah_target}
-                                                        onChange={(e) => updateMonthlyTarget(index + 6, parseInt(e.target.value) || 0)}
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        value={monthlyTargetsDisplay[index + 6]}
+                                                        onChange={(e) => handleMonthlyTargetChange(index + 6, e.target.value)}
                                                         className="h-10 bg-background border-input focus:border-ring focus:ring-ring/20"
                                                         placeholder="0"
                                                     />
@@ -349,10 +376,11 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
                                                     </Label>
                                                     <Input
                                                         id={`monthly_target_${monthTarget.bulan}`}
-                                                        type="number"
-                                                        min="0"
-                                                        value={monthTarget.jumlah_target}
-                                                        onChange={(e) => updateMonthlyTarget(index + 9, parseInt(e.target.value) || 0)}
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]*"
+                                                        value={monthlyTargetsDisplay[index + 9]}
+                                                        onChange={(e) => handleMonthlyTargetChange(index + 9, e.target.value)}
                                                         className="h-10 bg-background border-input focus:border-ring focus:ring-ring/20"
                                                         placeholder="0"
                                                     />

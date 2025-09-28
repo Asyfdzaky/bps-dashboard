@@ -110,6 +110,7 @@ interface KPICardProps {
     value: number;
     icon: React.ReactNode;
     color?: "primary" | "secondary" | "accent" | "destructive";
+    description?: string;
     className?: string;
 }
 
@@ -118,6 +119,7 @@ export function KPICard({
     value, 
     icon, 
     color = "primary",
+    description,
     className 
 }: KPICardProps) {
     const colorClasses = {
@@ -141,6 +143,11 @@ export function KPICard({
                         })}>
                             {value}
                         </h3>
+                        {description && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                                {description}
+                            </p>
+                        )}
                     </div>
                     <div className={cn("flex h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 items-center justify-center rounded-full flex-shrink-0", colorClasses[color])}>
                         {icon}
@@ -158,6 +165,7 @@ interface KPIGridProps {
         value: number;
         icon: React.ReactNode;
         color?: "primary" | "secondary" | "accent" | "destructive";
+        description?: string;
     }>;
     className?: string;
 }
@@ -172,6 +180,7 @@ export function KPIGrid({ items, className }: KPIGridProps) {
                     value={item.value}
                     icon={item.icon}
                     color={item.color}
+                    description={item.description}
                 />
             ))}
         </div>

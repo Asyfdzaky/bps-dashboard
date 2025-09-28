@@ -23,9 +23,9 @@ const getChartColors = () => {
     const fallbackColors = ['#60a5fa', '#34d399', '#ef4444'];
     
     try {
-        const chart2 = getCSSVariable('--chart-2') || '#60a5fa';
-        const chart3 = getCSSVariable('--chart-3') || '#34d399';
-        const destructive = getCSSVariable('--destructive') || '#ef4444';
+        const chart2 = getCSSVariable('--chart-1');
+        const chart3 = getCSSVariable('--chart-2');
+        const destructive = getCSSVariable('--chart-3') ;
         
         return [chart2, chart3, destructive];
     } catch {

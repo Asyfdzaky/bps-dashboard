@@ -5,21 +5,21 @@ import { Link } from '@inertiajs/react';
 import { Building, Calendar, Edit3, Eye, User } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 
-type Props = { books: Book[]; title?: string };
+type Props = { books: Book[] };
 
-export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) {
+export default function ListNaskahTerkini({ books }: Props) {
     // Ambil 5 data terbaru saja
     const recentBooks = [...books].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5);
 
-    const getStatusBadgeClass = (status: Book['status_keseluruhan']) => {
-        const classes: Record<string, string> = {
-            published: 'bg-accent/10 text-accent border-accent/20',
-            draft: 'bg-muted text-muted-foreground border-muted-foreground/20',
-            review: 'bg-secondary/10 text-secondary border-secondary/20',
-            editing: 'bg-primary/10 text-primary border-primary/20',
-            cancelled: 'bg-destructive/10 text-destructive border-destructive/20',
+    const getStatusBadgeVariant = (status: Book['status_keseluruhan']) => {
+        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+            published: 'default',
+            draft: 'outline',
+            review: 'secondary',
+            editing: 'default',
+            cancelled: 'destructive',
         };
-        return classes[status] ?? 'bg-muted text-muted-foreground border-muted-foreground/20';
+        return variants[status] ?? 'outline';
     };
 
     const getStatusText = (status: Book['status_keseluruhan']) => {
@@ -93,7 +93,8 @@ export default function ListNaskahTerkini({ books, title = 'Projects' }: Props) 
                                     {/* Status */}
                                     <div className="justify-centercol-span-8 flex items-center sm:col-span-2 lg:col-span-2">
                                         <Badge
-                                            className={`${getStatusBadgeClass(book.status_keseluruhan)} rounded-full border px-3 py-1 text-xs font-medium`}
+                                            variant={getStatusBadgeVariant(book.status_keseluruhan)}
+                                            className="rounded-full px-3 py-1 text-xs font-medium"
                                         >
                                             {getStatusText(book.status_keseluruhan)}
                                         </Badge>

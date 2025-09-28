@@ -19,21 +19,15 @@ interface ListBukuProps {
 }
 
 export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
-    const getStatusColor = (status: Book['status_keseluruhan']) => {
-        switch (status) {
-            case 'published':
-                return 'bg-green-100 text-green-700 border-green-200';
-            case 'draft':
-                return 'bg-gray-100 text-gray-700 border-gray-200';
-            case 'review':
-                return 'bg-blue-100 text-blue-700 border-blue-200';
-            case 'editing':
-                return 'bg-yellow-100 text-yellow-700 border-yellow-200';
-            case 'cancelled':
-                return 'bg-red-100 text-red-700 border-red-200';
-            default:
-                return 'bg-gray-100 text-gray-700 border-gray-200';
-        }
+    const getStatusBadgeVariant = (status: Book['status_keseluruhan']) => {
+        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+            published: 'default',
+            draft: 'outline',
+            review: 'secondary',
+            editing: 'default',
+            cancelled: 'destructive',
+        };
+        return variants[status] ?? 'outline';
     };
 
     const getStatusText = (status: Book['status_keseluruhan']) => {
@@ -119,7 +113,9 @@ export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
             cell: ({ row }) => {
                 return (
                     <div className="flex justify-center">
-                        <Badge className={getStatusColor(row.original.status_keseluruhan)}>{getStatusText(row.original.status_keseluruhan)}</Badge>
+                        <Badge variant={getStatusBadgeVariant(row.original.status_keseluruhan)}>
+                            {getStatusText(row.original.status_keseluruhan)}
+                        </Badge>
                     </div>
                 );
             },

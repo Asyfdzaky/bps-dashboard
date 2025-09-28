@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { KPIGrid } from '@/components/ui/progress-summary';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
@@ -440,62 +441,40 @@ export default function Analitik({
                 </div>
 
                 <div className="space-y-8">
-                    {/* Metrik Utama - Clean tanpa background */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Buku</CardTitle>
-                                <BookOpen className="h-5 w-5 text-primary" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold text-primary">{metrics.totalBooks}</div>
-                                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                    <span>{metrics.completedBooks} selesai</span>
-                                    <span>•</span>
-                                    <span>{metrics.inProgressBooks} proses</span>
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Tingkat Penyelesaian</CardTitle>
-                                <CheckCircle className="h-5 w-5" style={{ color: chartColors.success }} />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold" style={{ color: chartColors.success }}>{metrics.completionRate}%</div>
-                                <p className="text-xs text-muted-foreground">
-                                    {metrics.completedTasks} dari {metrics.totalTasks} tugas
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Tugas Terlambat</CardTitle>
-                                <AlertTriangle className="h-5 w-5" style={{ color: chartColors.warning }} />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold" style={{ color: chartColors.warning }}>{metrics.overdueTasks}</div>
-                                <p className="text-xs text-muted-foreground">
-                                    {metrics.overdueRate}% dari total tugas
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Tim Aktif</CardTitle>
-                                <Users className="h-5 w-5" style={{ color: chartColors.chart5 }} />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold" style={{ color: chartColors.chart5 }}>{metrics.activeMembers}</div>
-                                <p className="text-xs text-muted-foreground">
-                                    Anggota dengan tugas aktif
-                                </p>
-                            </CardContent>
-                        </Card>
-                    </div>
+                    {/* Metrik Utama menggunakan KPIGrid */}
+                    <KPIGrid 
+                        items={[
+                            {
+                                title: "Total Buku",
+                                value: metrics.totalBooks,
+                                icon: <BookOpen className="h-5 w-5" />,
+                                color: "primary",
+                                description: `${metrics.completedBooks} selesai • ${metrics.inProgressBooks} proses`
+                            },
+                            {
+                                title: "Tingkat Penyelesaian",
+                                value: metrics.completionRate,
+                                icon: <CheckCircle className="h-5 w-5" />,
+                                color: "primary",
+                                description: `${metrics.completedTasks} dari ${metrics.totalTasks} tugas`
+                            },
+                            {
+                                title: "Tugas Terlambat",
+                                value: metrics.overdueTasks,
+                                icon: <AlertTriangle className="h-5 w-5" />,
+                                color: "primary",
+                                description: `${metrics.overdueRate}% dari total tugas`
+                            },
+                            {
+                                title: "Tim Aktif",
+                                value: metrics.activeMembers,
+                                icon: <Users className="h-5 w-5" />,
+                                color: "primary",
+                                description: "Anggota dengan tugas aktif"
+                            }
+                        ]}
+                        className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                    />
 
                     {/* Charts Row 1 */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

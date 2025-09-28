@@ -55,40 +55,35 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 function getStatusBadge(status: string) {
-    switch (status) {
-        case 'draft':
-            return (
-                <Badge variant="outline" className="border-blue-200 bg-blue-100 text-blue-800">
-                    Draft
-                </Badge>
-            );
-        case 'pending':
-            return (
-                <Badge variant="outline" className="border-yellow-200 bg-yellow-100 text-yellow-800">
-                    Sedang Review
-                </Badge>
-            );
-        case 'approved':
-            return (
-                <Badge variant="outline" className="border-green-200 bg-green-100 text-green-800">
-                    Disetujui
-                </Badge>
-            );
-        case 'cancelled':
-            return (
-                <Badge variant="outline" className="border-red-200 bg-red-100 text-red-800">
-                    Ditolak
-                </Badge>
-            );
-        case 'review':
-            return (
-                <Badge variant="outline" className="border-yellow-200 bg-yellow-100 text-yellow-800">
-                    Sedang Review
-                </Badge>
-            );
-        default:
-            return <Badge variant="outline">Unknown</Badge>;
-    }
+    const getStatusBadgeVariant = (status: string) => {
+        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+            draft: 'outline',
+            pending: 'secondary',
+            approved: 'default',
+            cancelled: 'destructive',
+            review: 'secondary',
+            canceled: 'destructive',
+        };
+        return variants[status] ?? 'outline';
+    };
+
+    const getStatusText = (status: string) => {
+        const text: Record<string, string> = {
+            draft: 'Draft',
+            pending: 'Sedang Review',
+            approved: 'Disetujui',
+            cancelled: 'Ditolak',
+            review: 'Sedang Review',
+            canceled: 'Ditolak',
+        };
+        return text[status] ?? 'Unknown';
+    };
+
+    return (
+        <Badge variant={getStatusBadgeVariant(status)}>
+            {getStatusText(status)}
+        </Badge>
+    );
 }
 
 export default function ApprovalNaskah({ manuscripts, stats }: Props) {
@@ -221,19 +216,19 @@ export default function ApprovalNaskah({ manuscripts, stats }: Props) {
                             title: 'Draft',
                             value: stats.draft,
                             icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: 'chart-2',
+                            color: 'primary',
                         },
                         {
                             title: 'Sedang Review',
                             value: stats.pending,
                             icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: 'chart-3',
+                            color: 'primary',
                         },
                         {
                             title: 'Ditolak',
                             value: stats.rejected,
                             icon: <XCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: 'destructive',
+                            color: 'primary',
                         },
                         {
                             title: 'Total Aktif',

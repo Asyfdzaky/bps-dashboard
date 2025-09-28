@@ -99,19 +99,19 @@ export default function ProgressPage() {
                             title: "Sedang Diproses",
                             value: sedangDiprosesCount,
                             icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: "chart-2",
+                            color: "primary",
                         },
                         {
                             title: "Selesai",
                             value: selesaiCount,
                             icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: "chart-3",
+                            color: "primary",
                         },
                         {
                             title: "Tertunda",
                             value: tertundaCount,
                             icon: <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: "destructive",
+                            color: "primary",
                         },
                     ]}
                 />

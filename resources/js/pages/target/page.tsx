@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { KPIGrid } from '@/components/ui/progress-summary';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, Link } from '@inertiajs/react';
@@ -626,41 +627,33 @@ export default function TargetPage({
 
 
                 <div className="space-y-8">
-                    {/* Metrik Utama */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Progres Tahunan</CardTitle>
-                                <BookCopy className="h-5 w-5 text-primary" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold text-primary">{metrics.progresTahunan}%</div>
-                                <p className="text-xs text-muted-foreground">dari target tahunan</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Pencapaian vs Target (YTD)</CardTitle>
-                                <TrendingUp className="h-5 w-5" style={{ color: 'hsl(var(--chart-5))' }} />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold" style={{ color: 'hsl(var(--chart-5))' }}>{metrics.pencapaianYTD}</div>
-                                <p className="text-xs text-muted-foreground">dari {metrics.targetYTD} target</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Rata-rata Buku/Bulan</CardTitle>
-                                <Calendar className="h-5 w-5" style={{ color: 'hsl(var(--chart-2))' }} />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-3xl font-bold" style={{ color: 'hsl(var(--chart-2))' }}>{metrics.avgBooksPerMonth}</div>
-                                <p className="text-xs text-muted-foreground">realisasi per bulan</p>
-                            </CardContent>
-                        </Card>
-                    </div>
+                    {/* Metrik Utama menggunakan KPIGrid */}
+                    <KPIGrid 
+                        items={[
+                            {
+                                title: "Progres Tahunan",
+                                value: metrics.progresTahunan,
+                                icon: <BookCopy className="h-5 w-5" />,
+                                color: "primary",
+                                description: "dari target tahunan"
+                            },
+                            {
+                                title: "Pencapaian vs Target (YTD)",
+                                value: metrics.pencapaianYTD,
+                                icon: <TrendingUp className="h-5 w-5" />,
+                                color: "primary",
+                                description: `dari ${metrics.targetYTD} target`
+                            },
+                            {
+                                title: "Rata-rata Buku/Bulan",
+                                value: metrics.avgBooksPerMonth,
+                                icon: <Calendar className="h-5 w-5" />,
+                                color: "primary",
+                                description: "realisasi per bulan"
+                            }
+                        ]}
+                        className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                    />
 
                     {/* Target Tahunan Table */}
                     <Card>
