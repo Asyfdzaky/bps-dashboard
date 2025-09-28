@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { KPIGrid } from '@/components/ui/progress-summary';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
+import { hasRole } from '@/types/access';
 import { type Book } from '@/types/books';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Book as BookIcon, CheckCircle, Clock, FileText, Plus } from 'lucide-react';
@@ -21,7 +22,8 @@ export default function ManajemenNaskah() {
     const { books } = usePage<{
         books: Book[];
     }>().props;
-
+    const { auth } = usePage<{ auth: { user?: { roles?: string[] } } }>().props;
+    const user = auth.user;
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -51,6 +53,7 @@ export default function ManajemenNaskah() {
     const draftBooks = books.filter((book) => book.status_keseluruhan === 'draft').length;
     const inProgressBooks = books.filter((book) => ['editing', 'review'].includes(book.status_keseluruhan)).length;
     const publishedBooks = books.filter((book) => book.status_keseluruhan === 'published').length;
+    const isPenerbit = hasRole(user, 'penerbit');
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -62,12 +65,15 @@ export default function ManajemenNaskah() {
                         <h1 className="text-2xl font-bold text-gray-900">Manajemen Naskah</h1>
                         <p className="mt-1 text-sm text-gray-600">Kelola semua naskah buku dalam sistem</p>
                     </div>
-                    <Link href="/manajemen-naskah/create">
-                        <Button className="flex items-center gap-2">
-                            <Plus className="h-4 w-4" />
-                            Tambah Naskah
-                        </Button>
-                    </Link>
+
+                    {!isPenerbit && (
+                        <Link href="/manajemen-naskah/create">
+                            <Button className="flex items-center gap-2">
+                                <Plus className="h-4 w-4" />
+                                Tambah Naskah
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 <div className="mb-6">

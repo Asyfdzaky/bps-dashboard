@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,9 +15,8 @@ import listPlugin from '@fullcalendar/list';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import { router } from '@inertiajs/react';
-import { Calendar as CalendarIcon, CalendarPlus, Clock, User } from 'lucide-react';
-import { useMemo, useState } from 'react';
-
+import { Calendar as CalendarIcon, CalendarPlus, CheckCircle, User, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 type CalendarStatus = 'proses' | 'selesai' | 'mendekati-deadline';
 
 type CalendarEvent = {
@@ -48,32 +48,48 @@ type NewEventForm = {
     pic_user_id: string | null;
 };
 
-const STATUS_COLOR: Record<CalendarStatus, string> = {
-    proses: '#f59e0b', // Orange
-    selesai: '#10b981', // Green
-    'mendekati-deadline': '#ef4444', // Red
+const STATUS_BG: Record<CalendarStatus, string> = {
+    proses: 'var(--fc-event-bg-proses)',
+    selesai: 'var(--fc-event-bg-selesai)',
+    'mendekati-deadline': 'var(--fc-event-bg-mendekati-deadline)',
 };
-
+const STATUS_BORDER: Record<CalendarStatus, string> = {
+    proses: 'var(--fc-event-border-proses)',
+    selesai: 'var(--fc-event-border-selesai)',
+    'mendekati-deadline': 'var(--fc-event-border-mendekati-deadline)',
+};
+const STATUS_TEXT: Record<CalendarStatus, string> = {
+    proses: 'var(--fc-event-text-proses)',
+    selesai: 'var(--fc-event-text-selesai)',
+    'mendekati-deadline': 'var(--fc-event-text-mendekati-deadline)',
+};
 const STATUS_BADGE_CLASS = (status: CalendarStatus): string => {
     switch (status) {
         case 'proses':
-            return 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200';
+            return 'border border-orange-500 text-orange-800 bg-transparent';
         case 'selesai':
-            return 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200';
+            return 'border border-green-500 text-green-800 bg-transparent';
         case 'mendekati-deadline':
-            return 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200';
+            return 'border border-red-500 text-red-800 bg-transparent';
         default:
-            return 'bg-gray-100 text-gray-700 border-gray-200';
+            return 'border border-gray-400 text-gray-700 bg-transparent';
     }
 };
-
 const STATUS_LABEL: Record<CalendarStatus, string> = {
     proses: 'Sedang Berlangsung',
     selesai: 'Selesai',
     'mendekati-deadline': 'Mendekati Deadline',
 };
 
-export default function Calendar({ events, users = [] }: { events: CalendarEvent[]; users?: User[] }) {
+export default function Calendar({
+    flash,
+    events,
+    users = [],
+}: {
+    events: CalendarEvent[];
+    users?: User[];
+    flash?: { success?: string; error?: string };
+}) {
     const [open, setOpen] = useState(false);
     const [sheetOpen, setSheetOpen] = useState(false);
     const [clicked, setClicked] = useState<{
@@ -99,6 +115,43 @@ export default function Calendar({ events, users = [] }: { events: CalendarEvent
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [notification, setNotification] = useState<{
+        show: boolean;
+        message: string;
+        type: 'success' | 'error';
+    }>({
+        show: false,
+        message: '',
+        type: 'success',
+    });
+    // Auto-hide notification after 5 seconds
+    useEffect(() => {
+        if (notification.show) {
+            const timer = setTimeout(() => {
+                setNotification((prev) => ({ ...prev, show: false }));
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification.show]);
+
+    // Show notification from flash messages
+    useEffect(() => {
+        if (flash?.success) {
+            showNotification(flash.success, 'success');
+        }
+    }, [flash]);
+
+    const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+        setNotification({
+            show: true,
+            message,
+            type,
+        });
+    };
+
+    const hideNotification = () => {
+        setNotification((prev) => ({ ...prev, show: false }));
+    };
 
     // Map props -> event FullCalendar + pewarnaan
     const fcEvents = useMemo<EventInput[]>(
@@ -109,9 +162,9 @@ export default function Calendar({ events, users = [] }: { events: CalendarEvent
                 start: e.start,
                 end: e.end,
                 allDay: e.allDay ?? true,
-                backgroundColor: STATUS_COLOR[e.status],
-                borderColor: STATUS_COLOR[e.status],
-                textColor: '#ffffff',
+                backgroundColor: STATUS_BG[e.status],
+                borderColor: STATUS_BORDER[e.status],
+                textColor: STATUS_TEXT[e.status],
                 extendedProps: {
                     status: e.status,
                     description: e.description,
@@ -219,22 +272,42 @@ export default function Calendar({ events, users = [] }: { events: CalendarEvent
                             pic_user_id: null,
                         });
                         setSheetOpen(false);
+                        showNotification('Kegiatan berhasil ditambahkan.');
                     },
                     onError: (errors) => {
-                        console.error('Error creating event:', errors);
-                        alert('Gagal menambahkan kegiatan');
+                        showNotification('Gagal menambahkan kegiatan. Silakan coba lagi. ' + errors);
                     },
                     onFinish: () => setIsSubmitting(false),
                 },
             );
         } catch (error) {
-            console.error('Error:', error);
+            showNotification('Terjadi kesalahan saat mengirim data. Silakan coba lagi.' + error);
             setIsSubmitting(false);
         }
     };
 
     return (
         <>
+            {/* Notification Toast */}
+            {notification.show && (
+                <div className="fixed top-4 right-4 z-50 animate-in fade-in-0 slide-in-from-top-5">
+                    <Alert
+                        className={`min-w-80 border-l-4 shadow-lg ${
+                            notification.type === 'success' ? 'border-green-500 bg-green-50 text-green-800' : 'border-red-500 bg-red-50 text-red-800'
+                        }`}
+                    >
+                        <CheckCircle className={`h-4 w-4 ${notification.type === 'success' ? 'text-green-600' : 'text-red-600'}`} />
+                        <AlertTitle className="flex items-center justify-between">
+                            {notification.type === 'success' ? 'Berhasil!' : 'Error!'}
+                            <Button variant="ghost" size="icon" className="h-6 w-6 p-0 hover:bg-transparent" onClick={hideNotification}>
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </AlertTitle>
+                        <AlertDescription className="mt-1">{notification.message}</AlertDescription>
+                    </Alert>
+                </div>
+            )}
+
             <div className="space-y-6 p-6">
                 <div className="flex items-center justify-between">
                     <div className="space-y-1">
@@ -292,48 +365,50 @@ export default function Calendar({ events, users = [] }: { events: CalendarEvent
                         )}
                     </DialogHeader>
 
-                    <div className="space-y-4">
-                        {/* Status Badge */}
+                    <div className="grid grid-cols-[120px_1fr] gap-x-4 gap-y-2">
+                        {/* Status */}
                         {clicked?.status && (
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-muted-foreground">Status:</span>
+                            <>
+                                <span className="text-sm font-medium text-muted-foreground">Status</span>
                                 <Badge className={STATUS_BADGE_CLASS(clicked.status)}>{STATUS_LABEL[clicked.status]}</Badge>
-                            </div>
+                            </>
                         )}
 
-                        {/* Date Information */}
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-sm">
-                                <Clock className="h-4 w-4 text-muted-foreground" />
-                                <span className="font-medium text-muted-foreground">Mulai:</span>
-                                <span>{clicked?.startStr ?? '-'}</span>
-                            </div>
-                            {clicked?.endStr && (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <Clock className="h-4 w-4 text-muted-foreground" />
-                                    <span className="font-medium text-muted-foreground">Selesai:</span>
-                                    <span>{clicked.endStr}</span>
-                                </div>
-                            )}
-                        </div>
+                        {/* Tanggal Mulai */}
+                        <span className="text-sm font-medium text-muted-foreground">Mulai</span>
+                        <span className="text-sm">{clicked?.startStr ?? '-'}</span>
 
-                        {/* Additional Information */}
-                        <div className="space-y-2">
-                            {clicked?.pic_name && (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    <span className="font-medium text-muted-foreground">PIC:</span>
-                                    <span>{clicked.pic_name}</span>
-                                </div>
-                            )}
-                            {clicked?.created_by && (
-                                <div className="flex items-center gap-2 text-sm">
-                                    <User className="h-4 w-4 text-muted-foreground" />
-                                    <span className="font-medium text-muted-foreground">Dibuat oleh:</span>
-                                    <span>{clicked.created_by}</span>
-                                </div>
-                            )}
-                        </div>
+                        {/* Tanggal Selesai */}
+                        {clicked?.endStr && (
+                            <>
+                                <span className="text-sm font-medium text-muted-foreground">Selesai</span>
+                                <span className="text-sm">{clicked.endStr}</span>
+                            </>
+                        )}
+
+                        {/* PIC */}
+                        {clicked?.pic_name && (
+                            <>
+                                <span className="text-sm font-medium text-muted-foreground">PIC</span>
+                                <span className="text-sm">{clicked.pic_name}</span>
+                            </>
+                        )}
+
+                        {/* Dibuat oleh */}
+                        {clicked?.created_by && (
+                            <>
+                                <span className="text-sm font-medium text-muted-foreground">Dibuat oleh</span>
+                                <span className="text-sm">{clicked.created_by}</span>
+                            </>
+                        )}
+
+                        {/* Deskripsi */}
+                        {clicked?.description && (
+                            <>
+                                <span className="text-sm font-medium text-muted-foreground">Deskripsi</span>
+                                <span className="text-sm">{clicked.description}</span>
+                            </>
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>

@@ -20,9 +20,22 @@ class CalenderController extends Controller
     public function index()
     {
         $today = Carbon::today();
+        $user = Auth::user();
 
         // Ambil progres tugas + relasi untuk judul buku, nama tugas, dan PIC
-        $tasks = TaskProgress::with(['book', 'masterTask', 'pic'])->get();
+        $tasksQuery = TaskProgress::with(['book', 'masterTask', 'pic']);
+        $booksQuery = Book::query();
+
+        // Jika user adalah penerbit, filter hanya data miliknya
+        if ($user && $user->hasRole('penerbit')) {
+            $tasksQuery->whereHas('book', function ($q) use ($user) {
+                $q->where('penerbit_id', $user->penerbit_id);
+            });
+            $booksQuery->where('penerbit_id', $user->penerbit_id);
+        }
+
+        $tasks = $tasksQuery->get();
+        $books = $booksQuery->get();
 
         $taskEvents = $tasks->map(function ($t) use ($today) {
             $deadline = $t->deadline ? Carbon::parse($t->deadline) : null;
@@ -54,8 +67,6 @@ class CalenderController extends Controller
             ];
         });
 
-        // Tambahkan event target naik cetak buku
-        $books = Book::all();
         $bookEvents = $books->filter(fn($b) => !empty($b->tanggal_target_naik_cetak))->map(function ($b) {
             $status = $b->tanggal_realisasi_naik_cetak ? 'selesai' : 'proses';
 
@@ -70,30 +81,33 @@ class CalenderController extends Controller
             ];
         });
 
-        // Ambil custom calendar events dari database
-        $customEvents = Calendar::with(['creator'])
-            ->orderBy('start_date')
-            ->get()
-            ->map(function ($event) {
-                return [
-                    'id' => $event->id,
-                    'title' => $event->title,
-                    'start' => $event->start_date->toDateString(),
-                    'end' => $event->end_date ? $event->end_date->toDateString() : null,
-                    'status' => $event->status,
-                    'description' => $event->description,
-                    'pic_name' => $event->pic_name,
-                    'allDay' => $event->all_day,
-                    'created_by' => $event->creator->nama_lengkap ?? null,
-                    'source' => 'custom_event',
-                ];
-            });
+        // Custom calendar events (optional: filter jika ada relasi penerbit)
+        $customEventsQuery = Calendar::with(['creator'])->orderBy('start_date');
+        // Jika event custom juga terkait penerbit, tambahkan filter di sini
+        // Contoh: $customEventsQuery->where('penerbit_id', $user->penerbit_id);
 
-        // Gabungkan semua events
+        $customEvents = $customEventsQuery->get()->map(function ($event) {
+            return [
+                'id' => $event->id,
+                'title' => $event->title,
+                'start' => $event->start_date->toDateString(),
+                'end' => $event->end_date ? $event->end_date->toDateString() : null,
+                'status' => $event->status,
+                'description' => $event->description,
+                'pic_name' => $event->pic_name,
+                'allDay' => $event->all_day,
+                'created_by' => $event->creator->nama_lengkap ?? null,
+                'source' => 'custom_event',
+            ];
+        });
+
         $events = $taskEvents->concat($bookEvents)->concat($customEvents)->values();
 
-        // Ambil data users untuk dropdown PIC
-        $users = User::select('user_id', 'nama_lengkap')->orderBy('nama_lengkap')->get();
+        $usersQuery = User::select('user_id', 'nama_lengkap')->orderBy('nama_lengkap');
+        if ($user && $user->hasRole('penerbit')) {
+            $usersQuery->where('penerbit_id', $user->penerbit_id);
+        }
+        $users = $usersQuery->get();
 
         return Inertia::render('calender/page', [
             'events' => $events,

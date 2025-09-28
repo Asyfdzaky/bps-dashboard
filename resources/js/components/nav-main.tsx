@@ -69,7 +69,7 @@ export function NavMain({
                                 asChild
                                 isActive={page.url.startsWith(item.href)}
                                 tooltip={isCollapsed ? { children: title } : undefined}
-                                className="h-9 px-3 text-sm font-medium"
+                                className="h-7 px-3 text-sm font-medium"
                             >
                                 <Link href={item.href} prefetch>
                                     <div className="flex w-full items-center gap-3">
@@ -102,7 +102,7 @@ export function NavMain({
                             <SidebarMenuButton
                                 tooltip={{ children: title }}
                                 isActive={isGroupActive}
-                                className="h-9 justify-center px-3 data-[state=collapsed]:justify-center"
+                                className="h-7 justify-center px-3 data-[state=collapsed]:justify-center"
                             >
                                 <div className="flex items-center justify-center">
                                     {icon && <span className="flex-shrink-0 text-sidebar-foreground">{icon}</span>}
@@ -150,7 +150,7 @@ export function NavMain({
                             !shouldBeCollapsible || isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                         } `}
                     >
-                        <div className="mt-1 ml-6 border-l border-sidebar-border/50 pl-3">
+                        <div className="mt-1 ml-6 border-l border-sidebar-border pl-3">
                             <SidebarMenu className="gap-1">
                                 {items.map((item) => (
                                     <SidebarMenuItem key={item.href}>

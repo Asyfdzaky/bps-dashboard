@@ -14,6 +14,8 @@ class ProgresNaskahController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+
         // Subquery: current_order per buku = MIN(urutan) dari task yang belum selesai
         $currentStageSub = TaskProgress::query()
             ->select([
@@ -25,7 +27,7 @@ class ProgresNaskahController extends Controller
             ->groupBy('task_progress.buku_id');
 
         // Ambil buku + info tahapan saat ini (join ke master_tasks via current_order)
-        $booksWithStage = Book::query()
+        $booksQuery = Book::query()
             ->leftJoinSub($currentStageSub, 'cs', 'cs.buku_id', '=', 'books.buku_id')
             ->leftJoin('master_tasks as mt', 'mt.urutan', '=', 'cs.current_order')
             ->select([
@@ -40,8 +42,14 @@ class ProgresNaskahController extends Controller
                 'publisher',
                 'taskProgress.masterTask',
                 'taskProgress.pic',
-            ])
-            ->get();
+            ]);
+
+        // Jika user adalah penerbit, filter hanya naskah miliknya
+        if ($user && $user->hasRole('penerbit')) {
+            $booksQuery->where('books.penerbit_id', $user->penerbit_id);
+        }
+
+        $booksWithStage = $booksQuery->get();
 
         // Kelompokkan buku per stage_name dengan logika status
         $grouped = $booksWithStage->groupBy(function ($book) {
@@ -49,7 +57,7 @@ class ProgresNaskahController extends Controller
             if (!$book->current_stage_name) {
                 return 'Selesai';
             }
-            
+
             // Cek apakah ada task yang tertunda (melewati deadline)
             $hasPendingOverdue = $book->taskProgress
                 ->where('status', 'pending')
@@ -57,11 +65,11 @@ class ProgresNaskahController extends Controller
                     return $task->deadline && now()->isAfter($task->deadline);
                 })
                 ->isNotEmpty();
-                
+
             if ($hasPendingOverdue) {
                 return 'Tertunda';
             }
-            
+
             return $book->current_stage_name;
         })->sortKeys();
 
@@ -78,9 +86,7 @@ class ProgresNaskahController extends Controller
         $booksByStage = collect($orderedStageNames)->mapWithKeys(function ($stageName) use ($grouped) {
             return [$stageName => $grouped->get($stageName, collect())];
         });
-        
-        $user = Auth::user();
-       
+
         return Inertia::render('manajemen-naskah/progress', [
             // Untuk tampilan "per stage"
             'BooksByStage' => $booksByStage,

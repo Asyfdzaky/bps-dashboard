@@ -62,13 +62,19 @@ const ManajemenTaskNavItems: NavItem[] = [
         href: '/manajemen-task',
     },
 ];
-
+const PenerbitNavItems: NavItem[] = [
+    {
+        title: 'Penerbit',
+        href: '/penerbit',
+    },
+];
 
 export function AppSidebar() {
     const { auth } = usePage<{ auth: { user?: { roles?: string[] } } }>().props;
     const user = auth.user;
     const { state } = useSidebar(); // Get sidebar state
     const isCollapsed = state === 'collapsed';
+    const filteredNaskahNavItems = hasRole(user, 'penerbit') ? NaskahNavItems.filter((item) => item.title !== 'Approval Naskah') : NaskahNavItems;
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -76,7 +82,7 @@ export function AppSidebar() {
                     <Link href="/dashboard" className="flex items-center justify-center">
                         {isCollapsed ? (
                             // Show book icon when collapsed
-                            <BookOpen className="h-6 w-6 text-primary" />
+                            <BookOpen className="text-primary h-6 w-6" />
                         ) : (
                             // Show full logo when expanded
                             <AppLogo />
@@ -97,7 +103,7 @@ export function AppSidebar() {
                 {hasRole(user, ['manajer', 'produksi', 'penerbit']) && (
                     <SidebarGroup>
                         <SidebarGroupContent>
-                            <NavMain items={NaskahNavItems} title="Naskah" collapsible icon={<FileText className="h-4 w-4" />} />
+                            <NavMain items={filteredNaskahNavItems} title="Naskah" collapsible icon={<FileText className="h-4 w-4" />} />
                         </SidebarGroupContent>
                     </SidebarGroup>
                 )}
@@ -125,6 +131,14 @@ export function AppSidebar() {
                     <SidebarGroup>
                         <SidebarGroupContent>
                             <NavMain items={ManajemenTaskNavItems} title="Manajemen Task" collapsible icon={<ListCollapse className="h-4 w-4" />} />
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
+                {/* Penerbit (manajer saja) */}
+                {hasRole(user, 'manajer') && (
+                    <SidebarGroup>
+                        <SidebarGroupContent>
+                            <NavMain items={PenerbitNavItems} title="Penerbit" collapsible icon={<BookOpen className="h-4 w-4" />} />
                         </SidebarGroupContent>
                     </SidebarGroup>
                 )}
