@@ -21,12 +21,12 @@ const getCSSVariable = (variable: string) => {
 const getChartColors = () => {
     // Fallback colors jika CSS variables tidak tersedia
     const fallbackColors = ['#60a5fa', '#34d399', '#ef4444'];
-    
+
     try {
         const chart2 = getCSSVariable('--chart-1');
         const chart3 = getCSSVariable('--chart-2');
-        const destructive = getCSSVariable('--chart-3') ;
-        
+        const destructive = getCSSVariable('--chart-3');
+
         return [chart2, chart3, destructive];
     } catch {
         return fallbackColors;
@@ -54,7 +54,11 @@ export default function StatusBukuChart({ data, title = 'Status Buku' }: StatusB
                         ))}
                     </Pie>
                     <Tooltip formatter={(value: number) => [`${value} buku`, 'Jumlah']} labelFormatter={(label: string) => `Status: ${label}`} />
-                    <Legend verticalAlign="bottom" height={36} formatter={(value: string) => <span className="text-sm text-foreground">{value}</span>} />
+                    <Legend
+                        verticalAlign="bottom"
+                        height={36}
+                        formatter={(value: string) => <span className="text-sm text-foreground">{value}</span>}
+                    />
                 </PieChart>
             </ResponsiveContainer>
         </div>

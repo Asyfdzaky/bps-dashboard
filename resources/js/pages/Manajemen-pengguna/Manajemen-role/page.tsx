@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { KPICard } from '@/components/ui/progress-summary';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
@@ -33,7 +33,7 @@ const categorizePermissions = (permissions: Permission[]) => {
 };
 
 export default function Page() {
-    const { roles, filters, can, permissions } = usePage<RoleIndexPageProps>().props;
+    const { roles, filters, can, permissions, users } = usePage<RoleIndexPageProps>().props;
 
     const { data, setData, post, processing, reset, errors } = useForm({
         name: '',
@@ -141,7 +141,7 @@ export default function Page() {
                                                 <div className="space-y-4">
                                                     {Object.entries(permissionCategories).map(([category, categoryPermissions]) => (
                                                         <div key={category} className="space-y-2">
-                                                            <h4 className="text-muted-foreground text-sm font-medium capitalize">
+                                                            <h4 className="text-sm font-medium text-muted-foreground capitalize">
                                                                 {category} ({categoryPermissions.length})
                                                             </h4>
                                                             <div className="grid grid-cols-1 gap-2 pl-4">
@@ -166,7 +166,7 @@ export default function Page() {
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <div className="text-muted-foreground py-4 text-center">Tidak ada permission yang tersedia</div>
+                                                <div className="py-4 text-center text-muted-foreground">Tidak ada permission yang tersedia</div>
                                             )}
 
                                             {errors.permissions && <p className="text-sm text-red-500">{errors.permissions}</p>}
@@ -188,25 +188,21 @@ export default function Page() {
                 </div>
 
                 {/* Summary Statistics */}
-                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Role</CardTitle>
-                            <Users className="text-muted-foreground h-4 w-4" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{roles.total}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Permission </CardTitle>
-                            <Key className="text-muted-foreground h-4 w-4" />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{roles.data.reduce((sum, role) => sum + role.permissions_count, 0)}</div>
-                        </CardContent>
-                    </Card>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <KPICard
+                        title="Total Role"
+                        value={roles.total}
+                        icon={<Users className="h-6 w-6" />}
+                        color="secondary"
+                        description="Jumlah user dengan role penerjemah"
+                    />
+                    <KPICard
+                        title="Total Permission"
+                        value={roles.data.reduce((sum, role) => sum + role.permissions_count, 0)}
+                        icon={<Key className="h-6 w-6" />}
+                        color="accent"
+                        description="Jumlah permission yang terpakai di semua role"
+                    />
                 </div>
 
                 <div className="flex items-center justify-between">
@@ -218,12 +214,6 @@ export default function Page() {
                             delete: !!can?.delete,
                         }}
                         onSearch={(value) => search(value)}
-                        onSort={(col, dir) => {
-                            router.get(route('roles.index'), { ...filters, sort: col, dir }, { preserveState: true, replace: true });
-                        }}
-                        onPageChange={(page) => {
-                            router.get(route('roles.index'), { ...filters, page }, { preserveState: true, replace: true });
-                        }}
                     />
                 </div>
             </div>

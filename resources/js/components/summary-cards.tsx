@@ -58,22 +58,22 @@ export function SummaryStats({
     ];
 
     return (
-        <Card className="bg-secondary">
-            <CardContent className="p-6">
+        <Card>
+            <CardContent className="p-2">
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     {items.map((item, index) => {
                         return (
                             <div
                                 key={item.key}
                                 className={cn(
-                                    'relative flex items-center gap-4 rounded-lg border bg-card p-4',
+                                    'relative flex items-center gap-4 bg-card p-4',
                                     // Add subtle divider for larger screens using border color
                                     index < items.length - 1 &&
                                         'lg:after:absolute lg:after:top-1/2 lg:after:-right-3 lg:after:h-8 lg:after:w-px lg:after:-translate-y-1/2 lg:after:bg-border',
                                 )}
                             >
                                 {/* Icon container */}
-                                <div className={cn('flex h-12 w-12 items-center justify-center rounded-lg border', item.colorClass)}>
+                                <div className={cn('mr-2 flex h-12 w-12 items-center justify-center rounded-lg border', item.colorClass)}>
                                     <item.icon className="h-6 w-6" />
                                 </div>
 

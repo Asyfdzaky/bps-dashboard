@@ -20,6 +20,7 @@ export type RoleRow = {
     name: string;
     guard_name: string;
     permissions_count: number;
+    users_count: number;
     created_at: string;
 };
 
@@ -42,4 +43,5 @@ export type RoleIndexPageProps = {
     filters: RoleIndexFilters;
     can: RoleIndexCan;
     permissions: Permission[];
+    users: { id: number; name: string }[];
 };

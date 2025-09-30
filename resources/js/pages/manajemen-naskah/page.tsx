@@ -85,24 +85,28 @@ export default function ManajemenNaskah() {
                                 value: totalBooks,
                                 icon: <BookIcon className="h-5 w-5 sm:h-6 sm:w-6" />,
                                 color: 'primary',
+                                description: 'Total Naskah',
                             },
                             {
                                 title: 'Draft',
                                 value: draftBooks,
                                 icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'primary',
+                                color: 'accent',
+                                description: 'Naskah dalam Status Draft',
                             },
                             {
                                 title: 'Sedang Diproses',
                                 value: inProgressBooks,
                                 icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'primary',
+                                color: 'destructive',
+                                description: 'Naskah yang Sedang dalam Proses',
                             },
                             {
                                 title: 'Terbit',
                                 value: publishedBooks,
                                 icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'primary',
+                                color: 'secondary',
+                                description: 'Naskah yang Sudah Diterbitkan',
                             },
                         ]}
                     />

@@ -146,7 +146,7 @@ export function KPICard({
             <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                     <div className="min-w-0 flex-1">
-                        <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">{title}</p>
+                        <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate mb-2">{title}</p>
                         <h3 className={cn("text-xl sm:text-2xl lg:text-3xl font-bold", {
                             "text-primary": color === "primary",
                             "text-secondary": color === "secondary", 
@@ -156,7 +156,7 @@ export function KPICard({
                             {value}
                         </h3>
                         {description && (
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-xs text-muted-foreground mt-2">
                                 {description}
                             </p>
                         )}
@@ -184,7 +184,10 @@ interface KPIGridProps {
 
 export function KPIGrid({ items, className }: KPIGridProps) {
     return (
-        <div className={cn("grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4", className)}>
+        <div className={cn(
+  "grid gap-4 grid-cols-[repeat(auto-fit,minmax(200px,1fr))]",
+  className
+)}>
             {items.map((item, index) => (
                 <KPICard
                     key={index}

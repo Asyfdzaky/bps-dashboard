@@ -14,7 +14,6 @@ type Props = {
     filters: RoleIndexFilters;
     can: { edit: boolean; delete: boolean };
     onSearch: (q: string) => void;
-    onPageChange: (page: number) => void;
 };
 
 export default function TableRole({ roles, can, onSearch, onPageChange }: Props) {
@@ -91,11 +90,11 @@ export default function TableRole({ roles, can, onSearch, onPageChange }: Props)
             cell: ({ row }) => (
                 <div>
                     {row.original.permissions_count > 0 ? (
-                        <div className="text-muted-foreground text-sm">
+                        <div className="text-sm text-muted-foreground">
                             {row.original.permissions_count} permission{row.original.permissions_count > 1 ? 's' : ''} assigned
                         </div>
                     ) : (
-                        <div className="text-muted-foreground text-sm italic">No permissions</div>
+                        <div className="text-sm text-muted-foreground italic">No permissions</div>
                     )}
                 </div>
             ),
@@ -111,9 +110,9 @@ export default function TableRole({ roles, can, onSearch, onPageChange }: Props)
             id: 'actions',
             header: 'Aksi',
             cell: ({ row }) => (
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center gap-2">
                     {can.edit && (
-                        <Button asChild variant="ghost" size="icon" className="text-primary hover:bg-primary/10 h-8 w-8">
+                        <Button asChild variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-primary/10">
                             <Link href={route('roles.edit', row.original.id)}>
                                 <Edit className="h-4 w-4" />
                             </Link>
@@ -123,7 +122,7 @@ export default function TableRole({ roles, can, onSearch, onPageChange }: Props)
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
                             onClick={() => handleDeleteClick(row.original)}
                         >
                             <Trash2 className="h-4 w-4" />
@@ -147,7 +146,6 @@ export default function TableRole({ roles, can, onSearch, onPageChange }: Props)
                     total: roles.total,
                 }}
                 onSearch={onSearch}
-                onPageChange={onPageChange}
             />
 
             {/* Delete Confirmation Dialog */}
@@ -155,8 +153,8 @@ export default function TableRole({ roles, can, onSearch, onPageChange }: Props)
                 <DialogContent>
                     <DialogHeader>
                         <div className="flex items-center gap-3">
-                            <div className="bg-destructive/10 flex h-10 w-10 items-center justify-center rounded-full">
-                                <AlertTriangle className="text-destructive h-5 w-5" />
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                                <AlertTriangle className="h-5 w-5 text-destructive" />
                             </div>
                             <div>
                                 <DialogTitle>Hapus Role</DialogTitle>

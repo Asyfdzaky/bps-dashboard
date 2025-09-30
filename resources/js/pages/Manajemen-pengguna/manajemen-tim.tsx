@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { X } from 'lucide-react';
 
 import { DataTable } from '@/components/table-data';
+import { KPICard } from '@/components/ui/progress-summary';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 import type { Role, TeamIndexPageProps, UserRow } from '@/types/team';
@@ -166,7 +166,7 @@ export default function ManajemenTim() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-primary hover:bg-primary/10 h-8 w-8"
+                            className="h-8 w-8 text-primary hover:bg-primary/10"
                             onClick={() => startEdit(row.original)}
                         >
                             <Edit className="h-4 w-4" />
@@ -176,7 +176,7 @@ export default function ManajemenTim() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
                             onClick={() => onDelete(row.original.user_id)}
                         >
                             <Trash2 className="h-4 w-4" />
@@ -194,7 +194,7 @@ export default function ManajemenTim() {
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-foreground text-2xl font-bold">Manajemen Tim</h1>
+                        <h1 className="text-2xl font-bold text-foreground">Manajemen Tim</h1>
                         <p className="text-muted-foreground">Kelola anggota tim, tambah user baru, dan assign role untuk mereka</p>
                     </div>
                     {can?.create && (
@@ -207,39 +207,27 @@ export default function ManajemenTim() {
 
                 {/* Summary Statistics */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-                            <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-                                <Users className="text-primary h-4 w-4" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-primary text-2xl font-bold">{users.total}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Users with Roles</CardTitle>
-                            <div className="bg-secondary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-                                <UserCheck className="text-secondary h-4 w-4" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-secondary text-2xl font-bold">{users.data.filter((user) => user.roles.length > 0).length}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Roles</CardTitle>
-                            <div className="bg-accent/10 flex h-8 w-8 items-center justify-center rounded-lg">
-                                <Settings className="text-accent h-4 w-4" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-accent text-2xl font-bold">{roles.length}</div>
-                        </CardContent>
-                    </Card>
+                    <KPICard
+                        title="Total Users"
+                        value={users.total}
+                        icon={<Users className="h-6 w-6" />}
+                        color="primary"
+                        description="Jumlah total pengguna terdaftar di sistem"
+                    />
+                    <KPICard
+                        title="Users with Roles"
+                        value={users.data.filter((user) => user.roles.length > 0).length}
+                        icon={<UserCheck className="h-6 w-6" />}
+                        color="secondary"
+                        description="Jumlah pengguna yang memiliki setidaknya satu role"
+                    />
+                    <KPICard
+                        title="Total Roles"
+                        value={roles.length}
+                        icon={<Settings className="h-6 w-6" />}
+                        color="accent"
+                        description="Jumlah total role yang tersedia di sistem"
+                    />
                 </div>
 
                 {/* Create User Form */}
@@ -260,7 +248,7 @@ export default function ManajemenTim() {
                                         className={errors.nama_lengkap ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.nama_lengkap && <p className="text-destructive text-sm">{errors.nama_lengkap}</p>}
+                                    {errors.nama_lengkap && <p className="text-sm text-destructive">{errors.nama_lengkap}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
@@ -272,7 +260,7 @@ export default function ManajemenTim() {
                                         className={errors.email ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
+                                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                                 </div>
                             </div>
 
@@ -287,7 +275,7 @@ export default function ManajemenTim() {
                                         className={errors.password ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
+                                    {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password_confirmation">Konfirmasi Password</Label>
@@ -299,7 +287,7 @@ export default function ManajemenTim() {
                                         className={errors.password_confirmation ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.password_confirmation && <p className="text-destructive text-sm">{errors.password_confirmation}</p>}
+                                    {errors.password_confirmation && <p className="text-sm text-destructive">{errors.password_confirmation}</p>}
                                 </div>
                             </div>
 
@@ -323,7 +311,7 @@ export default function ManajemenTim() {
                                 {/* Display selected roles */}
                                 {data.roles.length > 0 && (
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground text-sm">Role yang dipilih:</Label>
+                                        <Label className="text-sm text-muted-foreground">Role yang dipilih:</Label>
                                         <div className="flex flex-wrap gap-2">
                                             {data.roles.map((roleId) => {
                                                 const role = roles.find((r) => r.id === roleId);
@@ -331,7 +319,7 @@ export default function ManajemenTim() {
                                                     <Badge key={role.id} variant="default" className="flex items-center gap-1">
                                                         {role.name}
                                                         <X
-                                                            className="hover:text-destructive h-3 w-3 cursor-pointer"
+                                                            className="h-3 w-3 cursor-pointer hover:text-destructive"
                                                             onClick={() => handleRoleRemove(role.id)}
                                                         />
                                                     </Badge>
@@ -340,7 +328,7 @@ export default function ManajemenTim() {
                                         </div>
                                     </div>
                                 )}
-                                {errors.roles && <p className="text-destructive text-sm">{errors.roles}</p>}
+                                {errors.roles && <p className="text-sm text-destructive">{errors.roles}</p>}
                             </div>
 
                             {/* Publisher Selection */}
@@ -362,7 +350,7 @@ export default function ManajemenTim() {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.penerbit_id && <p className="text-destructive text-sm">{errors.penerbit_id}</p>}
+                                    {errors.penerbit_id && <p className="text-sm text-destructive">{errors.penerbit_id}</p>}
                                 </div>
                             )}
 
@@ -396,7 +384,7 @@ export default function ManajemenTim() {
                                         className={errors.nama_lengkap ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.nama_lengkap && <p className="text-destructive text-sm">{errors.nama_lengkap}</p>}
+                                    {errors.nama_lengkap && <p className="text-sm text-destructive">{errors.nama_lengkap}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="edit-email">Email</Label>
@@ -408,7 +396,7 @@ export default function ManajemenTim() {
                                         className={errors.email ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
+                                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                                 </div>
                             </div>
 
@@ -432,7 +420,7 @@ export default function ManajemenTim() {
                                 {/* Display selected roles */}
                                 {data.roles.length > 0 && (
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground text-sm">Role yang dipilih:</Label>
+                                        <Label className="text-sm text-muted-foreground">Role yang dipilih:</Label>
                                         <div className="flex flex-wrap gap-2">
                                             {data.roles.map((roleId) => {
                                                 const role = roles.find((r) => r.id === roleId);
@@ -440,7 +428,7 @@ export default function ManajemenTim() {
                                                     <Badge key={role.id} variant="default" className="flex items-center gap-1">
                                                         {role.name}
                                                         <X
-                                                            className="hover:text-destructive h-3 w-3 cursor-pointer"
+                                                            className="h-3 w-3 cursor-pointer hover:text-destructive"
                                                             onClick={() => handleRoleRemove(role.id)}
                                                         />
                                                     </Badge>
@@ -449,7 +437,7 @@ export default function ManajemenTim() {
                                         </div>
                                     </div>
                                 )}
-                                {errors.roles && <p className="text-destructive text-sm">{errors.roles}</p>}
+                                {errors.roles && <p className="text-sm text-destructive">{errors.roles}</p>}
                             </div>
 
                             {/* Publisher Selection */}
@@ -471,7 +459,7 @@ export default function ManajemenTim() {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.penerbit_id && <p className="text-destructive text-sm">{errors.penerbit_id}</p>}
+                                    {errors.penerbit_id && <p className="text-sm text-destructive">{errors.penerbit_id}</p>}
                                 </div>
                             )}
 

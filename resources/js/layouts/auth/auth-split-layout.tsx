@@ -27,35 +27,35 @@ export default function AuthSplitLayout({
                     }}
                 >
                     {/* Overlay untuk memastikan text tetap terbaca */}
-                    <div className="absolute inset-0 rounded-2xl bg-black/40"></div>
+                    <div className="absolute inset-0 rounded-2xl"></div>
                 </div>
-
+{/* 
                 <div className="relative z-10 flex h-full flex-col justify-center rounded-2xl p-8 text-white">
                     <div className="w-1/2 text-wrap">
-                        <h2 className="mb-4 text-4xl font-bold">Effortlessly manage your publishing workflow.</h2>
+                        <h2 className="mb-4 text-4xl font-bold text-primary">Kelola alur penerbitan Anda dengan mudah.</h2>
                         <p className="mb-8 text-justify text-lg leading-relaxed">
-                            Access your dashboard to manage manuscripts, track progress, and collaborate with your team efficiently.
+                            Akses dashboard untuk mengelola naskah, memantau progres, dan berkolaborasi dengan tim secara efisien.
                         </p>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* Left Side - Auth Form */}
             <div className="flex flex-col justify-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24">
                 <div className="mx-auto w-full lg:w-120">
                     {/* Logo */}
-                    <div className="absolute top-6 right-6">
-                        <Link href={route('home')} className="flex items-center">
-                            <AppLogoIcon className="h-16 w-auto" />
-                        </Link>
-                    </div>
 
                     {/* Card Wrapper */}
-                    <div className="rounded-xl border bg-card p-8 shadow-lg">
+                    <div className="rounded-xl border bg-card p-8">
                         {/* Title & Description */}
+                        <div className="mb-8 flex justify-center">
+                            <Link href={route('home')} className="flex items-center">
+                                <AppLogoIcon className="h-16 w-auto" />
+                            </Link>
+                        </div>
                         <div className="mb-8">
-                            <h1 className="mb-2 text-3xl font-bold text-foreground">{title}</h1>
-                            <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
+                            <h1 className="mb-2 text-center text-xl font-bold text-foreground">{title}</h1>
+                            <p className="text-center text-sm text-muted-foreground">{description}</p>
                         </div>
 
                         {/* Auth Form */}

@@ -1,6 +1,5 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +13,7 @@ import type { Role, TeamIndexPageProps, UserRow } from '@/types/team';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { BookOpen, Edit, Languages, Plus, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
+import { KPICard } from '@/components/ui/progress-summary';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -160,7 +160,7 @@ export default function ManajemenPengguna() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-primary hover:bg-primary/10 h-8 w-8"
+                            className="h-8 w-8 text-primary hover:bg-primary/10"
                             onClick={() => startEdit(row.original)}
                         >
                             <Edit className="h-4 w-4" />
@@ -170,7 +170,7 @@ export default function ManajemenPengguna() {
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="text-destructive hover:bg-destructive/10 h-8 w-8"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
                             onClick={() => onDelete(row.original.user_id)}
                         >
                             <Trash2 className="h-4 w-4" />
@@ -188,7 +188,7 @@ export default function ManajemenPengguna() {
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-foreground text-2xl font-bold">Manajemen Pengguna</h1>
+                        <h1 className="text-2xl font-bold text-foreground">Manajemen Pengguna</h1>
                         <p className="text-muted-foreground">Kelola penulis dan penerjemah untuk proyek naskah</p>
                     </div>
                     {/* Action Buttons */}
@@ -204,28 +204,20 @@ export default function ManajemenPengguna() {
 
                 {/* Summary Statistics */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Penulis</CardTitle>
-                            <div className="bg-primary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-                                <BookOpen className="text-primary h-4 w-4" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-primary text-2xl font-bold">{penulisUsers.length}</div>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Penerjemah</CardTitle>
-                            <div className="bg-secondary/10 flex h-8 w-8 items-center justify-center rounded-lg">
-                                <Languages className="text-secondary h-4 w-4" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-secondary text-2xl font-bold">{penerjemahUsers.length}</div>
-                        </CardContent>
-                    </Card>
+                    <KPICard
+                        title="Total Penulis"
+                        value={penulisUsers.length}
+                        icon={<BookOpen className="h-6 w-6" />}
+                        color="primary"
+                        description="Jumlah user dengan role penulis"
+                    />
+                    <KPICard
+                        title="Total Penerjemah"
+                        value={penerjemahUsers.length}
+                        icon={<Languages className="h-6 w-6" />}
+                        color="secondary"
+                        description="Jumlah user dengan role penerjemah"
+                    />
                 </div>
 
                 {/* Create User Form */}
@@ -246,7 +238,7 @@ export default function ManajemenPengguna() {
                                         className={errors.nama_lengkap ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.nama_lengkap && <p className="text-destructive text-sm">{errors.nama_lengkap}</p>}
+                                    {errors.nama_lengkap && <p className="text-sm text-destructive">{errors.nama_lengkap}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
@@ -258,7 +250,7 @@ export default function ManajemenPengguna() {
                                         className={errors.email ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
+                                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                                 </div>
                             </div>
 
@@ -273,7 +265,7 @@ export default function ManajemenPengguna() {
                                         className={errors.password ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
+                                    {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="password_confirmation">Konfirmasi Password</Label>
@@ -285,7 +277,7 @@ export default function ManajemenPengguna() {
                                         className={errors.password_confirmation ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.password_confirmation && <p className="text-destructive text-sm">{errors.password_confirmation}</p>}
+                                    {errors.password_confirmation && <p className="text-sm text-destructive">{errors.password_confirmation}</p>}
                                 </div>
                             </div>
 
@@ -308,7 +300,7 @@ export default function ManajemenPengguna() {
                                         <SelectItem value="penerjemah">Penerjemah</SelectItem>
                                     </SelectContent>
                                 </Select>
-                                {errors.roles && <p className="text-destructive text-sm">{errors.roles}</p>}
+                                {errors.roles && <p className="text-sm text-destructive">{errors.roles}</p>}
                             </div>
 
                             <DialogFooter>
@@ -341,7 +333,7 @@ export default function ManajemenPengguna() {
                                         className={errors.nama_lengkap ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.nama_lengkap && <p className="text-destructive text-sm">{errors.nama_lengkap}</p>}
+                                    {errors.nama_lengkap && <p className="text-sm text-destructive">{errors.nama_lengkap}</p>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="edit-email">Email</Label>
@@ -353,7 +345,7 @@ export default function ManajemenPengguna() {
                                         className={errors.email ? 'border-destructive' : ''}
                                         required
                                     />
-                                    {errors.email && <p className="text-destructive text-sm">{errors.email}</p>}
+                                    {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                                 </div>
                             </div>
 
@@ -377,7 +369,7 @@ export default function ManajemenPengguna() {
                                 {/* Display selected roles */}
                                 {data.roles.length > 0 && (
                                     <div className="space-y-2">
-                                        <Label className="text-muted-foreground text-sm">Role yang dipilih:</Label>
+                                        <Label className="text-sm text-muted-foreground">Role yang dipilih:</Label>
                                         <div className="flex flex-wrap gap-2">
                                             {data.roles.map((roleId) => {
                                                 const role = roles.find((r: Role) => r.id === roleId);
@@ -385,7 +377,7 @@ export default function ManajemenPengguna() {
                                                     <Badge key={role.id} variant="default" className="flex items-center gap-1">
                                                         {role.name}
                                                         <X
-                                                            className="hover:text-destructive h-3 w-3 cursor-pointer"
+                                                            className="h-3 w-3 cursor-pointer hover:text-destructive"
                                                             onClick={() => handleRoleRemove(role.id)}
                                                         />
                                                     </Badge>
@@ -394,7 +386,7 @@ export default function ManajemenPengguna() {
                                         </div>
                                     </div>
                                 )}
-                                {errors.roles && <p className="text-destructive text-sm">{errors.roles}</p>}
+                                {errors.roles && <p className="text-sm text-destructive">{errors.roles}</p>}
                             </div>
 
                             <DialogFooter>

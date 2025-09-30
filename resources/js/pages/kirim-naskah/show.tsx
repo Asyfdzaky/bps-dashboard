@@ -143,13 +143,12 @@ export default function KirimNaskahShow({ manuscript }: Props) {
         <AppHeaderLayout breadcrumbs={breadcrumbs}>
             <Head title={`Detail Naskah - ${manuscript.judul_naskah}`} />
 
-            <div className="space-y-6">
+            <div className="space-y-6 p-8">
                 {/* Header */}
-                <div className="rounded-lg bg-primary p-6 text-white">
+                <div className="rounded-lg bg-primary/95 p-6 text-white">
                     <div className="flex items-center justify-start gap-8">
                         <Button variant="secondary" onClick={() => router.visit('/dashboard')}>
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Kembali
+                            <ArrowLeft className="h-4 w-4" />
                         </Button>
                         <div>
                             <h1 className="mb-2 text-2xl font-bold">{manuscript.judul_naskah}</h1>

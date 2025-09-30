@@ -73,8 +73,8 @@
     --primary: oklch(74.7% 0.225 56.8); /* #ff7500 */
     --primary-foreground: oklch(98.5% 0 0);
 
-    --secondary: oklch(28.9% 0.064 268.04); /* #1d2858 */
-    --secondary-foreground: oklch(98.5% 0 0);
+    --secondary: oklch(56.5% 0.27 282.6); /* #6F00FF biru tua terang */
+    --secondary-foreground: oklch(98.5% 0 0); /* Putih */
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);
     --accent: oklch(39.1% 0.104 170.7); /* #125142 */

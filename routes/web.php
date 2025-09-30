@@ -56,10 +56,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/analitik', [AnalitikController::class, 'index'])->name('analitik');
     // Calendar routes
-    Route::get('/calender', [CalenderController::class, 'index'])->name('calender.index');
-    Route::post('/calendar/events', [CalenderController::class, 'store'])->name('calendar.events.store');
-    Route::put('/calendar/events/{id}', [CalenderController::class, 'update'])->name('calendar.events.update');
-    Route::delete('/calendar/events/{id}', [CalenderController::class, 'destroy'])->name('calendar.events.destroy');
+    Route::get('/calender', [CalenderController::class, 'index'])
+        ->name('calender.index')
+        ->middleware('role:manajer|penerbit|produksi');
+    Route::post('/calendar/events', [CalenderController::class, 'store'])->name('calendar.events.store')->middleware('role:manajer|penerbit|produksi');;
+    Route::put('/calendar/events/{id}', [CalenderController::class, 'update'])->name('calendar.events.update')->middleware('role:manajer|penerbit|produksi');;
+    Route::delete('/calendar/events/{id}', [CalenderController::class, 'destroy'])->name('calendar.events.destroy')->middleware('role:manajer|penerbit|produksi');;
 
     Route::get('/target', [TargetController::class, 'index'])->name('target');
     Route::get('/target/create', [TargetController::class, 'create'])->name('target.create');

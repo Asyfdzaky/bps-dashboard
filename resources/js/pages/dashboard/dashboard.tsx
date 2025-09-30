@@ -62,24 +62,28 @@ export default function Dashboard() {
             value: TargetTahunan,
             icon: <Trophy className="h-5 w-5 lg:h-6 lg:w-6" />,
             color: 'primary' as const,
+            description: 'Target Cetak Buku per Tahun',
         },
         {
             title: 'Buku Published',
             value: Published,
             icon: <BookOpen className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: 'primary' as const,
+            color: 'secondary' as const,
+            description: 'Jumlah Buku yang Sudah Diterbitkan',
         },
         {
             title: 'Sedang Dikerjakan',
             value: SedangDikerjakan,
             icon: <FileText className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: 'primary' as const,
+            color: 'accent' as const,
+            description: 'Naskah yang Sedang dalam Proses',
         },
         {
             title: 'Mendekati Deadline',
             value: MendekatiDeadline,
             icon: <Clock className="h-5 w-5 lg:h-6 lg:w-6" />,
-            color: 'primary' as const,
+            color: 'destructive' as const,
+            description: 'Naskah yang Mendekati Batas Waktu',
         },
     ];
 
@@ -128,7 +132,7 @@ export default function Dashboard() {
                                         <div className="mb-4">
                                             <h2 className="mb-2 text-xl font-semibold text-foreground">Naskah Terkini</h2>
                                         </div>
-                                        <ListNaskahTerkini books={books}/>
+                                        <ListNaskahTerkini books={books} />
                                     </div>
                                 </div>
 

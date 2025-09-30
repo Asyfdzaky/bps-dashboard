@@ -117,7 +117,7 @@ export function NavMain({
                 <>
                     <SidebarGroupLabel
                         className={`mx-0 flex h-9 items-center rounded-md px-3 transition-all duration-200 ${
-                            shouldBeCollapsible ? 'cursor-pointer hover:bg-primary/60 hover:text-black' : 'cursor-default'
+                            shouldBeCollapsible ? 'cursor-pointer hover:bg-gray-100 hover:text-primary' : 'cursor-default'
                         } ${isGroupActive ? 'text-sm' : 'text-sm font-medium'} `}
                         onClick={toggleGroup}
                     >
@@ -130,7 +130,7 @@ export function NavMain({
                                         {icon}
                                     </span>
                                 )}
-                                <span className="truncate text-black">{title}</span>
+                                <span className="truncate text-black hover:text-primary">{title}</span>
                             </div>
                             {shouldBeCollapsible && (
                                 <span className="ml-2 flex-shrink-0 opacity-60 transition-opacity hover:opacity-100">
