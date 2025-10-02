@@ -177,7 +177,7 @@ export default function ManajemenTaskPage() {
                 </div>
             )}
 
-            <div className="container mx-auto h-full space-y-6 p-4 sm:p-6 lg:p-8">
+            <div className="container mx-auto h-full space-y-6">
                 {/* Header */}
                 <div className="space-y-2">
                     <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Manajemen Task</h1>

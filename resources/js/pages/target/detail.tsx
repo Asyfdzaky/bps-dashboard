@@ -84,7 +84,7 @@ export default function TargetDetailPage({ tahun, penerbit_id, kategori, nama_pe
         <AppLayout breadcrumbs={dynamicBreadcrumbs}>
             <Head title={`${editMode ? 'Edit' : 'Detail'} Target ${kategori === 'target_terbit' ? 'Terbit' : 'Akuisisi'} ${tahun} - ${nama_penerbit}`} />
 
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>

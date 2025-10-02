@@ -231,37 +231,38 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
     const renderActionButtons = () => {
         if (manuscript.status === 'draft') {
             return (
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setShowRejectModal(true)} className="border-red-200 text-red-700 hover:bg-red-50">
-                        <XCircle className="mr-2 h-4 w-4" />
+                <>
+                    <Button variant="outline" onClick={() => setShowRejectModal(true)} className="flex-1 border-red-200 text-red-700 hover:bg-red-50 sm:flex-none">
+                        <XCircle className="mr-1 h-4 w-4 sm:mr-2" />
                         Tolak
                     </Button>
                     <Button
                         variant="outline"
                         onClick={() => setShowReviewModal(true)}
-                        className="border-yellow-200 text-yellow-700 hover:bg-yellow-50"
+                        className="flex-1 border-yellow-200 text-yellow-700 hover:bg-yellow-50 sm:flex-none"
                     >
-                        <Eye className="mr-2 h-4 w-4" />
-                        Mulai Review
+                        <Eye className="mr-1 h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Mulai Review</span>
+                        <span className="sm:hidden">Review</span>
                     </Button>
-                    <Button onClick={() => setShowApproveModal(true)} className="bg-green-600 hover:bg-green-700">
-                        <CheckCircle className="mr-2 h-4 w-4" />
+                    <Button onClick={() => setShowApproveModal(true)} className="flex-1 bg-green-600 hover:bg-green-700 sm:flex-none">
+                        <CheckCircle className="mr-1 h-4 w-4 sm:mr-2" />
                         Approve
                     </Button>
-                </div>
+                </>
             );
         } else if (manuscript.status === 'review') {
             return (
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={() => setShowRejectModal(true)} className="border-red-200 text-red-700 hover:bg-red-50">
-                        <XCircle className="mr-2 h-4 w-4" />
+                <>
+                    <Button variant="outline" onClick={() => setShowRejectModal(true)} className="flex-1 border-red-200 text-red-700 hover:bg-red-50 sm:flex-none">
+                        <XCircle className="mr-1 h-4 w-4 sm:mr-2" />
                         Tolak
                     </Button>
-                    <Button onClick={() => setShowApproveModal(true)} className="bg-green-600 hover:bg-green-700">
-                        <CheckCircle className="mr-2 h-4 w-4" />
+                    <Button onClick={() => setShowApproveModal(true)} className="flex-1 bg-green-600 hover:bg-green-700 sm:flex-none">
+                        <CheckCircle className="mr-1 h-4 w-4 sm:mr-2" />
                         Approve
                     </Button>
-                </div>
+                </>
             );
         }
         return null; // Jika status canceled, tidak ada tombol aksi
@@ -284,37 +285,42 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Review Naskah - ${manuscript.judul_naskah}`} />
 
-            <div className="m-8 space-y-6">
+            <div className="m-4 space-y-4 sm:m-6 sm:space-y-6 lg:m-8">
                 {/* Header */}
-                <div className="flex items-start justify-between">
-                    <div>
-                        <Button variant="default" size="sm" onClick={() => router.visit('/approval')} className="mb-4">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Kembali ke List
-                        </Button>
-                    </div>
-                    {manuscript.status !== 'cancelled' && renderActionButtons()}
+                <div className="space-y-3 sm:space-y-4">
+                    <Button variant="default" size="sm" onClick={() => router.visit('/approval')} className="w-full sm:w-auto">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Kembali ke List
+                    </Button>
+                    
+                    {/* Action Buttons - Stack on mobile */}
+                    {manuscript.status !== 'cancelled' && (
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                            {renderActionButtons()}
+                        </div>
+                    )}
                 </div>
 
                 {/* Border full width dengan title di dalam */}
-                <div className="border-t border-border pt-6">
-                    <h1 className="text-2xl font-bold text-foreground">{manuscript.judul_naskah}</h1>
-                    <div className="mt-2 flex items-center gap-4">
+                <div className="border-t border-border pt-4 sm:pt-6">
+                    <h1 className="text-xl font-bold text-foreground sm:text-2xl">{manuscript.judul_naskah}</h1>
+                    <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
                         {getStatusBadge(manuscript.status)}
-                        <span className="text-sm text-muted-foreground">Dikirim pada {formatDate(manuscript.created_at)}</span>
+                        <span className="text-xs text-muted-foreground sm:text-sm">Dikirim pada {formatDate(manuscript.created_at)}</span>
                     </div>
                 </div>
 
                 {/* PDF Preview Toggle */}
-                <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setShowPdfPreview(!showPdfPreview)}>
-                        <Eye className="mr-2 h-4 w-4" />
-                        {showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}
+                <div className="grid grid-cols-2 gap-2 sm:flex">
+                    <Button variant="outline" size="sm" onClick={() => setShowPdfPreview(!showPdfPreview)} className="w-full sm:w-auto">
+                        <Eye className="mr-1 h-4 w-4 sm:mr-2" />
+                        <span className="hidden sm:inline">{showPdfPreview ? 'Tutup Preview' : 'Preview PDF'}</span>
+                        <span className="sm:hidden">Preview</span>
                     </Button>
-                    <Button variant="outline" className="text-primary hover:bg-accent" size="sm" asChild>
+                    <Button variant="outline" className="w-full text-primary hover:bg-accent sm:w-auto" size="sm" asChild>
                         <a href={pdfUrl} target="_blank" rel="noopener noreferrer">
-                            <Download className="mr-2 h-4 w-4" />
-                            Download PDF
+                            <Download className="mr-1 h-4 w-4 sm:mr-2" />
+                            Download
                         </a>
                     </Button>
                 </div>
@@ -322,36 +328,36 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
                 {/* PDF Preview */}
                 {showPdfPreview && (
                     <Card>
-                        <CardHeader>
-                            <CardTitle>Preview Naskah</CardTitle>
+                        <CardHeader className="p-4 sm:p-6">
+                            <CardTitle className="text-base sm:text-lg">Preview Naskah</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="h-96 w-full">
+                        <CardContent className="p-4 sm:p-6">
+                            <div className="h-64 w-full sm:h-96">
                                 <iframe src={pdfUrl} className="h-full w-full rounded-lg border" title="PDF Preview" />
                             </div>
                         </CardContent>
                     </Card>
                 )}
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
                     {/* Informasi Penulis */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <User className="h-5 w-5" />
+                        <CardHeader className="p-4 sm:p-6">
+                            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                                <User className="h-4 w-4 sm:h-5 sm:w-5" />
                                 Informasi Penulis
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
                             <div className="flex items-center gap-3">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
-                                    <User className="h-6 w-6 text-blue-600" />
+                                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:h-12 sm:w-12">
+                                    <User className="h-5 w-5 text-blue-600 sm:h-6 sm:w-6" />
                                 </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">{manuscript.author.nama_lengkap}</h3>
-                                    <div className="flex items-center gap-1 text-sm text-gray-500">
-                                        <Mail className="h-3 w-3" />
-                                        {manuscript.author.email}
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="truncate text-sm font-semibold text-gray-900 sm:text-base">{manuscript.author.nama_lengkap}</h3>
+                                    <div className="flex items-center gap-1 text-xs text-gray-500 sm:text-sm">
+                                        <Mail className="h-3 w-3 flex-shrink-0" />
+                                        <span className="truncate">{manuscript.author.email}</span>
                                     </div>
                                 </div>
                             </div>
@@ -360,52 +366,52 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
 
                     {/* Informasi Naskah */}
                     <Card>
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <FileText className="h-5 w-5" />
+                        <CardHeader className="p-4 sm:p-6">
+                            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                                <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
                                 Informasi Naskah
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-3">
+                        <CardContent className="space-y-3 p-4 pt-0 sm:p-6 sm:pt-0">
                             <div>
-                                <Label className="text-sm font-medium">Genre</Label>
-                                <p className="text-sm text-gray-700">{manuscript.genre}</p>
+                                <Label className="text-xs font-medium sm:text-sm">Genre</Label>
+                                <p className="text-xs text-gray-700 sm:text-sm">{manuscript.genre}</p>
                             </div>
                             <div>
-                                <Label className="text-sm font-medium">Status</Label>
+                                <Label className="text-xs font-medium sm:text-sm">Status</Label>
                                 <div className="mt-1">{getStatusBadge(manuscript.status)}</div>
                             </div>
                             <div>
-                                <Label className="text-sm font-medium">Tanggal Kirim</Label>
-                                <p className="text-sm text-gray-700">{formatDate(manuscript.created_at)}</p>
+                                <Label className="text-xs font-medium sm:text-sm">Tanggal Kirim</Label>
+                                <p className="text-xs text-gray-700 sm:text-sm">{formatDate(manuscript.created_at)}</p>
                             </div>
                         </CardContent>
                     </Card>
 
                     {/* Sinopsis */}
                     <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <CardTitle>Sinopsis</CardTitle>
+                        <CardHeader className="p-4 sm:p-6">
+                            <CardTitle className="text-base sm:text-lg">Sinopsis</CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <p className="leading-relaxed text-gray-700">{manuscript.sinopsis}</p>
+                        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                            <p className="text-sm leading-relaxed text-gray-700 sm:text-base">{manuscript.sinopsis}</p>
                         </CardContent>
                     </Card>
 
                     {/* Target Penerbit */}
                     {manuscript.target_publishers && manuscript.target_publishers.length > 0 && (
                         <Card className="lg:col-span-2">
-                            <CardHeader>
-                                <CardTitle>Target Penerbit</CardTitle>
+                            <CardHeader className="p-4 sm:p-6">
+                                <CardTitle className="text-base sm:text-lg">Target Penerbit</CardTitle>
                             </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
+                            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+                                <div className="space-y-2 sm:space-y-3">
                                     {manuscript.target_publishers.map((target) => (
-                                        <div key={target.prioritas} className="flex items-center justify-between rounded-lg border p-3">
-                                            <div>
-                                                <h4 className="font-medium">{target.publisher.nama_penerbit}</h4>
+                                        <div key={target.prioritas} className="flex items-center justify-between rounded-lg border p-2.5 sm:p-3">
+                                            <div className="min-w-0 flex-1">
+                                                <h4 className="truncate text-sm font-medium sm:text-base">{target.publisher.nama_penerbit}</h4>
                                             </div>
-                                            <Badge variant="outline">Prioritas {target.prioritas}</Badge>
+                                            <Badge variant="outline" className="ml-2 flex-shrink-0 text-xs">P{target.prioritas}</Badge>
                                         </div>
                                     ))}
                                 </div>
@@ -416,32 +422,32 @@ export default function ApprovalDetail({ manuscript, publishers = [] }: Props) {
                     {/* Riwayat Status */}
                     {manuscript.info_tambahan && (
                         <Card className="lg:col-span-2">
-                            <CardHeader>
-                                <CardTitle>Riwayat Approval</CardTitle>
+                            <CardHeader className="p-4 sm:p-6">
+                                <CardTitle className="text-base sm:text-lg">Riwayat Approval</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
                                 <div className="space-y-3">
                                     {manuscript.info_tambahan.reviewed_at && (
-                                        <div className="border-l-4 border-yellow-400 pl-4">
-                                            <p className="font-medium">Direview</p>
-                                            <p className="text-sm text-gray-600">{formatDate(manuscript.info_tambahan.reviewed_at)}</p>
+                                        <div className="border-l-4 border-yellow-400 pl-3 sm:pl-4">
+                                            <p className="text-sm font-medium sm:text-base">Direview</p>
+                                            <p className="text-xs text-gray-600 sm:text-sm">{formatDate(manuscript.info_tambahan.reviewed_at)}</p>
                                         </div>
                                     )}
                                     {manuscript.info_tambahan.approved_at && (
-                                        <div className="border-l-4 border-green-400 pl-4">
-                                            <p className="font-medium">Disetujui</p>
-                                            <p className="text-sm text-gray-600">{formatDate(manuscript.info_tambahan.approved_at)}</p>
+                                        <div className="border-l-4 border-green-400 pl-3 sm:pl-4">
+                                            <p className="text-sm font-medium sm:text-base">Disetujui</p>
+                                            <p className="text-xs text-gray-600 sm:text-sm">{formatDate(manuscript.info_tambahan.approved_at)}</p>
                                             {manuscript.info_tambahan.catatan_approval && (
-                                                <p className="mt-1 text-sm text-gray-700">Catatan: {manuscript.info_tambahan.catatan_approval}</p>
+                                                <p className="mt-1 text-xs text-gray-700 sm:text-sm">Catatan: {manuscript.info_tambahan.catatan_approval}</p>
                                             )}
                                         </div>
                                     )}
                                     {manuscript.info_tambahan.rejected_at && (
-                                        <div className="border-l-4 border-red-400 pl-4">
-                                            <p className="font-medium">Ditolak</p>
-                                            <p className="text-sm text-gray-600">{formatDate(manuscript.info_tambahan.rejected_at)}</p>
+                                        <div className="border-l-4 border-red-400 pl-3 sm:pl-4">
+                                            <p className="text-sm font-medium sm:text-base">Ditolak</p>
+                                            <p className="text-xs text-gray-600 sm:text-sm">{formatDate(manuscript.info_tambahan.rejected_at)}</p>
                                             {manuscript.info_tambahan.alasan_penolakan && (
-                                                <p className="mt-1 text-sm text-gray-700">Alasan: {manuscript.info_tambahan.alasan_penolakan}</p>
+                                                <p className="mt-1 text-xs text-gray-700 sm:text-sm">Alasan: {manuscript.info_tambahan.alasan_penolakan}</p>
                                             )}
                                         </div>
                                     )}

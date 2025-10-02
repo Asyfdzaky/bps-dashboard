@@ -142,7 +142,7 @@ export default function EditTaskAssignmentPage({ taskProgress, users, masterTask
                 </div>
 
                 {/* Content */}
-                <div className="mx-auto max-w-4xl px-6 py-8">
+                <div className="mx-auto max-w-4xl">
                     <div className="space-y-6">
                         {/* Task Info */}
                         <Card>

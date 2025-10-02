@@ -157,7 +157,7 @@ export default function TaskAssignmentPage({ books, users, masterTasks, statisti
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Assignment Tugas" />
-            <div className="mx-auto w-full max-w-7xl px-4 py-6">
+            <div className="mx-auto w-full max-w-7xl">
                 {/* Header */}
                 <div className="mb-6 flex items-center justify-between">
                     <div>

@@ -195,7 +195,7 @@ export default function PenerbitPage() {
                 </div>
             )}
 
-            <div className="w-full p-8">
+            <div className="w-full">
                 <div className="mb-6 flex items-center justify-between">
                     <h1 className="text-3xl font-bold text-gray-800">Manajemen Penerbit</h1>
 

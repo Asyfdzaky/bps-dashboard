@@ -82,7 +82,7 @@ export default function Analitik({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Analitik Kinerja Tim" />
-            <div className="p-8">
+            <div>
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-900">Analitik Kinerja Tim</h1>
@@ -310,32 +310,32 @@ export default function Analitik({
                             title: "Tepat Waktu",
                             value: deadlinePerformance.on_time,
                             icon: <CheckCircle className="h-5 w-5" />,
-                            color: "accent",
+                            color: "secondary",
                             description: "Tugas selesai sesuai deadline"
                         },
                         {
                             title: "Mendekati Deadline",
                             value: deadlinePerformance.upcoming,
                             icon: <Clock className="h-5 w-5" />,
-                            color: "accent",
+                            color: "secondary",
                             description: "Tugas dengan deadline dalam 7 hari"
                         },
                         {
                             title: "Terlambat",
                             value: deadlinePerformance.late,
                             icon: <AlertTriangle className="h-5 w-5" />,
-                            color: "accent",
+                            color: "secondary",
                             description: "Tugas selesai melewati deadline"
                         },
                         {
                             title: "Lewat Deadline",
                             value: deadlinePerformance.overdue,
                             icon: <AlertTriangle className="h-5 w-5" />,
-                            color: "accent",
+                            color: "secondary",
                             description: "Tugas yang sudah melewati deadline"
                         }
                     ]}
-                    className="grid-cols-2 md:grid-cols-4"
+                    className="grid-cols-1 md:grid-cols-4"
                 />
                 </div>
             </div>

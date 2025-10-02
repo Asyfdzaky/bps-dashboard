@@ -91,7 +91,11 @@ export default function ProgressPage() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Progres Naskah" />
-            <div className="flex h-full max-w-full flex-1 flex-col gap-4 overflow-hidden p-4 sm:gap-6 sm:p-8">
+            <div className="flex h-full max-w-full flex-1 flex-col gap-4 overflow-hidden sm:gap-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Progress Naskah</h1>
+                    <p className="mt-1 text-sm text-gray-600">Lihat semua progress naskah</p>
+                </div>
                 {/* KPI Cards */}
                 <KPIGrid
                     items={[
@@ -106,21 +110,21 @@ export default function ProgressPage() {
                             title: 'Sedang Diproses',
                             value: sedangDiprosesCount,
                             icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: 'accent',
+                            color: 'primary',
                             description: 'Naskah yang Sedang dalam Proses',
                         },
                         {
                             title: 'Selesai',
                             value: selesaiCount,
                             icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: 'secondary',
+                            color: 'primary',
                             description: 'Naskah yang Sudah Selesai',
                         },
                         {
                             title: 'Tertunda',
                             value: tertundaCount,
                             icon: <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                            color: 'destructive',
+                            color: 'primary',
                             description: 'Naskah yang Tertunda',
                         },
                     ]}

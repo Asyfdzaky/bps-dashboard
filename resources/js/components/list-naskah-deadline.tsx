@@ -59,10 +59,10 @@ export default function ListNaskahDeadline({ books, title }: Props) {
     };
 
     return (
-        <Card className="border border-border">
+        <Card className=" p-0">
             <CardContent className="p-0">
                 {upcomingDeadlines.length > 0 ? (
-                    <div className="space-y-4 p-3 pt-2">
+                    <div className="space-y-4 px-3 py-3">
                         {upcomingDeadlines.map((book) => {
                             const urgency = getDeadlineUrgency(book.tanggal_target_naik_cetak);
                             return (

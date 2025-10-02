@@ -185,7 +185,7 @@ export default function ManajemenPengguna() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manajemen Pengguna" />
-            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6">
+            <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-bold text-foreground">Manajemen Pengguna</h1>

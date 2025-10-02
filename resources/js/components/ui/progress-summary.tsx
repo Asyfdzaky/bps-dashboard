@@ -126,13 +126,13 @@ interface KPICardProps {
     className?: string;
 }
 
-export function KPICard({ 
-    title, 
-    value, 
-    icon, 
+export function KPICard({
+    title,
+    value,
+    icon,
     color = "primary",
     description,
-    className 
+    className
 }: KPICardProps) {
     const colorClasses = {
         primary: "text-primary bg-primary/10",
@@ -142,31 +142,29 @@ export function KPICard({
     };
 
     return (
-        <Card className={cn("relative overflow-hidden", className)}>
-            <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                    <div className="min-w-0 flex-1">
-                        <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate mb-2">{title}</p>
-                        <h3 className={cn("text-xl sm:text-2xl lg:text-3xl font-bold", {
-                            "text-primary": color === "primary",
-                            "text-secondary": color === "secondary", 
-                            "text-accent": color === "accent",
-                            "text-destructive": color === "destructive",
-                        })}>
-                            {value}
-                        </h3>
-                        {description && (
-                            <p className="text-xs text-muted-foreground mt-2">
-                                {description}
-                            </p>
-                        )}
-                    </div>
-                    <div className={cn("flex h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 items-center justify-center rounded-full flex-shrink-0", colorClasses[color])}>
-                        {icon}
-                    </div>
+        <div className={cn("relative overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm p-4", className)}>
+            <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                    <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate mb-2">{title}</p>
+                    <h3 className={cn("text-xl sm:text-2xl lg:text-3xl font-bold", {
+                        "text-primary": color === "primary",
+                        "text-secondary": color === "secondary",
+                        "text-accent": color === "accent",
+                        "text-destructive": color === "destructive",
+                    })}>
+                        {value}
+                    </h3>
+                    {description && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                            {description}
+                        </p>
+                    )}
                 </div>
-            </CardContent>
-        </Card>
+                <div className={cn("flex h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 items-center justify-center font-bold rounded-full flex-shrink-0", colorClasses[color])}>
+                    {icon}
+                </div>
+            </div>
+        </div>
     );
 }
 

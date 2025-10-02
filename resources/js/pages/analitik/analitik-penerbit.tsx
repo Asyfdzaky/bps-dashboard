@@ -77,7 +77,7 @@ export default function AnalitikPenerbit({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Analitik Penerbit" />
-            <div className="p-8">
+            <div>
                 {/* Header */}
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-900">Analitik Penerbit</h1>

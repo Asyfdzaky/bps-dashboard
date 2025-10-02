@@ -140,7 +140,7 @@ export default function AssignTaskPage({ book, books, users, masterTasks }: Assi
                 </div>
 
                 {/* Content */}
-                <div className="mx-auto max-w-4xl px-6 py-8">
+                <div className="mx-auto max-w-4xl">
                     <div className="space-y-6">
                         {/* Mode Selection */}
                         <Card>

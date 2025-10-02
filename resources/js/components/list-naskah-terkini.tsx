@@ -2,8 +2,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Book } from '@/types/books';
 import { Link } from '@inertiajs/react';
-import { Building, Calendar, Edit3, Eye, User } from 'lucide-react';
+import { Building, Calendar, Edit3, Eye, MoreVertical } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type Props = { books: Book[] };
 
@@ -36,101 +43,114 @@ export default function ListNaskahTerkini({ books }: Props) {
     const formatDate = (s?: string) => (s ? new Date(s).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
 
     return (
-        <Card className="border-0">
-            <CardContent className="p-0">
+        <Card className="border-0 py-2 px-0">
+            <CardContent className="">
                 {recentBooks.length > 0 ? (
                     <>
-                        {/* Header */}
-                        <div className="grid grid-cols-12 gap-4 border-b bg-muted/20 px-4 py-3 text-sm font-medium text-muted-foreground">
-                            <div className="col-span-12 sm:col-span-4 lg:col-span-3">Judul</div>
-                            <div className="hidden sm:col-span-2 sm:block lg:col-span-2">Penerbit</div>
-                            <div className="hidden lg:col-span-2 lg:block">PIC</div>
-                            <div className="hidden lg:col-span-2 lg:block">Tanggal</div>
-                            <div className="hidden text-center sm:col-span-2 sm:block lg:col-span-2">Status</div>
-                            <div className="hidden text-center sm:col-span-4 sm:block lg:col-span-1">Aksi</div>
-                        </div>
-
-                        {/* Book List */}
-                        <div className="divide-y">
-                            {recentBooks.map((book) => (
-                                <div key={book.buku_id} className="grid grid-cols-12 items-center gap-4 p-4 transition-colors hover:bg-muted/30">
-                                    {/* Judul */}
-                                    <div className="col-span-12 sm:col-span-4 lg:col-span-3">
-                                        <h4 className="text-truncate text-foreground">{book.judul_buku}</h4>
-
-                                        {/* Meta Info for Mobile - Hidden on larger screens */}
-                                        <div className="mt-2 flex flex-col gap-2 text-xs text-muted-foreground sm:hidden">
-                                            <div className="flex items-center gap-2">
-                                                <Building className="h-3 w-3" />
-                                                <span>{book.publisher?.nama_penerbit || 'N/A'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <User className="h-3 w-3" />
-                                                <span>{book.pic?.nama_lengkap || 'N/A'}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <Calendar className="h-3 w-3" />
-                                                <span>{formatDate(book.created_at)}</span>
-                                            </div>
-                                            {/* Status di mobile */}
-                                            <div className="flex items-center gap-2">
-                                                <span>Status:</span>
-                                                <Badge
-                                                    variant={getStatusBadgeVariant(book.status_keseluruhan)}
-                                                    className="rounded-lg px-3 py-1 text-xs font-medium"
-                                                >
+                        {/* Desktop Table View */}
+                        <div className="hidden sm:block">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead className="w-[35%] lg:w-[30%]">Judul</TableHead>
+                                        <TableHead className="w-[20%]">Penerbit</TableHead>
+                                        <TableHead className="hidden lg:table-cell lg:w-[20%]">PIC</TableHead>
+                                        <TableHead className="hidden lg:table-cell lg:w-[15%]">Tanggal</TableHead>
+                                        <TableHead className="w-[15%] text-center">Status</TableHead>
+                                        <TableHead className="w-[10%] lg:w-[5%] text-center">Aksi</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {recentBooks.map((book) => (
+                                        <TableRow key={book.buku_id}>
+                                            <TableCell className="font-medium">
+                                                <div className="truncate">{book.judul_buku}</div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="truncate">{book.publisher?.nama_penerbit || 'N/A'}</div>
+                                            </TableCell>
+                                            <TableCell className="hidden lg:table-cell">
+                                                <div className="truncate">{book.pic?.nama_lengkap || 'N/A'}</div>
+                                            </TableCell>
+                                            <TableCell className="hidden lg:table-cell text-muted-foreground">
+                                                {formatDate(book.created_at)}
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <Badge variant={getStatusBadgeVariant(book.status_keseluruhan)} className="text-xs">
                                                     {getStatusText(book.status_keseluruhan)}
                                                 </Badge>
-                                            </div>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 bg-white">
+                                                            <MoreVertical className="h-4 w-4 text-black" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem asChild>
+                                                            <Link href={`/manajemen-naskah/${book.buku_id}?from=dashboard`} className="cursor-pointer">
+                                                                <Eye className="h-4 w-4" />
+                                                                <span>Lihat Detail</span>
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem asChild>
+                                                            <Link href={`/manajemen-naskah/${book.buku_id}/edit`} className="cursor-pointer">
+                                                                <Edit3 className="h-4 w-4" />
+                                                                <span>Edit</span>
+                                                            </Link>
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+
+                        {/* Mobile Card View - Minimalist */}
+                        <div className="sm:hidden divide-y">
+                            {recentBooks.map((book) => (
+                                <div key={book.buku_id} className="py-2">
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                        <h4 className="text-sm font-medium text-foreground line-clamp-2 flex-1">{book.judul_buku}</h4>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0 bg-white">
+                                                    <MoreVertical className="h-4 w-4 text-black" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={`/manajemen-naskah/${book.buku_id}?from=dashboard`} className="cursor-pointer">
+                                                        <Eye className="h-4 w-4" />
+                                                        <span>Lihat Detail</span>
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={`/manajemen-naskah/${book.buku_id}/edit`} className="cursor-pointer">
+                                                        <Edit3 className="h-4 w-4" />
+                                                        <span>Edit</span>
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                    <div className="space-y-1 text-xs text-muted-foreground">
+                                        <div className="flex items-center gap-1.5">
+                                            <Building className="h-3.5 w-3.5 flex-shrink-0" />
+                                            <span className="truncate">{book.publisher?.nama_penerbit || 'N/A'}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5">
+                                            <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
+                                            <span>{formatDate(book.created_at)}</span>
                                         </div>
                                     </div>
-
-                                    {/* Penerbit - Hidden on mobile */}
-                                    <div className="hidden sm:col-span-2 sm:block lg:col-span-2">
-                                        <span className="block truncate text-sm text-foreground">{book.publisher?.nama_penerbit || 'N/A'}</span>
-                                    </div>
-
-                                    {/* PIC - Hidden on mobile and small tablet */}
-                                    <div className="hidden lg:col-span-2 lg:block">
-                                        <span className="block truncate text-sm text-foreground">{book.pic?.nama_lengkap || 'N/A'}</span>
-                                    </div>
-
-                                    {/* Tanggal - Hidden on mobile and small tablet */}
-                                    <div className="hidden lg:col-span-2 lg:block">
-                                        <span className="text-sm whitespace-nowrap text-muted-foreground">{formatDate(book.created_at)}</span>
-                                    </div>
-
-                                    {/* Status - Hidden on mobile, tampil di sm ke atas */}
-                                    <div className="hidden sm:col-span-2 sm:flex sm:items-center sm:justify-center lg:col-span-2">
-                                        <Badge variant={getStatusBadgeVariant(book.status_keseluruhan)} className="px-3 py-1 text-xs font-medium">
+                                    <div className="mt-2">
+                                        <Badge variant={getStatusBadgeVariant(book.status_keseluruhan)} className="text-xs">
                                             {getStatusText(book.status_keseluruhan)}
                                         </Badge>
-                                    </div>
-
-                                    {/* Actions */}
-                                    <div className="col-span-4 flex justify-end sm:col-span-4 lg:col-span-1">
-                                        <div className="flex items-center gap-1">
-                                            <Button
-                                                asChild
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10"
-                                            >
-                                                <Link href={`/manajemen-naskah/${book.buku_id}?from=dashboard`}>
-                                                    <Eye className="h-4 w-4" />
-                                                </Link>
-                                            </Button>
-                                            <Button
-                                                asChild
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-secondary hover:bg-secondary/10"
-                                            >
-                                                <Link href={`/manajemen-naskah/${book.buku_id}/edit`}>
-                                                    <Edit3 className="h-4 w-4" />
-                                                </Link>
-                                            </Button>
-                                        </div>
                                     </div>
                                 </div>
                             ))}

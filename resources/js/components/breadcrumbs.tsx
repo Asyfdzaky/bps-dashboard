@@ -15,9 +15,9 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[]
                                 <Fragment key={index}>
                                     <BreadcrumbItem>
                                         {isLast ? (
-                                            <BreadcrumbPage>{item.title}</BreadcrumbPage>
+                                            <BreadcrumbPage className="max-w-20 truncate md:max-w-none">{item.title}</BreadcrumbPage>
                                         ) : (
-                                            <BreadcrumbLink asChild>
+                                            <BreadcrumbLink asChild className="max-w-20 truncate md:max-w-none">
                                                 <Link href={item.href}>{item.title}</Link>
                                             </BreadcrumbLink>
                                         )}

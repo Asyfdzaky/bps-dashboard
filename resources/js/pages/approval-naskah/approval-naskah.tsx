@@ -207,8 +207,11 @@ export default function ApprovalNaskah({ manuscripts, stats }: Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Approval Naskah" />
-
-            <div className="m-8 space-y-6">
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">Approval Naskah</h1>
+                    <p className="mt-1 text-sm text-gray-600">Lihat semua naskah yang perlu disetujui</p>
+                </div>
                 {/* KPI Cards */}
                 <KPIGrid
                     items={[
@@ -217,24 +220,28 @@ export default function ApprovalNaskah({ manuscripts, stats }: Props) {
                             value: stats.draft,
                             icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
                             color: 'primary',
+                            description: 'Naskah yang belum disetujui',
                         },
                         {
                             title: 'Sedang Review',
                             value: stats.pending,
                             icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
                             color: 'primary',
+                            description: 'Naskah yang sedang di review',
                         },
                         {
                             title: 'Ditolak',
                             value: stats.rejected,
                             icon: <XCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
                             color: 'primary',
+                            description: 'Naskah yang ditolak',
                         },
                         {
                             title: 'Total Aktif',
                             value: stats.total,
                             icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
                             color: 'primary',
+                            description: 'Total naskah',
                         },
                     ]}
                 />

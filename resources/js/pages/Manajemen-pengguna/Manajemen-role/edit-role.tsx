@@ -74,7 +74,7 @@ export default function EditRole({ role, permissions }: EditRolePageProps) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Role - ${role.name}`} />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl">
                 <div className="flex items-center gap-4">
                     <Link href={route('roles.index')} className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
                         <ArrowLeft className="h-4 w-4" />

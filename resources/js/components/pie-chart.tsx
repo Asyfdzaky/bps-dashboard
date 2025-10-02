@@ -33,7 +33,7 @@ const getChartColors = () => {
     }
 };
 
-export default function StatusBukuChart({ data, title = 'Status Buku' }: StatusBukuChartProps) {
+export default function StatusBukuChart({ data }: StatusBukuChartProps) {
     // Convert the data object to array format for Recharts
     const chartData = Object.entries(data).map(([name, value]) => ({
         name,
@@ -45,7 +45,6 @@ export default function StatusBukuChart({ data, title = 'Status Buku' }: StatusB
 
     return (
         <div className="w-full">
-            {title && <h3 className="mb-4 text-lg font-semibold text-foreground">{title}</h3>}
             <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                     <Pie data={chartData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={3} dataKey="value">

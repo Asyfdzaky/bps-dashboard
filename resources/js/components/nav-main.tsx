@@ -75,7 +75,7 @@ export function NavMain({
                                     <div className="flex w-full items-center gap-3">
                                         {icon && (
                                             <span
-                                                className={`flex-shrink-0 transition-colors duration-200 ${page.url.startsWith(item.href) ? 'text-sidebar-foreground' : 'text-sidebar-foreground/60'} `}
+                                                className={`flex-shrink-0 transition-colors duration-200 ${page.url.startsWith(item.href) ? 'text-primary' : 'text-sidebar-foreground/60'} `}
                                             >
                                                 {icon}
                                             </span>
@@ -105,7 +105,7 @@ export function NavMain({
                                 className="h-7 justify-center px-3 data-[state=collapsed]:justify-center"
                             >
                                 <div className="flex items-center justify-center">
-                                    {icon && <span className="flex-shrink-0 text-sidebar-foreground">{icon}</span>}
+                                    {icon && <span className={`flex-shrink-0 ${isGroupActive ? 'text-primary' : 'text-sidebar-foreground'}`}>{icon}</span>}
                                     <span className="sr-only">{title}</span>
                                 </div>
                             </SidebarMenuButton>
@@ -118,19 +118,19 @@ export function NavMain({
                     <SidebarGroupLabel
                         className={`mx-0 flex h-9 items-center rounded-md px-3 transition-all duration-200 ${
                             shouldBeCollapsible ? 'cursor-pointer hover:bg-gray-100 hover:text-primary' : 'cursor-default'
-                        } ${isGroupActive ? 'text-sm' : 'text-sm font-medium'} `}
+                        } text-sm font-medium ${isGroupActive ? 'text-primary' : ''}`}
                         onClick={toggleGroup}
                     >
                         <div className="flex w-full items-center justify-between">
                             <div className="flex items-center gap-3">
                                 {icon && (
                                     <span
-                                        className={`flex-shrink-0 transition-colors duration-200 ${isGroupActive ? 'text-foreground/70' : 'text-foreground/70'} `}
+                                        className={`flex-shrink-0 transition-colors duration-200 ${isGroupActive ? 'text-primary' : 'text-foreground/70'} `}
                                     >
                                         {icon}
                                     </span>
                                 )}
-                                <span className="truncate text-black hover:text-primary">{title}</span>
+                                <span className={`truncate hover:text-primary ${isGroupActive ? 'text-primary' : 'text-black'}`}>{title}</span>
                             </div>
                             {shouldBeCollapsible && (
                                 <span className="ml-2 flex-shrink-0 opacity-60 transition-opacity hover:opacity-100">

@@ -58,9 +58,9 @@ export default function ManajemenNaskah() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Manajemen Naskah" />
-            <div className="w-full p-8">
+            <div className="max-w-7xl">
                 {/* Header */}
-                <div className="mb-6 flex items-center justify-between">
+                <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">Manajemen Naskah</h1>
                         <p className="mt-1 text-sm text-gray-600">Kelola semua naskah buku dalam sistem</p>
@@ -91,21 +91,21 @@ export default function ManajemenNaskah() {
                                 title: 'Draft',
                                 value: draftBooks,
                                 icon: <FileText className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'accent',
+                                color: 'primary',
                                 description: 'Naskah dalam Status Draft',
                             },
                             {
                                 title: 'Sedang Diproses',
                                 value: inProgressBooks,
                                 icon: <Clock className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'destructive',
+                                color: 'primary',
                                 description: 'Naskah yang Sedang dalam Proses',
                             },
                             {
                                 title: 'Terbit',
                                 value: publishedBooks,
                                 icon: <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6" />,
-                                color: 'secondary',
+                                color: 'primary',
                                 description: 'Naskah yang Sudah Diterbitkan',
                             },
                         ]}

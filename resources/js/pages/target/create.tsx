@@ -117,7 +117,7 @@ export default function CreateTargetPage({ publishers, userPublisher }: PageProp
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Tambah Target Penerbitan" />
 
-            <div className="flex h-full flex-1 flex-col gap-2 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-2 overflow-x-auto rounded-xl">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Tambah Target Penerbitan</h1>
                     <p className="text-muted-foreground">Tetapkan target penerbitan untuk penerbit</p>

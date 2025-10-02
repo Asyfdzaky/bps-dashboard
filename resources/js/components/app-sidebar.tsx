@@ -91,7 +91,7 @@ export function AppSidebar() {
                 </div>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="thin-scrollbar">
                 {/* Menu Utama (semua bisa lihat) */}
                 <SidebarGroup>
                     <SidebarGroupContent>

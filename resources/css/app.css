@@ -73,7 +73,7 @@
     --primary: oklch(74.7% 0.225 56.8); /* #ff7500 */
     --primary-foreground: oklch(98.5% 0 0);
 
-    --secondary: oklch(56.5% 0.27 282.6); /* #6F00FF biru tua terang */
+    --secondary: oklch(56.5% 0.19 264.2); /* #2563eb blue-600 */
     --secondary-foreground: oklch(98.5% 0 0); /* Putih */
     --muted: oklch(0.97 0 0);
     --muted-foreground: oklch(0.556 0 0);
@@ -85,8 +85,8 @@
     --input: oklch(0.922 0 0);
     --ring: oklch(0.87 0 0);
     --chart-1: oklch(0.646 0.222 41.116);
-    --chart-2: oklch(0.6 0.118 184.704);
-    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-2: oklch(56.5% 0.19 264.2); /* #2563eb blue-600 */
+    --chart-3: oklch(72% 0.14 150); /* hijau muda, sedikit lebih tua */
     --chart-4: oklch(0.828 0.189 84.429);
     --chart-5: oklch(0.769 0.188 70.08);
     --radius: 0.625rem;
@@ -165,6 +165,30 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+    /* Custom Scrollbar */
+    .thin-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: theme('colors.gray.300') theme('colors.gray.100');
+    }
+
+    .thin-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .thin-scrollbar::-webkit-scrollbar-track {
+        background-color: theme('colors.gray.100');
+        border-radius: 100vh;
+    }
+
+    .thin-scrollbar::-webkit-scrollbar-thumb {
+        background-color: theme('colors.gray.300');
+        border-radius: 100vh;
+    }
+
+    .thin-scrollbar::-webkit-scrollbar-thumb:hover {
+        background-color: theme('colors.gray.400');
     }
 }
 /* FullCalendar Modern Clean Styling - Inspired by Reference */
