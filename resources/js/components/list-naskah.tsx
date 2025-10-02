@@ -5,6 +5,7 @@ import { Book } from '@/types/books';
 import { Link } from '@inertiajs/react';
 import { type ColumnDef } from '@tanstack/react-table';
 import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react'; // Tambahkan import untuk state dan memo
 import { DataTable } from './table-data';
 
 interface ListBukuProps {
@@ -13,13 +14,21 @@ interface ListBukuProps {
     showFilters?: boolean;
     onEdit?: (book: Book) => void;
     onDelete?: (book: Book) => void;
-
-    onSearch?: (q: string) => void;
+    // Hapus onSearch dari props karena pencarian sekarang di FE
 }
 
-export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
+export default function ListBuku({ books, onDelete }: ListBukuProps) {
+    // Tambahkan state untuk query pencarian
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Filter data books berdasarkan query pencarian (case-insensitive, berdasarkan judul_buku)
+    const filteredBooks = useMemo(() => {
+        if (!searchQuery.trim()) return books;
+        return books.filter((book) => book.judul_buku.toLowerCase().includes(searchQuery.toLowerCase()));
+    }, [books, searchQuery]);
+
     const getStatusBadgeVariant = (status: Book['status_keseluruhan']) => {
-        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+        const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
             published: 'default',
             draft: 'outline',
             review: 'secondary',
@@ -53,6 +62,7 @@ export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
             year: 'numeric',
         });
     };
+
     const columns: ColumnDef<Book>[] = [
         {
             accessorKey: 'judul_buku',
@@ -61,7 +71,6 @@ export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
                 return <div>{row.original.judul_buku}</div>;
             },
         },
-
         {
             accessorKey: 'penulis',
             header: 'Penulis',
@@ -95,7 +104,7 @@ export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
             header: 'Status',
             cell: ({ row }) => {
                 return (
-                    <div className="">
+                    <div className="text-center">
                         <Badge variant={getStatusBadgeVariant(row.original.status_keseluruhan)}>
                             {getStatusText(row.original.status_keseluruhan)}
                         </Badge>
@@ -139,14 +148,14 @@ export default function ListBuku({ books, onDelete, onSearch }: ListBukuProps) {
         <div className="w-full">
             <DataTable
                 columns={columns}
-                data={books}
+                data={filteredBooks} // Gunakan data yang sudah difilter
                 searchableColumn="judul_buku"
                 pagination={{
                     page: 1,
                     perPage: 5,
-                    total: books.length,
+                    total: filteredBooks.length, // Update total berdasarkan data yang difilter
                 }}
-                onSearch={onSearch}
+                onSearch={(query) => setSearchQuery(query)} // Update state query, tanpa kirim ke BE
             />
         </div>
     );
