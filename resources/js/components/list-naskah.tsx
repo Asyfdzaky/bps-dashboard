@@ -104,7 +104,7 @@ export default function ListBuku({ books, onDelete }: ListBukuProps) {
             header: 'Status',
             cell: ({ row }) => {
                 return (
-                    <div className="text-center">
+                    <div>
                         <Badge variant={getStatusBadgeVariant(row.original.status_keseluruhan)}>
                             {getStatusText(row.original.status_keseluruhan)}
                         </Badge>
