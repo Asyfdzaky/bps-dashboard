@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\{Role, Permission};
 
-class RoleController extends Controller
+class roleController extends Controller
 {
     public function index(Request $request)
     {

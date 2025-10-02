@@ -12,7 +12,7 @@ use App\Http\Controllers\Analitik\AnalitikController;
 use App\Http\Controllers\calender\CalenderController;
 use App\Http\Controllers\naskah\KirimNaskahController;
 use App\Http\Controllers\dashboard\DashboardController;
-use App\Http\Controllers\rolePermission\RoleController;
+use App\Http\Controllers\rolePermission\roleController;
 use App\Http\Controllers\rolePermission\TeamController;
 use App\Http\Controllers\naskah\ProgresNaskahController;
 use App\Http\Controllers\naskah\ApprovalNaskahController;
