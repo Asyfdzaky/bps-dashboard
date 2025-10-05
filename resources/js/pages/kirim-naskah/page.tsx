@@ -267,7 +267,7 @@ export default function KirimNaskahPage() {
         };
 
         return (
-            <div className="w-full py-2">
+            <div className="w-full py-2 ">
                 <div className="flex items-center">
                     {items.map((it, idx) => {
                         const isActive = step === it.id;

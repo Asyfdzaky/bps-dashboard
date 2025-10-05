@@ -1,16 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Book } from '@/types/books';
 import { Link } from '@inertiajs/react';
 import { Building, Calendar, Edit3, Eye, MoreVertical } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 type Props = { books: Book[] };
 
@@ -43,7 +38,7 @@ export default function ListNaskahTerkini({ books }: Props) {
     const formatDate = (s?: string) => (s ? new Date(s).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '—');
 
     return (
-        <Card className="border-0 py-2 px-0">
+        <Card className="border-0 px-0 py-2">
             <CardContent className="">
                 {recentBooks.length > 0 ? (
                     <>
@@ -57,7 +52,7 @@ export default function ListNaskahTerkini({ books }: Props) {
                                         <TableHead className="hidden lg:table-cell lg:w-[20%]">PIC</TableHead>
                                         <TableHead className="hidden lg:table-cell lg:w-[15%]">Tanggal</TableHead>
                                         <TableHead className="w-[15%] text-center">Status</TableHead>
-                                        <TableHead className="w-[10%] lg:w-[5%] text-center">Aksi</TableHead>
+                                        <TableHead className="w-[10%] text-center lg:w-[5%]">Aksi</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -72,7 +67,7 @@ export default function ListNaskahTerkini({ books }: Props) {
                                             <TableCell className="hidden lg:table-cell">
                                                 <div className="truncate">{book.pic?.nama_lengkap || 'N/A'}</div>
                                             </TableCell>
-                                            <TableCell className="hidden lg:table-cell text-muted-foreground">
+                                            <TableCell className="hidden text-muted-foreground lg:table-cell">
                                                 {formatDate(book.created_at)}
                                             </TableCell>
                                             <TableCell className="text-center">
@@ -89,7 +84,10 @@ export default function ListNaskahTerkini({ books }: Props) {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem asChild>
-                                                            <Link href={`/manajemen-naskah/${book.buku_id}?from=dashboard`} className="cursor-pointer">
+                                                            <Link
+                                                                href={`/manajemen-naskah/${book.buku_id}?from=dashboard`}
+                                                                className="cursor-pointer"
+                                                            >
                                                                 <Eye className="h-4 w-4" />
                                                                 <span>Lihat Detail</span>
                                                             </Link>
@@ -110,11 +108,11 @@ export default function ListNaskahTerkini({ books }: Props) {
                         </div>
 
                         {/* Mobile Card View - Minimalist */}
-                        <div className="sm:hidden divide-y">
+                        <div className="divide-y sm:hidden">
                             {recentBooks.map((book) => (
                                 <div key={book.buku_id} className="py-2">
-                                    <div className="flex items-start justify-between gap-2 mb-2">
-                                        <h4 className="text-sm font-medium text-foreground line-clamp-2 flex-1">{book.judul_buku}</h4>
+                                    <div className="mb-2 flex items-start justify-between gap-2">
+                                        <h4 className="line-clamp-2 flex-1 text-sm font-medium text-foreground">{book.judul_buku}</h4>
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0 bg-white">
