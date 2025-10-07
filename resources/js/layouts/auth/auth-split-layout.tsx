@@ -1,4 +1,4 @@
-import authBackground from '@/assets/image.png';
+import authBackground from '@/assets/image.jpg';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
@@ -18,26 +18,27 @@ export default function AuthSplitLayout({
     return (
         <div className="grid min-h-screen lg:grid-cols-2">
             {/* Right Side - Marketing Content with Background Image */}
-            <div className="relative m-3 hidden overflow-hidden rounded-2xl lg:block">
+            <div className="relative hidden overflow-hidden lg:block">
                 {/* Background Image */}
                 <div
-                    className="absolute inset-0 rounded-2xl bg-cover bg-center bg-no-repeat"
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                     style={{
                         backgroundImage: `url("${backgroundImage}")`,
                     }}
                 >
-                    {/* Overlay untuk memastikan text tetap terbaca */}
-                    <div className="absolute inset-0 rounded-2xl"></div>
+                    {/* Overlay dengan warna semi-transparan untuk membuat gambar tidak terlalu jelas */}
+                    <div className="absolute inset-0 bg-black/50"></div> {/* Tambahkan bg-black/40 untuk overlay hitam 40% opacity */}
                 </div>
-{/* 
-                <div className="relative z-10 flex h-full flex-col justify-center rounded-2xl p-8 text-white">
-                    <div className="w-1/2 text-wrap">
-                        <h2 className="mb-4 text-4xl font-bold text-primary">Kelola alur penerbitan Anda dengan mudah.</h2>
-                        <p className="mb-8 text-justify text-lg leading-relaxed">
+
+                {/* Jika ada text di atas overlay, pastikan kontras (misal, tambahkan di sini jika belum ada) */}
+                <div className="relative z-10 flex h-full items-center justify-center p-8">
+                    <div className="text-center font-semibold text-white">
+                        <h2 className="mb-4 text-4xl font-bold">Kelola Alur Penerbitan Anda dengan Mudah</h2>
+                        <p className="text-lg">
                             Akses dashboard untuk mengelola naskah, memantau progres, dan berkolaborasi dengan tim secara efisien.
                         </p>
                     </div>
-                </div> */}
+                </div>
             </div>
 
             {/* Left Side - Auth Form */}
