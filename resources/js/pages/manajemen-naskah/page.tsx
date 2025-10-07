@@ -44,9 +44,7 @@ export default function ManajemenNaskah() {
         setSelectedBook(null);
     };
 
-    const handleSearch = (q: string) => {
-        router.get('/manajemen-naskah', { q });
-    };
+
 
     // Calculate statistics
     const totalBooks = books.length;
@@ -118,10 +116,10 @@ export default function ManajemenNaskah() {
                         <CardTitle>Daftar Naskah</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ListNaskah books={books} onDelete={handleDelete} onSearch={handleSearch} />
+                        <ListNaskah books={books} onDelete={handleDelete} />
                     </CardContent>
                 </Card>
-            </div>
+            </div>  
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

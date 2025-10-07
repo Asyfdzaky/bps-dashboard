@@ -1,4 +1,4 @@
-import authBackground from '@/assets/image.jpg';
+import authBackground from '@/assets/image.png';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Link } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';

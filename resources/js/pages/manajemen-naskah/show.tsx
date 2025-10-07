@@ -16,13 +16,13 @@ interface InfoCardProps {
 
 function InfoCard({ title, icon, children }: InfoCardProps) {
     return (
-        <div className="relative overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm p-4">
+        <div className="relative overflow-hidden rounded-lg border bg-card p-4 text-card-foreground shadow-sm">
             <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                    <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate mb-2">{title}</p>
+                    <p className="mb-2 truncate text-xs font-medium text-muted-foreground sm:text-sm">{title}</p>
                     {children}
                 </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-full flex-shrink-0 font-bold text-primary bg-primary/10">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 font-bold text-primary">
                     {icon}
                 </div>
             </div>
@@ -117,9 +117,9 @@ export default function ShowDashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Detail Buku - ${book.judul_buku}`} />
 
-            <div className="min-h-screen bg-gray-50">
+            <div className="min-h-screen">
                 {/* Header */}
-                <div className="bg-white">
+                <div>
                     <div className="max-w-7xl">
                         <div className="flex items-center justify-between">
                             <div className="mb-6">
@@ -146,9 +146,7 @@ export default function ShowDashboard() {
                             </InfoCard>
 
                             <InfoCard title="Target Cetak" icon={<Calendar className="h-5 w-5" />}>
-                                <h3 className="text-lg font-bold">
-                                    {formatDate(book.tanggal_target_naik_cetak) || 'Belum ditentukan'}
-                                </h3>
+                                <h3 className="text-lg font-bold">{formatDate(book.tanggal_target_naik_cetak) || 'Belum ditentukan'}</h3>
                                 <p className="mt-2 text-xs text-muted-foreground">
                                     Realisasi: {formatDate(book.tanggal_realisasi_naik_cetak) || 'Belum ada'}
                                 </p>
@@ -242,11 +240,7 @@ export default function ShowDashboard() {
                                                                 }`}
                                                             >
                                                                 {task.status === 'completed' && (
-                                                                    <svg
-                                                                        className="h-2.5 w-2.5 text-white"
-                                                                        fill="currentColor"
-                                                                        viewBox="0 0 20 20"
-                                                                    >
+                                                                    <svg className="h-2.5 w-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                                                                         <path
                                                                             fillRule="evenodd"
                                                                             d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -268,9 +262,7 @@ export default function ShowDashboard() {
                                                                         {task.pic?.nama_lengkap || 'Belum ada PIC'}
                                                                     </p>
                                                                 </div>
-                                                                <Badge className={getStatusColor(task.status)}>
-                                                                    {getStatusText(task.status)}
-                                                                </Badge>
+                                                                <Badge className={getStatusColor(task.status)}>{getStatusText(task.status)}</Badge>
                                                             </div>
 
                                                             {/* Progress */}
@@ -278,9 +270,7 @@ export default function ShowDashboard() {
                                                                 <div className="mb-2">
                                                                     <div className="mb-1 flex items-center justify-between">
                                                                         <span className="text-xs text-muted-foreground">Progress</span>
-                                                                        <span className="text-xs font-medium">
-                                                                            {task.progress_percentage}%
-                                                                        </span>
+                                                                        <span className="text-xs font-medium">{task.progress_percentage}%</span>
                                                                     </div>
                                                                     <Progress value={task.progress_percentage} className="h-1.5" />
                                                                 </div>
@@ -291,9 +281,7 @@ export default function ShowDashboard() {
                                                                 {task.tanggal_mulai && (
                                                                     <div>
                                                                         <span>Mulai: </span>
-                                                                        <span className="font-medium">
-                                                                            {formatDate(task.tanggal_mulai)}
-                                                                        </span>
+                                                                        <span className="font-medium">{formatDate(task.tanggal_mulai)}</span>
                                                                     </div>
                                                                 )}
                                                                 {task.deadline && (
@@ -305,18 +293,14 @@ export default function ShowDashboard() {
                                                                 {task.tanggal_selesai && (
                                                                     <div>
                                                                         <span>Selesai: </span>
-                                                                        <span className="font-medium">
-                                                                            {formatDate(task.tanggal_selesai)}
-                                                                        </span>
+                                                                        <span className="font-medium">{formatDate(task.tanggal_selesai)}</span>
                                                                     </div>
                                                                 )}
                                                             </div>
 
                                                             {/* Notes */}
                                                             {task.catatan && (
-                                                                <div className="mt-2 rounded bg-muted/30 p-2 text-xs">
-                                                                    {task.catatan}
-                                                                </div>
+                                                                <div className="mt-2 rounded bg-muted/30 p-2 text-xs">{task.catatan}</div>
                                                             )}
                                                         </div>
                                                     </div>
