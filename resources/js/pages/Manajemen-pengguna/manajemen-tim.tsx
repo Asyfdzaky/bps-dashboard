@@ -218,14 +218,14 @@ export default function ManajemenTim() {
                         title="Users with Roles"
                         value={users.data.filter((user) => user.roles.length > 0).length}
                         icon={<UserCheck className="h-6 w-6" />}
-                        color="secondary"
+                        color="primary"
                         description="Jumlah pengguna yang memiliki setidaknya satu role"
                     />
                     <KPICard
                         title="Total Roles"
                         value={roles.length}
                         icon={<Settings className="h-6 w-6" />}
-                        color="accent"
+                        color="primary"
                         description="Jumlah total role yang tersedia di sistem"
                     />
                 </div>

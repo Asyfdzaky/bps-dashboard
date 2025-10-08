@@ -93,7 +93,7 @@ export default function Page() {
                         <h1 className="text-2xl font-bold">Manajemen Role</h1>
                         <p className="text-muted-foreground">Kelola role dan permission untuk user. Klik tombol edit untuk mengatur permission.</p>
                     </div>
-                    {can?.create && (
+                    {/* {can?.create && (
                         <div className="flex flex-col gap-2">
                             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
                                 <DialogTrigger asChild>
@@ -182,7 +182,7 @@ export default function Page() {
                                         </DialogFooter>
                                     </form>
                                 </DialogContent>
-                            </Dialog>
+                            </Dialog> */}
                         </div>
                     )}
                 </div>
@@ -193,14 +193,14 @@ export default function Page() {
                         title="Total Role"
                         value={roles.total}
                         icon={<Users className="h-6 w-6" />}
-                        color="secondary"
+                        color="primary"
                         description="Jumlah user dengan role penerjemah"
                     />
                     <KPICard
                         title="Total Permission"
                         value={roles.data.reduce((sum, role) => sum + role.permissions_count, 0)}
                         icon={<Key className="h-6 w-6" />}
-                        color="accent"
+                        color="primary"
                         description="Jumlah permission yang terpakai di semua role"
                     />
                 </div>

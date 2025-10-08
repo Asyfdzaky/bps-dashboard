@@ -215,7 +215,7 @@ export default function ManajemenPengguna() {
                         title="Total Penerjemah"
                         value={penerjemahUsers.length}
                         icon={<Languages className="h-6 w-6" />}
-                        color="secondary"
+                        color="primary"
                         description="Jumlah user dengan role penerjemah"
                     />
                 </div>
